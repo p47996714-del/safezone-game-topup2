@@ -80,7 +80,7 @@ function depositCard(d) {
 }
 function orderCard(o) {
   const emoji = {pending:'⏳', processing:'⚙️', completed:'✅', rejected:'❌'}[o.status] || 'ℹ️';
-  return `${emoji} <b>ORDER ${o.status.toUpperCase()}</b>\n\n${LINE}\n   👤  <b>${o.username}</b>\n   🎮  ${o.game}\n   📦  ${o.product}\n   💵  <b>${o.price.toLocaleString()} Ks</b>\n   🆔  <code>${o.playerId}</code>${o.serverId ? ' \u00B7 S:' + o.serverId : ''}\n${LINE}\n   🔖  <code>${o.id}</code>`;
+  return `${emoji} <b>ORDER ${o.status.toUpperCase()}</b>\n\n${LINE}\n   👤  <b>${o.username}</b>\n   🎮  ${o.game}\n   📦  ${o.product}\n   💵  <b>${o.price.toLocaleString()} Ks</b>\n   🆔  <code>${o.playerId}</code>${o.serverId ? " · S:" + o.serverId : ""}${o.serverId ? ' \u00B7 S:' + o.serverId : ''}\n${LINE}\n   🔖  <code>${o.id}</code>`;
 }
 
 async function showUserMenu(chatId, user, preText) {

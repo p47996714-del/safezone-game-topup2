@@ -165,7 +165,6 @@ body.light .faq-item{background:#fff}
 .toast.info{background:linear-gradient(135deg,#38bdf8,#3b82f6)}
 .confetti{position:fixed;width:10px;height:10px;z-index:10001;pointer-events:none;animation:confetti 3s linear forwards}
 @keyframes confetti{to{transform:translateY(100vh) rotate(720deg);opacity:0}}
-@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.4}}
 </style>
 </head>
 <body>
@@ -281,11 +280,10 @@ body.light .faq-item{background:#fff}
   <div class="faq-list">
     <details class="faq-item"><summary>💰 Deposit တင်ပြီး ဘယ်လောက်ကြာမလဲ?</summary><p>ပုံမှန် ၅-၁၅ မိနစ်အတွင်း approve လုပ်ပေးပါတယ်။</p></details>
     <details class="faq-item"><summary>❌ Order Reject ဖြစ်ရင် ငွေပြန်ရလား?</summary><p>ရပါတယ်။ Balance ကို အလိုအလျောက် ပြန်အမ်းပါတယ်။</p></details>
-    <details class="faq-item"><summary>🆔 Player ID မှားထည့်မိရင်?</summary><p>Live Chat မှာ ချက်ချင်း အသိပေးပါ။</p></details>
+    <details class="faq-item"><summary>🆔 Server ID ဆိုတာ ဘာလဲ?</summary><p>MLBB/Magic Chess မှာ Player ID နဲ့အတူ Server ID (ဥပမာ 2001) လိုအပ်ပါတယ်။</p></details>
     <details class="faq-item"><summary>⏱️ Order ဘယ်လောက်ကြာမလဲ?</summary><p>များသောအားဖြင့် ၁၀-၃၀ မိနစ်အတွင်း။</p></details>
-    <details class="faq-item"><summary>🔄 Order မှားမှာမိရင်?</summary><p>Pending ဖြစ်နေတုန်း Chat မှာ ပြောပါ။</p></details>
     <details class="faq-item"><summary>🎟️ Coupon ဘယ်လိုရမလဲ?</summary><p>Facebook/TikTok မှာ ဖြန့်ပေးတယ်။</p></details>
-    <details class="faq-item"><summary>💬 Live Chat ဖွင့်ချိန်?</summary><p>၂၄ နာရီ။</p></details>
+    <details class="faq-item"><summary>📱 App Premium ဘယ်လိုဝယ်မလဲ?</summary><p>App Premium ကို Telegram Admin ဆီ တိုက်ရိုက် ဆက်သွယ်ဝယ်ယူပါ။</p></details>
     <details class="faq-item"><summary>💵 ငွေဖြည့်နည်း?</summary><p>KBZ / Wave / UAB / AYA → 09763442881 (Mg Pyae Phyo Kyaw)။</p></details>
   </div>
 </div>
@@ -317,7 +315,7 @@ body.light .faq-item{background:#fff}
 <div class="modal" id="orderModal"><div class="modal-box">
   <h3 id="mTitle">Order</h3>
   <input id="playerId" placeholder="Player ID / UID">
-  <div id="serverIdField" style="display:none"><input id="serverId" placeholder="Server ID (e.g., 2001)"></div>
+  <div id="serverIdField" style="display:none"><input id="serverId" placeholder="Server ID (ဥပမာ 2001)"></div>
   <button onclick="submitOrder()">ဝယ်မယ်</button>
   <button class="cancel" onclick="closeModal('orderModal')">Cancel</button>
 </div></div>
@@ -576,9 +574,9 @@ async function loadOrders(){
         <span class="status-badge status-${x.status}">${x.status}</span>
       </div>
       <div>${x.product}</div>
-      <div style="font-size:12px;color:#94a3b8;margin-top:4px">ID: ${x.playerId} · ${x.price.toLocaleString()} Ks</div>
+      <div style="font-size:12px;color:#94a3b8;margin-top:4px">ID: ${x.playerId}${x.serverId?' · S:'+x.serverId:''} · ${x.price.toLocaleString()} Ks</div>
       <button onclick="reorder('${x.id}')" style="margin-top:8px;padding:8px 14px;background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;border-radius:10px;font-size:12px;font-weight:bold;cursor:pointer">🔄 Reorder</button>
-    </div>`).join('') : '<div class="empty">မှတ်တမ်း မရှိပါ</div>';
+    </div>`).join('') : '<div class="empt...' + '' + 'y">မှတ်တမ်း မရှိပါ</div>';
 }
 
 async function loadChat(){
@@ -644,11 +642,11 @@ function openModal(id){
   if (selected.game === 'App Premium') {
     const bu = siteData && siteData.botUsername;
     if (bu) {
-      if (confirm('\u{1F4F1} App Premium \u101D\u101A\u103A\u101B\u1014\u103A Admin \u1006\u102E Telegram \u1019\u103E\u102C \u1006\u1000\u103A\u101E\u103D\u101A\u103A\u1015\u102B\u104A\n\nTelegram \u1016\u103D\u1004\u103A\u103A\u1019\u101C\u102C\u1038?')) {
+      if (confirm('📱 App Premium ဝယ်ရန် Admin ဆီ Telegram မှာ ဆက်သွယ်ပါ။\n\nTelegram ဖွင့်မလား?')) {
         window.open('https://t.me/' + bu, '_blank');
       }
     } else {
-      alert('App Premium \u101D\u101A\u103A\u101B\u1014\u103A Admin \u1006\u102E Telegram \u1019\u103E\u102C \u1006\u1000\u103A\u101E\u103D\u101A\u103A\u1015\u102B');
+      alert('📱 App Premium ဝယ်ရန် Admin ဆီ Telegram မှာ ဆက်သွယ်ပါ');
     }
     return;
   }
@@ -667,15 +665,15 @@ async function submitOrder(){
   const playerId = document.getElementById('playerId').value.trim();
   const sf = document.getElementById('serverIdField');
   const serverId = (sf && sf.style.display !== 'none') ? document.getElementById('serverId').value.trim() : '';
-  if (!playerId) return showToast('Player ID \u1016\u103C\u100A\u103A\u1037\u1015\u102B', 'error');
-  if (sf && sf.style.display !== 'none' && !serverId) return showToast('Server ID \u1016\u103C\u100A\u103A\u1037\u1015\u102B', 'error');
+  if (!playerId) return showToast('Player ID ဖြည့်ပါ', 'error');
+  if (sf && sf.style.display !== 'none' && !serverId) return showToast('Server ID ဖြည့်ပါ', 'error');
   const d = await api('/api/order', {method:'POST', body: JSON.stringify({productId: selected.id, playerId, serverId})});
   if (d.success){
     playSound('success'); haptic(100); confetti();
-    showToast('\u2705 Order \u1010\u1004\u103A\u1015\u103C\u102E\u1038\u1015\u102B\u1015\u103C\u102E', 'success');
+    showToast('✅ Order တင်ပြီးပါပြီ', 'success');
     closeModal('orderModal');
     loadMe(); loadOrders();
-  } else { playSound('error'); showToast('\u274C ' + d.error, 'error'); }
+  } else { playSound('error'); showToast('❌ ' + d.error, 'error'); }
 }
 async function reorder(orderId){
   if (!confirm('ဒီ order ကို ပြန်မှာမှာလား?')) return;
