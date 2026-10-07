@@ -110,6 +110,19 @@ body.light .payment-method{background:#f8fafc}
 .pay-info .pay-num{font-size:12px;color:#94a3b8;margin-top:2px}
 .pay-owner{background:linear-gradient(135deg,#f59e0b,#ef4444);padding:12px 16px;border-radius:12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
 .copy-btn{background:rgba(255,255,255,0.25);border:none;color:#fff;padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer;font-weight:bold}
+.deposit-box{background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155;margin-top:15px}
+.deposit-box input[type="number"]{width:100%;padding:12px;margin-bottom:12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px}
+.deposit-label{display:block;font-size:12px;color:#94a3b8;margin-bottom:6px}
+.deposit-file{width:100%;padding:10px;margin-bottom:10px;border-radius:12px;border:1px dashed #38bdf8;background:rgba(56,189,248,0.05);color:#94a3b8;font-size:12px}
+.receipt-preview{display:none;margin-bottom:12px;text-align:center}
+.receipt-preview img{max-width:100%;max-height:200px;border-radius:12px;border:1px solid #38bdf8}
+.deposit-btn{width:100%;padding:13px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;font-weight:bold;cursor:pointer}
+.deposit-list-item{background:rgba(30,41,59,0.8);padding:14px;border-radius:14px;margin-bottom:10px;font-size:13px;border:1px solid #334155}
+.deposit-list-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.deposit-list-amount{color:#38bdf8;font-weight:bold}
+.deposit-list-meta{font-size:12px;color:#94a3b8}
+.receipt-thumb{margin-top:8px}
+.receipt-thumb img{max-width:80px;border-radius:8px;border:1px solid #334155;cursor:pointer}
 .faq-item{background:rgba(30,41,59,0.8);border:1px solid #334155;border-radius:14px;margin-bottom:10px;overflow:hidden}
 body.light .faq-item{background:#fff}
 .faq-item[open]{border-color:#38bdf8;background:rgba(56,189,248,0.05)}
@@ -146,8 +159,8 @@ body.light .faq-item{background:#fff}
 .tour-buttons button{flex:1;padding:12px;border:none;border-radius:12px;font-weight:bold;cursor:pointer;font-size:14px}
 .tour-skip{background:#334155;color:#fff}
 .tour-next{background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff}
-.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:14px 24px;border-radius:14px;font-weight:bold;font-size:14px;z-index:10000;transition:transform 0.4s;box-shadow:0 8px 25px rgba(16,185,129,0.4);max-width:90vw;text-align:center}
-.toast.show{transform:translateX(-50%) translateY(0)}
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:14px 24px;border-radius:14px;font-weight:bold;font-size:14px;z-index:10000;transition:all 0.4s;box-shadow:0 8px 25px rgba(16,185,129,0.4);max-width:90vw;text-align:center;opacity:0}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .toast.error{background:linear-gradient(135deg,#ef4444,#dc2626)}
 .toast.info{background:linear-gradient(135deg,#38bdf8,#3b82f6)}
 .confetti{position:fixed;width:10px;height:10px;z-index:10001;pointer-events:none;animation:confetti 3s linear forwards}
@@ -205,26 +218,14 @@ body.light .faq-item{background:#fff}
       <div class="vip-badge vip-Bronze" id="vipBadge">Bronze</div>
     </div>
   </div>
-
   <div class="carousel" id="carousel"><div class="dots" id="dots"></div></div>
-
   <div class="quick-grid">
-    <div class="quick-card" onclick="openCoupon()">
-      <div class="icon">🎟️</div><div class="label">Coupon</div><div class="value red">Redeem</div>
-    </div>
-    <div class="quick-card" onclick="openLeaderboard()">
-      <div class="icon">🏆</div><div class="label">Leaderboard</div><div class="value blue">Top 10</div>
-    </div>
-    <div class="quick-card" onclick="copyRef()">
-      <div class="icon">🎯</div><div class="label">Referral</div><div class="value green">Copy</div>
-    </div>
-    <div class="quick-card" onclick="openAchievements()">
-      <div class="icon">🏅</div><div class="label">Achievements</div><div class="value" id="achCount">0</div>
-    </div>
+    <div class="quick-card" onclick="openCoupon()"><div class="icon">🎟️</div><div class="label">Coupon</div><div class="value red">Redeem</div></div>
+    <div class="quick-card" onclick="openLeaderboard()"><div class="icon">🏆</div><div class="label">Leaderboard</div><div class="value blue">Top 10</div></div>
+    <div class="quick-card" onclick="copyRef()"><div class="icon">🎯</div><div class="label">Referral</div><div class="value green">Copy</div></div>
+    <div class="quick-card" onclick="openAchievements()"><div class="icon">🏅</div><div class="label">Achievements</div><div class="value" id="achCount">0</div></div>
   </div>
-
   <div class="search-bar"><input id="searchInput" placeholder="🔍 ဂိမ်း ရှာပါ..." oninput="filterGames()"></div>
-
   <div class="category-tabs" id="categoryTabs">
     <button class="active" onclick="setCategory('all',this)">🌐 အားလုံး</button>
     <button onclick="setCategory('MOBA',this)">⚔️ MOBA</button>
@@ -232,7 +233,6 @@ body.light .faq-item{background:#fff}
     <button onclick="setCategory('Casual',this)">♟️ Casual</button>
     <button onclick="setCategory('Premium',this)">⭐ Premium</button>
   </div>
-
   <div class="section-title">🎮 ဂိမ်းများ</div>
   <div class="games-grid" id="gamesGrid"></div>
 </div>
@@ -244,9 +244,14 @@ body.light .faq-item{background:#fff}
     <button class="copy-btn" onclick="copyNum()">📋 Copy</button>
   </div>
   <div id="paymentList"></div>
-  <div style="background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155;margin-top:15px">
-    <input id="dAmt" type="number" placeholder="ပမာဏ (Ks)" style="width:100%;padding:12px;margin-bottom:12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff">
-    <button onclick="deposit()" style="width:100%;padding:13px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;font-weight:bold">Deposit တင်မယ်</button>
+  <div class="deposit-box">
+    <input id="dAmt" type="number" placeholder="ပမာဏ (Ks)">
+    <label class="deposit-label">📸 ငွေလွှဲ Receipt ပုံ (Optional)</label>
+    <input type="file" id="receiptInput" accept="image/*" class="deposit-file" onchange="previewReceipt(this)">
+    <div id="receiptPreview" class="receipt-preview">
+      <img id="receiptImg" alt="receipt">
+    </div>
+    <button onclick="deposit()" class="deposit-btn">Deposit တင်မယ်</button>
   </div>
   <h3 style="margin:20px 0 10px;font-size:14px;color:#38bdf8">📜 ဖြည့်မှု မှတ်တမ်း</h3>
   <div id="depList"></div>
@@ -279,7 +284,7 @@ body.light .faq-item{background:#fff}
     <details class="faq-item"><summary>🆔 Player ID မှားထည့်မိရင်?</summary><p>Live Chat မှာ ချက်ချင်း အသိပေးပါ။</p></details>
     <details class="faq-item"><summary>⏱️ Order ဘယ်လောက်ကြာမလဲ?</summary><p>များသောအားဖြင့် ၁၀-၃၀ မိနစ်အတွင်း။</p></details>
     <details class="faq-item"><summary>🔄 Order မှားမှာမိရင်?</summary><p>Pending ဖြစ်နေတုန်း Chat မှာ ပြောပါ။</p></details>
-    <details class="faq-item"><summary>🎟️ Coupon ဘယ်လိုရမလဲ?</summary><p>Facebook/TikTok မှာ ဖြန့်ပေးတယ်။ Home → Coupon → Redeem။</p></details>
+    <details class="faq-item"><summary>🎟️ Coupon ဘယ်လိုရမလဲ?</summary><p>Facebook/TikTok မှာ ဖြန့်ပေးတယ်။</p></details>
     <details class="faq-item"><summary>💬 Live Chat ဖွင့်ချိန်?</summary><p>၂၄ နာရီ။</p></details>
     <details class="faq-item"><summary>💵 ငွေဖြည့်နည်း?</summary><p>KBZ / Wave / UAB / AYA → 09763442881 (Mg Pyae Phyo Kyaw)။</p></details>
   </div>
@@ -300,15 +305,6 @@ body.light .faq-item{background:#fff}
       <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#94a3b8">⭐ Points</span><b id="pPts">0</b></div>
       <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#94a3b8">💎 Total Spent</span><b id="pSpent">0 Ks</b></div>
       <div style="display:flex;justify-content:space-between"><span style="color:#94a3b8">🎁 Referral</span><b id="pRef" style="color:#38bdf8">-</b></div>
-    </div>
-    <div style="margin-top:12px;padding:12px;background:#0f172a;border-radius:14px;text-align:left">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <div>
-          <div style="font-size:13px;font-weight:bold">🔐 2FA Login</div>
-          <div style="font-size:11px;color:#94a3b8;margin-top:3px">Telegram OTP နဲ့ ဝင်ရောက်မယ်</div>
-        </div>
-        <button onclick="toggle2FA()" id="twoFABtn" style="padding:8px 16px;background:#334155;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-size:12px">OFF</button>
-      </div>
     </div>
     <button onclick="openTerms()" style="width:100%;padding:12px;background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;border-radius:12px;font-weight:bold;margin-top:15px;cursor:pointer">📜 Terms & Privacy</button>
     <div style="display:flex;justify-content:center;margin:12px 0 8px">
@@ -394,9 +390,12 @@ function haptic(ms){ if (navigator.vibrate) navigator.vibrate(ms || 30); }
 function showToast(text, type){
   const t = document.getElementById('toast');
   t.textContent = text;
-  t.className = 'toast ' + (type || '');
-  t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), 2500);
+  t.className = 'toast show ' + (type || '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => { t.textContent = ''; t.className = 'toast'; }, 400);
+  }, 2000);
 }
 if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light'); document.getElementById('themeBtn').textContent = '☀️'; }
 function toggleTheme(){
@@ -504,9 +503,6 @@ async function loadMe(){
   document.getElementById('pVip').textContent = vip;
   document.getElementById('pVip').className = 'vip-badge vip-' + vip;
   document.getElementById('achCount').textContent = (d.achievements||[]).length;
-  const btn = document.getElementById('twoFABtn');
-  if (d.twoFA) { btn.textContent = 'ON'; btn.style.background = '#22c55e'; }
-  else { btn.textContent = 'OFF'; btn.style.background = '#334155'; }
   if (d.unread > 0) {
     const b = document.getElementById('notifBadge');
     b.textContent = d.unread;
@@ -536,7 +532,7 @@ function renderGames(){
     const img = imgs[g] || 'https://via.placeholder.com/200x120/334155/38bdf8?text=Game';
     const isFav = favs.includes(g);
     return `<div class="game-card" onclick="openGameProducts('${g.replace(/'/g,"\\'")}')">
-      <button class="fav-btn ${isFav?'active':''}" onclick="event.stopPropagation();toggleFav('${g.replace(/'/g,"\\'")}',this)">${isFav?'❤️':'🤍'}</button>
+      <button class="fav-btn" onclick="event.stopPropagation();toggleFav('${g.replace(/'/g,"\\'")}',this)">${isFav?'❤️':'🤍'}</button>
       <img class="game-img" src="${img}" alt="${g}" onerror="this.src='https://via.placeholder.com/200x120/334155/38bdf8?text=Game'">
       <div class="game-title">${g}</div></div>`;
   }).join('') || '<div class="empty" style="grid-column:1/-1">ဂိမ်း မတွေ့ပါ</div>';
@@ -552,8 +548,8 @@ function setCategory(cat, el){
 function toggleFav(game, el){
   const favs = JSON.parse(localStorage.getItem('favs') || '[]');
   const idx = favs.indexOf(game);
-  if (idx >= 0) { favs.splice(idx,1); el.textContent='🤍'; el.classList.remove('active'); }
-  else { favs.push(game); el.textContent='❤️'; el.classList.add('active'); showToast('⭐ Favorite', 'info'); }
+  if (idx >= 0) { favs.splice(idx,1); el.textContent='🤍'; }
+  else { favs.push(game); el.textContent='❤️'; showToast('⭐ Favorite', 'info'); }
   localStorage.setItem('favs', JSON.stringify(favs));
   haptic(20);
 }
@@ -561,12 +557,13 @@ function toggleFav(game, el){
 async function loadDeposits(){
   const d = await api('/api/deposits');
   document.getElementById('depList').innerHTML = d.length ? d.map(x=>`
-    <div style="background:rgba(30,41,59,0.8);padding:14px;border-radius:14px;margin-bottom:10px;font-size:13px;border:1px solid #334155">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
-        <b style="color:#38bdf8">${x.amount.toLocaleString()} Ks</b>
+    <div class="deposit-list-item">
+      <div class="deposit-list-head">
+        <b class="deposit-list-amount">${x.amount.toLocaleString()} Ks</b>
         <span class="status-badge status-${x.status}">${x.status}</span>
       </div>
-      <div style="font-size:12px;color:#94a3b8">${x.method}</div>
+      <div class="deposit-list-meta">${x.method}</div>
+      ${x.receipt ? '<div class="receipt-thumb"><img src="'+x.receipt+'" onclick="window.open(this.src)"></div>' : ''}
     </div>`).join('') : '<div class="empty">မှတ်တမ်း မရှိပါ</div>';
 }
 async function loadOrders(){
@@ -666,14 +663,32 @@ async function reorder(orderId){
   if (d.success) { showToast('✅ Reorder ပြီးပါပြီ', 'success'); loadMe(); loadOrders(); }
   else showToast('❌ ' + d.error, 'error');
 }
+
+function previewReceipt(input){
+  const file = input.files[0];
+  if (!file) return;
+  if (file.size > 2 * 1024 * 1024) { showToast('ပုံ 2MB အောက်သာ', 'error'); input.value = ''; return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    document.getElementById('receiptImg').src = e.target.result;
+    document.getElementById('receiptPreview').style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
 async function deposit(){
   const amount = document.getElementById('dAmt').value;
   if (!amount || amount < 1000) return showToast('အနည်းဆုံး 1000 Ks', 'error');
-  const d = await api('/api/deposit', {method:'POST', body: JSON.stringify({amount, method:selectedPay})});
+  let receipt = null;
+  const preview = document.getElementById('receiptPreview');
+  const img = document.getElementById('receiptImg');
+  if (preview && preview.style.display !== 'none' && img && img.src) receipt = img.src;
+  const d = await api('/api/deposit', {method:'POST', body: JSON.stringify({amount, method:selectedPay, receipt})});
   if (d.success){
     playSound('success'); haptic(60);
     showToast('✅ ' + d.message, 'success');
     document.getElementById('dAmt').value='';
+    document.getElementById('receiptInput').value='';
+    preview.style.display='none';
     loadDeposits();
   } else { playSound('error'); showToast('❌ ' + d.error, 'error'); }
 }
@@ -725,28 +740,13 @@ function openAchievements(){
   document.getElementById('achModal').classList.add('show');
 }
 
-async function toggle2FA(){
-  const d = await api('/api/toggle-2fa', {method:'POST'});
-  if (d.success) { showToast(d.twoFA ? '✅ 2FA ON' : '🔓 2FA OFF', 'success'); loadMe(); }
-  else showToast('❌ ' + d.error, 'error');
-}
-
 async function openNotif(){
   playSound('click'); haptic(20);
   document.getElementById('notifModal').classList.add('show');
   document.getElementById('notifList').innerHTML = '<div class="empty">Loading...</div>';
   try {
     let list = await api('/api/notifications');
-    if (!list || list.error || !Array.isArray(list)) {
-      list = await api('/api/chat');
-      if (Array.isArray(list)) {
-        list = list.slice(-20).reverse().map(m => ({
-          message: (m.from === 'admin' ? '👨‍💼 ' : '👤 ') + (m.text || '[Media]'),
-          createdAt: m.createdAt,
-          read: m.from === 'user'
-        }));
-      } else list = [];
-    }
+    if (!list || list.error || !Array.isArray(list)) list = [];
     document.getElementById('notifList').innerHTML = list.length ? list.map(n=>`
       <div style="padding:14px;background:${n.read?'rgba(15,23,42,0.4)':'rgba(56,189,248,0.08)'};border-radius:12px;margin-bottom:8px;border:1px solid ${n.read?'#334155':'#38bdf8'}">
         <div style="font-size:13px">${escapeHtml(n.message)}</div>
@@ -766,10 +766,10 @@ function copyRef(){
 function openTerms(){ window.open('/terms.html', '_blank'); }
 
 const TOUR_STEPS = [
-  { icon:'👋', title:'Safe Zone မှ ကြိုဆိုပါတယ်!', text:'Game Topup လုပ်နည်း ၃ ဆင့် လမ်းညွှန်ပြပါမယ်။' },
-  { icon:'💰', title:'Step 1: Wallet ဖြည့်', text:'ငွေဖြည့် tab မှာ KBZ/Wave/UAB/AYA နဲ့ balance ဖြည့်ပါ။' },
-  { icon:'🎮', title:'Step 2: ဂိမ်း ရွေး', text:'ဂိမ်း ရွေးပြီး Player ID ထည့်ကာ Order တင်ပါ။' },
-  { icon:'⚡', title:'Step 3: ချက်ချင်း ရ', text:'Admin approve ပြီးရင် ဂိမ်းထဲ ငွေဝင်ပါပြီ!' }
+  { icon:'👋', title:'Safe Zone မှ ကြိုဆိုပါတယ်!', text:'Game Topup လုပ်နည်း လမ်းညွှန်ပြပါမယ်။' },
+  { icon:'💰', title:'Step 1: Wallet ဖြည့်', text:'ငွေဖြည့် tab မှာ ဖြည့်ပါ။' },
+  { icon:'🎮', title:'Step 2: ဂိမ်း ရွေး', text:'ဂိမ်း ရွေးပြီး Order တင်ပါ။' },
+  { icon:'⚡', title:'Step 3: ချက်ချင်း ရ', text:'Admin approve ပြီးရင် ရပါပြီ!' }
 ];
 let tourIdx = 0;
 function startTour(){
@@ -828,7 +828,7 @@ async function logout(){
         const b = document.getElementById('notifBadge');
         b.textContent = d.unread;
         b.style.display = 'inline-block';
-        if (d.unread > lastUnread) { playSound('success'); haptic(50); }
+        if (d.unread > lastUnread) { playSound('success'); haptic(50); showToast('🔔 Notification အသစ်', 'info'); }
       } else {
         document.getElementById('notifBadge').style.display = 'none';
       }

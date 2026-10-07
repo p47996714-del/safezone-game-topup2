@@ -249,7 +249,7 @@ app.post('/api/deposit', auth, rateLimit(60000, 5), (req, res) => {
   const { amount, method, ref, receipt } = req.body;
   if (!amount || amount < 1000) return res.status(400).json({error:'အနည်းဆုံး 1000 Ks'});
   const dep = { id:'DEP'+Date.now(), userId: req.user.id, username: req.user.username,
-    amount: Number(amount), method, ref, status:'pending', createdAt: Date.now() };
+    amount: Number(amount), method, receipt: receipt || null, status:"pending", createdAt: Date.now() };
   db.deposits.push(dep); saveDB();
   bot.notifyDeposit(dep);
   res.json({success:true, message:'Deposit တင်ပြီးပါပြီ'});
