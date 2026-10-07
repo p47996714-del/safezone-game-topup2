@@ -35,7 +35,7 @@ const DB_FILE = 'db.json';
 
 function defaultDB() {
   return {
-    users: [], orders: [], deposits: [], sessions: {}, chats: [],
+    users: [], orders: [], deposits: [], sessions: {}, chats: [], notifications: [],
     otps: {}, banned: [], broadcasts: [], coupons: {}, cashbacks: {},
     boxesOpened: {}, missions: {}, reviews: [],
     products: [
@@ -329,6 +329,17 @@ app.post('/api/chat', auth, (req, res) => {
 });
 
 // ===== LEADERBOARD =====
+
+app.get('/api/notifications', auth, (req, res) => {
+  const list = (db.notifications || []).filter(n => n.userId === req.user.id)
+    .sort((a,b) => b.createdAt - a.createdAt).slice(0, 50);
+  res.json(list);
+});
+app.post('/api/notifications/read', auth, (req, res) => {
+  (db.notifications || []).filter(n => n.userId === req.user.id).forEach(n => n.read = true);
+  saveDB(); res.json({success:true});
+});
+
 app.get('/api/leaderboard', (req, res) => {
   const totals = {};
   db.deposits.filter(d => d.status === 'approved').forEach(d => {

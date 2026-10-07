@@ -763,17 +763,35 @@ async function openNotif(){
   document.getElementById('notifModal').classList.add('show');
   document.getElementById('notifList').innerHTML = '<div class="empty">Loading...</div>';
   try {
-    let list = await api('/api/notifications');
-    if (!list || list.error || !Array.isArray(list)) list = [];
-    document.getElementById('notifList').innerHTML = list.length ? list.map(n=>`
-      <div style="padding:14px;background:${n.read?'rgba(15,23,42,0.4)':'rgba(56,189,248,0.08)'};border-radius:12px;margin-bottom:8px;border:1px solid ${n.read?'#334155':'#38bdf8'}">
-        <div style="font-size:13px">${escapeHtml(n.message)}</div>
-        <div style="font-size:11px;color:#64748b;margin-top:5px">${new Date(n.createdAt).toLocaleString()}</div>
-      </div>`).join('') : '<div class="empty">Notification မရှိပါ</div>';
-    await api('/api/notifications/read', {method:'POST'}).catch(()=>{});
+    let list = [];
+    try {
+      const r = await fetch('/api/notifications', {headers: H});
+      if (r.ok) { const j = await r.json(); if (Array.isArray(j)) list = j; }
+    } catch(e){}
+    if (!list.length) {
+      try {
+        const chat = await api('/api/chat');
+        if (Array.isArray(chat)) {
+          list = chat.slice(-30).reverse().map(m => ({
+            message: (m.from === 'admin' ? '\u{1F468}\u200D\u{1F4BC} Admin: ' : '\u{1F464} You: ') + (m.text || '[\u{1F4F7} Image]'),
+            createdAt: m.createdAt,
+            read: m.from === 'user'
+          }));
+        }
+      } catch(e){}
+    }
+    document.getElementById('notifList').innerHTML = list.length ? list.map(n=>
+      '<div style="padding:14px;background:' + (n.read ? 'rgba(15,23,42,0.4)' : 'rgba(56,189,248,0.08)') + ';border-radius:12px;margin-bottom:8px;border:1px solid ' + (n.read ? '#334155' : '#38bdf8') + '">' +
+      '<div style="font-size:13px">' + escapeHtml(n.message) + '</div>' +
+      '<div style="font-size:11px;color:#64748b;margin-top:5px">' + new Date(n.createdAt).toLocaleString() + '</div>' +
+      '</div>'
+    ).join('') : '<div class="empty">Notification \u1019\u101B\u103E\u102B\u1015\u102B</div>';
+    if (list.length && list.some(x => !x.read)) {
+      try { await fetch('/api/notifications/read', {method:'POST', headers: H}); } catch(e){}
+    }
     loadMe();
   } catch(e) {
-    document.getElementById('notifList').innerHTML = '<div class="empty">Error</div>';
+    document.getElementById('notifList').innerHTML = '<div class="empty">\u1019\u101B\u103E\u102B\u1015\u102B</div>';
   }
 }
 
