@@ -125,7 +125,7 @@ app.get('/api/site', (req, res) => res.json({
   payNumber: db.config.payNumber, payName: db.config.payName,
   gameImages: db.gameImages,
   whatsapp: db.config.whatsapp, viber: db.config.viber,
-  tiktok: db.config.tiktok, facebook: db.config.facebook,
+  tiktok: db.config.tiktok, facebook: db.config.facebook, botUsername: db.config.botUsername || null,
   trustBadge: { users: db.users.length, orders: db.orders.length, completed: db.orders.filter(o=>o.status==='completed').length }
 }));
 app.get('/api/terms', (req, res) => res.json({terms: db.config.terms, privacy: db.config.privacy}));
@@ -258,7 +258,7 @@ app.get('/api/deposits', auth, (req, res) => res.json(db.deposits.filter(d => d.
 
 // ===== ORDER + Cashback + VIP + Achievements (Features 14,19,20,23) =====
 app.post('/api/order', auth, (req, res) => {
-  const { productId, playerId } = req.body;
+  const { productId, playerId, serverId } = req.body;
   const product = db.products.find(p => p.id === productId);
   if (!product) return res.status(404).json({error:'Product မတွေ့'});
   if (!playerId) return res.status(400).json({error:'Player ID ဖြည့်ပါ'});

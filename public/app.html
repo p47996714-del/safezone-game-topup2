@@ -317,6 +317,7 @@ body.light .faq-item{background:#fff}
 <div class="modal" id="orderModal"><div class="modal-box">
   <h3 id="mTitle">Order</h3>
   <input id="playerId" placeholder="Player ID / UID">
+  <div id="serverIdField" style="display:none"><input id="serverId" placeholder="Server ID (e.g., 2001)"></div>
   <button onclick="submitOrder()">ဝယ်မယ်</button>
   <button class="cancel" onclick="closeModal('orderModal')">Cancel</button>
 </div></div>
@@ -639,23 +640,42 @@ function openGameProducts(game){
 }
 function openModal(id){
   selected = products.find(p=>p.id===id);
+  closeModal('productModal');
+  if (selected.game === 'App Premium') {
+    const bu = siteData && siteData.botUsername;
+    if (bu) {
+      if (confirm('\u{1F4F1} App Premium \u101D\u101A\u103A\u101B\u1014\u103A Admin \u1006\u102E Telegram \u1019\u103E\u102C \u1006\u1000\u103A\u101E\u103D\u101A\u103A\u1015\u102B\u104A\n\nTelegram \u1016\u103D\u1004\u103A\u103A\u1019\u101C\u102C\u1038?')) {
+        window.open('https://t.me/' + bu, '_blank');
+      }
+    } else {
+      alert('App Premium \u101D\u101A\u103A\u101B\u1014\u103A Admin \u1006\u102E Telegram \u1019\u103E\u102C \u1006\u1000\u103A\u101E\u103D\u101A\u103A\u1015\u102B');
+    }
+    return;
+  }
   document.getElementById('mTitle').textContent = selected.name + ' - ' + selected.price.toLocaleString() + ' Ks';
   document.getElementById('playerId').value = '';
-  closeModal('productModal');
+  const sf = document.getElementById('serverIdField');
+  const needsServer = ['Mobile Legends', 'Magic Chess'].includes(selected.game);
+  if (sf) sf.style.display = needsServer ? 'block' : 'none';
+  const si = document.getElementById('serverId');
+  if (si) si.value = '';
   document.getElementById('orderModal').classList.add('show');
 }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
 async function submitOrder(){
   const playerId = document.getElementById('playerId').value.trim();
-  if (!playerId) return showToast('Player ID ဖြည့်ပါ', 'error');
-  const d = await api('/api/order', {method:'POST', body: JSON.stringify({productId: selected.id, playerId})});
+  const sf = document.getElementById('serverIdField');
+  const serverId = (sf && sf.style.display !== 'none') ? document.getElementById('serverId').value.trim() : '';
+  if (!playerId) return showToast('Player ID \u1016\u103C\u100A\u103A\u1037\u1015\u102B', 'error');
+  if (sf && sf.style.display !== 'none' && !serverId) return showToast('Server ID \u1016\u103C\u100A\u103A\u1037\u1015\u102B', 'error');
+  const d = await api('/api/order', {method:'POST', body: JSON.stringify({productId: selected.id, playerId, serverId})});
   if (d.success){
     playSound('success'); haptic(100); confetti();
-    showToast('✅ Order တင်ပြီးပါပြီ', 'success');
+    showToast('\u2705 Order \u1010\u1004\u103A\u1015\u103C\u102E\u1038\u1015\u102B\u1015\u103C\u102E', 'success');
     closeModal('orderModal');
     loadMe(); loadOrders();
-  } else { playSound('error'); showToast('❌ ' + d.error, 'error'); }
+  } else { playSound('error'); showToast('\u274C ' + d.error, 'error'); }
 }
 async function reorder(orderId){
   if (!confirm('ဒီ order ကို ပြန်မှာမှာလား?')) return;

@@ -80,7 +80,7 @@ function depositCard(d) {
 }
 function orderCard(o) {
   const emoji = {pending:'⏳', processing:'⚙️', completed:'✅', rejected:'❌'}[o.status] || 'ℹ️';
-  return `${emoji} <b>ORDER ${o.status.toUpperCase()}</b>\n\n${LINE}\n   👤  <b>${o.username}</b>\n   🎮  ${o.game}\n   📦  ${o.product}\n   💵  <b>${o.price.toLocaleString()} Ks</b>\n   🆔  <code>${o.playerId}</code>\n${LINE}\n   🔖  <code>${o.id}</code>`;
+  return `${emoji} <b>ORDER ${o.status.toUpperCase()}</b>\n\n${LINE}\n   👤  <b>${o.username}</b>\n   🎮  ${o.game}\n   📦  ${o.product}\n   💵  <b>${o.price.toLocaleString()} Ks</b>\n   🆔  <code>${o.playerId}</code>${o.serverId ? ' \u00B7 S:' + o.serverId : ''}\n${LINE}\n   🔖  <code>${o.id}</code>`;
 }
 
 async function showUserMenu(chatId, user, preText) {
@@ -479,13 +479,29 @@ async function sendOTP(telegramId, code) {
 `🔐 <b>Safe Zone OTP</b>\n\n${LINE}\n   Code: <code>${code}</code>\n   ⏱ ၅ မိနစ် သက်တမ်း\n${LINE}\n\n<i>ဒီ code ကို လူမပြောပါနဲ့</i>`);
 }
 
+async function fetchBotUsername() {
+  const db = getDb();
+  const token = db.config.telegramBotToken;
+  if (!token) return;
+  try {
+    const r = await tgApi('getMe', {}, token);
+    if (r && r.ok && r.result.username) {
+      db.config.botUsername = r.result.username;
+      saveDb();
+      console.log('Bot username:', r.result.username);
+    }
+  } catch(e){ console.log('fetchBotUsername err:', e.message); }
+}
+
 async function pollLoop() {
   if (running) return;
   running = true;
+  let fetchedU = false;
   while (true) {
     const db = getDb();
     const token = db.config.telegramBotToken;
-    if (!token) { await sleep(5000); continue; }
+    if (!token) { await sleep(5000); fetchedU = false; continue; }
+    if (!fetchedU) { try { await fetchBotUsername(); } catch(e){} fetchedU = true; }
     try {
       const r = await tgApi('getUpdates', { offset: botOffset + 1, timeout: 25 }, token);
       if (r && r.ok) {
