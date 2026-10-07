@@ -133,7 +133,7 @@ app.get('/api/site', (req, res) => res.json({
   gameImages: db.gameImages,
   whatsapp: db.config.whatsapp, viber: db.config.viber,
   tiktok: db.config.tiktok, facebook: db.config.facebook, botUsername: db.config.botUsername || null,
-  adsBanner: db.config.adsBanner || {enabled:false,text:''}, logoUrl: db.config.logoUrl || 'https://i.imgur.com/iRwIfqs.png', customSound: db.config.customSound || '' botUsername: db.config.botUsername || null,
+  adsBanner: db.config.adsBanner || {enabled:false,text:''}, logoUrl: db.config.logoUrl || 'https://i.imgur.com/iRwIfqs.png', customSound: db.config.customSound || '', botUsername: db.config.botUsername || null,
   trustBadge: { users: db.users.length, orders: db.orders.length, completed: db.orders.filter(o=>o.status==='completed').length }
 }));
 app.get('/api/terms', (req, res) => res.json({terms: db.config.terms, privacy: db.config.privacy}));
