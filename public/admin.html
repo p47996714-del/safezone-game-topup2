@@ -336,6 +336,32 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
       <button class="btn" onclick="saveBanners()" style="margin-top:8px">💾 Save Banners</button>
     </div>
 
+    <div class="section" style="border:2px solid #22c55e">
+      <h3>💾 GitHub Backup (Data Save)</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:12px">
+        <div>
+          <div style="font-weight:bold;font-size:14px">Auto Backup Status</div>
+          <div id="bkStatus" style="font-size:12px;color:#94a3b8;margin-top:3px">Checking...</div>
+        </div>
+        <button id="bkToggleBtn" onclick="toggleBackup()" style="padding:10px 18px;background:#334155;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-family:inherit">⏳</button>
+      </div>
+      <div class="row"><input id="bkToken" type="password" placeholder="GitHub Token (ghp_...)"></div>
+      <div class="row"><input id="bkOwner" placeholder="GitHub Username (e.g. p47996714-del)"></div>
+      <div class="row"><input id="bkRepo" placeholder="Backup Repo Name (e.g. safezone-backup)"></div>
+      <div class="row">
+        <input id="bkBranch" placeholder="Branch (main)" value="main">
+        <input id="bkInterval" type="number" placeholder="Interval (minutes)" value="5">
+      </div>
+      <div class="row">
+        <button onclick="saveBackupConfig()">💾 Save Config</button>
+        <button onclick="backupNow()" style="background:linear-gradient(135deg,#22c55e,#059669)">🚀 Backup Now</button>
+      </div>
+      <div class="row">
+        <button onclick="restoreNow()" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">⬇️ Restore from GitHub</button>
+      </div>
+      <p style="font-size:12px;color:#94a3b8;margin-top:10px">⚠️ Private Repo သုံးပါ။ db.json မှာ password တွေ ပါတယ်။</p>
+    </div>
+
     <div class="section">
       <h3>📢 Broadcast</h3>
       <div class="row"><textarea id="bcText" placeholder="User အားလုံးဆီ ပို့မယ့် စာ"></textarea></div>
@@ -960,6 +986,63 @@ tab = function(name, btn){
   if (name==='autoreply') loadAutoReply();
   if (name==='chats') renderQR();
 };
+
+
+// ===== GITHUB BACKUP UI =====
+async function loadBackupConfig(){
+  try {
+    const c = await api('/api/admin/backup-config');
+    document.getElementById('bkOwner').value = c.owner || '';
+    document.getElementById('bkRepo').value = c.repo || '';
+    document.getElementById('bkBranch').value = c.branch || 'main';
+    document.getElementById('bkInterval').value = c.intervalMin || 5;
+    const st = document.getElementById('bkStatus');
+    const btn = document.getElementById('bkToggleBtn');
+    if (c.enabled && c.hasToken) {
+      const last = c.lastBackup ? new Date(c.lastBackup).toLocaleString() : 'Never';
+      st.innerHTML = '<span style="color:#22c55e;font-weight:bold">🟢 Enabled</span> · Last: ' + last;
+      btn.textContent = '🔴 Disable'; btn.style.background = '#ef4444';
+    } else {
+      st.innerHTML = '<span style="color:#94a3b8">⚪ Disabled</span>';
+      btn.textContent = '🟢 Enable'; btn.style.background = '#22c55e';
+    }
+  } catch(e){}
+}
+async function toggleBackup(){
+  const c = await api('/api/admin/backup-config');
+  const enabled = !c.enabled;
+  if (enabled && (!c.hasToken || !c.owner || !c.repo)) {
+    return alert('⚠️ အရင်ဆုံး Token + Owner + Repo ဖြည့်ပြီး Save လုပ်ပါ');
+  }
+  const d = await api('/api/admin/backup-config', {method:'POST', body: JSON.stringify({enabled})});
+  if (d.success) { loadBackupConfig(); alert(enabled ? '🟢 Auto Backup ON' : '🔴 Auto Backup OFF'); }
+  else alert('❌ ' + (d.error || 'Failed'));
+}
+async function saveBackupConfig(){
+  const body = {
+    token: document.getElementById('bkToken').value.trim(),
+    owner: document.getElementById('bkOwner').value.trim(),
+    repo: document.getElementById('bkRepo').value.trim(),
+    branch: document.getElementById('bkBranch').value.trim() || 'main',
+    intervalMin: Number(document.getElementById('bkInterval').value) || 5
+  };
+  if (!body.token && !body.owner) return alert('Token + Owner ဖြည့်ပါ');
+  const d = await api('/api/admin/backup-config', {method:'POST', body: JSON.stringify(body)});
+  if (d.success) { alert('✅ Config သိမ်းပြီး'); document.getElementById('bkToken').value=''; loadBackupConfig(); }
+  else alert('❌ ' + (d.error || 'Failed'));
+}
+async function backupNow(){
+  if (!confirm('အခု backup လုပ်မယ်။ သေချာလား?')) return;
+  const d = await api('/api/admin/backup-now', {method:'POST'});
+  if (d.success) { alert('✅ Backup ပြီး: ' + d.sha.substring(0,7)); loadBackupConfig(); }
+  else alert('❌ ' + (d.error || 'Backup failed'));
+}
+async function restoreNow(){
+  if (!confirm('⚠️ GitHub ကနေ data ပြန်ဆွဲမယ်။ လက်ရှိ data ကို overwrite လုပ်မယ်။ သေချာလား?')) return;
+  const d = await api('/api/admin/restore', {method:'POST'});
+  if (d.success) { alert('✅ Restore ပြီး'); location.reload(); }
+  else alert('❌ Restore failed');
+}
 
 if (ap) showPanel();
 </script>

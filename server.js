@@ -69,7 +69,8 @@ function defaultDB() {
       facebook: 'https://facebook.com/safezone',
       terms: 'Safe Zone Game Topup ကို အသုံးပြုခြင်းဖြင့် အောက်ပါ စည်းကမ်းချက်များကို လက်ခံပါသည်:\n\n1. User သည် မှန်ကန်သော အချက်အလက်များ ဖြည့်ရမည်\n2. Deposit လုပ်သောအခါ Ref No. မှန်ရမည်\n3. Order Reject ဖြစ်ပါက 100% ပြန်အမ်းပါမည်\n4. Fraud ဖြစ်ပါက Account ပိတ်ပါမည်\n5. ငွေလွှဲပြီးမှသာ Balance ဝင်ပါမည်\n6. မည်သည့် Dispute မဆို Admin ဆုံးဖြတ်ချက်သည် အတည်ဖြစ်သည်',
       privacy: 'Safe Zone သည် သင့် Data များကို လုံခြုံစွာ ထိန်းသိမ်းပါသည်။ Phone number ကို Admin သာ မြင်နိုင်သည်။ Password ကို encrypt မလုပ်ထားပါ (Demo) — Production အတွက် bcrypt သုံးပါ။',
-      adsBanner: { enabled: false, text: '' }, logoUrl: 'https://i.imgur.com/iRwIfqs.png', customSound: '',
+      adsBanner: { enabled: false, text: '' },
+      githubBackup: { enabled: false, token: '', owner: '', repo: '', branch: 'main', path: 'db.json', intervalMin: 5, lastBackup: 0 }, logoUrl: 'https://i.imgur.com/iRwIfqs.png', customSound: '',
       autoReply: {}, maintenance: { enabled: false, message: '🔧 ပြုပြင်နေပါသည်။ မကြာမီ ပြန်လည်ဖွင့်ပါမည်။' },
       coupons: { 'WELCOME100': { amount: 100, uses: 1000, usesLeft: 1000, expires: 0 } }
     },
@@ -644,6 +645,35 @@ app.get('/api/admin/user-report/:username', adminAuth, (req, res) => {
     orders: orders.slice(0,10), deposits: deps.slice(0,10)
   });
 });
+app.post('/api/admin/backup-now', adminAuth, async (req, res) => {
+  const r = await backupToGitHub(false);
+  logActivity(req.admin.username, 'backup-now', r.success ? 'OK' : 'FAIL');
+  res.json(r);
+});
+app.post('/api/admin/backup-config', adminAuth, superAdmin, (req, res) => {
+  const { enabled, token, owner, repo, branch, intervalMin } = req.body;
+  if (!db.config.githubBackup) db.config.githubBackup = {};
+  const c = db.config.githubBackup;
+  if (typeof enabled === 'boolean') c.enabled = enabled;
+  if (token !== undefined) c.token = token;
+  if (owner !== undefined) c.owner = owner;
+  if (repo !== undefined) c.repo = repo;
+  if (branch !== undefined) c.branch = branch;
+  if (intervalMin !== undefined) c.intervalMin = Number(intervalMin);
+  if (c.path === undefined) c.path = 'db.json';
+  saveDB();
+  logActivity(req.admin.username, 'backup-config', enabled ? 'enabled' : 'disabled');
+  res.json({ success: true, config: { enabled: c.enabled, owner: c.owner, repo: c.repo, branch: c.branch, intervalMin: c.intervalMin, hasToken: !!c.token, lastBackup: c.lastBackup } });
+});
+app.get('/api/admin/backup-config', adminAuth, (req, res) => {
+  const c = db.config.githubBackup || {};
+  res.json({ enabled: c.enabled, owner: c.owner, repo: c.repo, branch: c.branch, intervalMin: c.intervalMin, hasToken: !!c.token, lastBackup: c.lastBackup, path: c.path });
+});
+app.post('/api/admin/restore', adminAuth, superAdmin, async (req, res) => {
+  const ok = await restoreFromGitHub();
+  logActivity(req.admin.username, 'restore', ok ? 'OK' : 'FAIL');
+  res.json({ success: ok });
+});
 app.get('/api/admin/admins', adminAuth, superAdmin, (req, res) => res.json(db.admins.map(a => ({username:a.username, role:a.role, createdAt:a.createdAt}))));
 app.post('/api/admin/admins', adminAuth, superAdmin, (req, res) => {
   const { username, password, role } = req.body;
@@ -680,6 +710,87 @@ app.post('/api/admin/banners', adminAuth, superAdmin, (req, res) => {
   db.banners = req.body.banners;
   saveDB(); res.json({success:true});
 });
+
+
+// ===== GITHUB BACKUP =====
+async function ghApi(method, url, token, body) {
+  try {
+    const r = await fetch('https://api.github.com' + url, {
+      method,
+      headers: {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'SafeZone-Backup'
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    return await r.json();
+  } catch(e) { console.log('ghApi err:', e.message); return null; }
+}
+
+async function backupToGitHub(silent) {
+  const cfg = db.config.githubBackup;
+  if (!cfg || !cfg.enabled || !cfg.token || !cfg.owner || !cfg.repo) {
+    if (!silent) console.log('GitHub backup: not configured');
+    return { error: 'Not configured' };
+  }
+  const path = cfg.path || 'db.json';
+  const data = fs.readFileSync(DB_FILE, 'utf8');
+  const content = Buffer.from(data).toString('base64');
+  const apiPath = '/repos/' + cfg.owner + '/' + cfg.repo + '/contents/' + path;
+  let sha = null;
+  const existing = await ghApi('GET', apiPath + '?ref=' + (cfg.branch||'main'), cfg.token);
+  if (existing && existing.sha) sha = existing.sha;
+  const body = {
+    message: 'Auto backup ' + new Date().toISOString(),
+    content,
+    branch: cfg.branch || 'main'
+  };
+  if (sha) body.sha = sha;
+  const res = await ghApi('PUT', apiPath, cfg.token, body);
+  if (res && res.commit) {
+    cfg.lastBackup = Date.now();
+    saveDB();
+    console.log('\u2705 GitHub backup done: ' + res.commit.sha.substring(0,7));
+    return { success: true, sha: res.commit.sha };
+  } else {
+    console.log('\u274C GitHub backup failed:', res && res.message);
+    return { error: (res && res.message) || 'Failed' };
+  }
+}
+
+async function restoreFromGitHub() {
+  const cfg = db.config.githubBackup;
+  if (!cfg || !cfg.enabled || !cfg.token || !cfg.owner || !cfg.repo) return false;
+  const path = cfg.path || 'db.json';
+  const apiPath = '/repos/' + cfg.owner + '/' + cfg.repo + '/contents/' + path;
+  const res = await ghApi('GET', apiPath + '?ref=' + (cfg.branch||'main'), cfg.token);
+  if (res && res.content) {
+    try {
+      const data = Buffer.from(res.content, 'base64').toString('utf8');
+      const parsed = JSON.parse(data);
+      if (parsed && parsed.users) {
+        db = { ...db, ...parsed };
+        fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+        console.log('\u2705 Restored from GitHub: ' + (parsed.users ? parsed.users.length : 0) + ' users');
+        return true;
+      }
+    } catch(e) { console.log('Restore parse err:', e.message); }
+  }
+  return false;
+}
+
+// ===== BACKUP LOOP =====
+function startBackupLoop() {
+  setInterval(async () => {
+    const cfg = db.config.githubBackup;
+    if (!cfg || !cfg.enabled || !cfg.token) return;
+    const minMs = (cfg.intervalMin || 5) * 60 * 1000;
+    if (Date.now() - (cfg.lastBackup||0) >= minMs) {
+      await backupToGitHub(true);
+    }
+  }, 60000);
+}
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
