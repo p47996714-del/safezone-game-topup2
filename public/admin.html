@@ -6,15 +6,15 @@
 <title>Admin - Safe Zone</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
-body{background:radial-gradient(circle at 20% 20%,#1e3a8a33,transparent),#0b1120;color:#fff;min-height:100vh;padding:20px}
+body{background:radial-gradient(circle at 20% 20%,#1e3a8a33,transparent),#0b1120;color:#fff;min-height:100vh;padding:15px}
 h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 .login{max-width:340px;margin:60px auto;background:rgba(30,41,59,0.8);padding:30px;border-radius:20px;border:1px solid #334155;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
-.login input{width:100%;padding:14px;margin-bottom:12px;border-radius:14px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px}
+.login input{width:100%;padding:14px;margin-bottom:12px;border-radius:14px;border:1px solid #334155;background:#0f172a;color:#fff}
 .login input:focus{outline:none;border-color:#38bdf8}
-.login button{width:100%;padding:14px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:14px;font-weight:bold;cursor:pointer;font-size:15px}
+.login button{width:100%;padding:14px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:14px;font-weight:bold;cursor:pointer;font-family:inherit}
 .top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;max-width:1000px;margin-left:auto;margin-right:auto;flex-wrap:wrap;gap:10px}
-.tabs{display:flex;gap:8px;margin-bottom:20px;justify-content:center;flex-wrap:wrap;max-width:1000px;margin-left:auto;margin-right:auto}
-.tabs button{padding:10px 16px;background:rgba(30,41,59,0.8);color:#94a3b8;border:1px solid #334155;border-radius:12px;cursor:pointer;font-weight:bold;font-size:13px;position:relative;font-family:inherit}
+.tabs{display:flex;gap:6px;margin-bottom:15px;justify-content:center;flex-wrap:wrap;max-width:1000px;margin-left:auto;margin-right:auto}
+.tabs button{padding:9px 14px;background:rgba(30,41,59,0.8);color:#94a3b8;border:1px solid #334155;border-radius:10px;cursor:pointer;font-weight:bold;font-size:12px;position:relative;font-family:inherit}
 .tabs button.active{background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border-color:transparent}
 .badge{position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:bold}
 .panel{display:none;max-width:1000px;margin:0 auto}
@@ -24,37 +24,36 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 .item.processing{border-left-color:#3b82f6}
 .item.rejected{border-left-color:#ef4444}
 .item b{color:#38bdf8}
-.item input[type="checkbox"]{width:20px;height:20px;cursor:pointer;accent-color:#38bdf8;vertical-align:middle;margin-right:8px}
-.btn{background:#22c55e;color:#fff;border:none;padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:bold;margin-right:6px;font-size:13px;margin-top:8px;font-family:inherit;transition:0.15s}
-.btn:active{transform:scale(0.95)}
+.item input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:#38bdf8;vertical-align:middle;margin-right:8px}
+.btn{background:#22c55e;color:#fff;border:none;padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:bold;margin-right:6px;font-size:12px;margin-top:8px;font-family:inherit}
 .btn.red{background:#ef4444}
 .btn.blue{background:#3b82f6}
 .btn.gray{background:#334155}
 .btn.orange{background:#f59e0b}
 .meta{font-size:12px;color:#94a3b8;margin-top:5px}
 .empty{text-align:center;padding:30px;color:#64748b}
-.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;max-width:1000px;margin:0 auto 20px}
-.stat-card{background:linear-gradient(135deg,#1e293b,#334155);padding:18px;border-radius:16px;border:1px solid #334155}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;max-width:1000px;margin:0 auto 15px}
+.stat-card{background:linear-gradient(135deg,#1e293b,#334155);padding:15px;border-radius:14px;border:1px solid #334155}
 .stat-card .label{font-size:12px;color:#94a3b8}
-.stat-card .value{font-size:22px;font-weight:bold;margin-top:5px}
+.stat-card .value{font-size:20px;font-weight:bold;margin-top:5px}
 .stat-card.green .value{color:#22c55e}
 .stat-card.blue .value{color:#38bdf8}
 .stat-card.orange .value{color:#f59e0b}
 .stat-card.red .value{color:#ef4444}
-.chart{background:rgba(30,41,59,0.8);padding:20px;border-radius:16px;border:1px solid #334155;max-width:1000px;margin:0 auto 20px}
-.chart h3{color:#38bdf8;margin-bottom:15px;font-size:15px}
-.bars{display:flex;align-items:flex-end;gap:8px;height:150px;justify-content:space-around}
-.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:5px;height:100%;justify-content:flex-end}
-.bar{width:100%;max-width:40px;background:linear-gradient(180deg,#38bdf8,#a855f7);border-radius:6px 6px 0 0;min-height:3px;transition:height 0.5s}
+.chart{background:rgba(30,41,59,0.8);padding:15px;border-radius:16px;border:1px solid #334155;max-width:1000px;margin:0 auto 15px}
+.chart h3{color:#38bdf8;margin-bottom:12px;font-size:15px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:130px;justify-content:space-around}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.bar{width:100%;max-width:36px;background:linear-gradient(180deg,#38bdf8,#a855f7);border-radius:5px 5px 0 0;min-height:3px}
 .bar-label{font-size:10px;color:#94a3b8}
 .bar-val{font-size:10px;color:#38bdf8;font-weight:bold}
-.section{background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155;margin-bottom:15px}
+.section{background:rgba(30,41,59,0.8);padding:15px;border-radius:16px;border:1px solid #334155;margin-bottom:15px}
 .section h3{color:#38bdf8;margin-bottom:12px;font-size:15px}
-.row{display:flex;gap:10px;margin-bottom:10px;flex-wrap:wrap}
-.row input,.row select,.row textarea{flex:1;min-width:120px;padding:11px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:13px;font-family:inherit}
-.row textarea{min-height:80px;resize:vertical}
-.row input:focus,.row select:focus,.row textarea:focus{outline:none;border-color:#38bdf8}
-.row button{padding:11px 18px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-size:13px;font-family:inherit}
+.row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.row input,.row select,.row textarea{flex:1;min-width:120px;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:13px;font-family:inherit}
+.row textarea{min-height:70px;resize:vertical}
+.row input:focus,.row select:focus{outline:none;border-color:#38bdf8}
+.row button{padding:10px 16px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-size:13px;font-family:inherit}
 .admin-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:10px;margin-bottom:8px;border:1px solid #334155}
 .role-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:bold}
 .role-super{background:#a855f722;color:#a855f7;border:1px solid #a855f755}
@@ -64,8 +63,7 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 .vip-Silver{background:#c0c0c0;color:#000}
 .vip-Gold{background:linear-gradient(135deg,#ffd700,#ffb700);color:#000}
 .vip-Diamond{background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff}
-.chat-list-item{display:flex;justify-content:space-between;align-items:center;padding:14px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px;border:1px solid #334155;cursor:pointer;transition:0.15s}
-.chat-list-item:hover{border-color:#38bdf8}
+.chat-list-item{display:flex;justify-content:space-between;align-items:center;padding:14px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px;border:1px solid #334155;cursor:pointer}
 .chat-unread{background:#ef4444;color:#fff;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:bold}
 .chat-window{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:300;display:none;flex-direction:column;padding:15px;max-width:600px;margin:0 auto}
 .chat-window.show{display:flex}
@@ -78,31 +76,29 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 .bubble.admin{align-self:flex-end;background:linear-gradient(135deg,#38bdf8,#3b82f6)}
 .bubble .t{font-size:10px;opacity:0.7;margin-top:4px}
 .chat-input{display:flex;gap:8px;margin-top:10px}
-.chat-input input[type="text"]{flex:1;padding:12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff}
-.chat-input button{padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;font-weight:bold;cursor:pointer}
-.prod-row{display:grid;grid-template-columns:60px 1fr 1fr 90px 100px 40px;gap:6px;margin-bottom:8px;align-items:center;background:rgba(15,23,42,0.6);padding:8px;border-radius:10px;border:1px solid #334155}
-.prod-row input,.prod-row select{padding:8px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:12px;width:100%;font-family:inherit}
+.chat-input input[type=text]{flex:1;padding:12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff}
+.chat-input button{padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;font-weight:bold;cursor:pointer;font-family:inherit}
+.prod-row{display:grid;grid-template-columns:55px 1fr 1fr 85px 100px 35px;gap:5px;margin-bottom:8px;align-items:center;background:rgba(15,23,42,0.6);padding:8px;border-radius:10px;border:1px solid #334155}
+.prod-row input,.prod-row select{padding:7px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:12px;width:100%;font-family:inherit}
 .prod-row .del{background:#ef4444;color:#fff;border:none;border-radius:8px;cursor:pointer;padding:6px;font-size:12px}
 @media (max-width:700px){.prod-row{grid-template-columns:1fr 1fr}}
-.search-box{position:relative;margin-bottom:15px}
-.search-box input{width:100%;padding:12px 16px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px}
-.search-box input:focus{outline:none;border-color:#38bdf8}
+.search-box{margin-bottom:15px}
+.search-box input{width:100%;padding:12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px;font-family:inherit}
 .user-card{background:rgba(30,41,59,0.8);padding:15px;border-radius:14px;margin-bottom:10px;border:1px solid #334155;border-left:4px solid #38bdf8}
 .user-card.banned{border-left-color:#ef4444;opacity:0.7}
 .modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:400;padding:20px}
 .modal.show{display:flex}
-.modal-box{background:#1e293b;padding:25px;border-radius:20px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;border:1px solid #334155}
+.modal-box{background:#1e293b;padding:22px;border-radius:20px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;border:1px solid #334155}
 .modal-box h3{color:#38bdf8;margin-bottom:15px}
-.modal-box input,.modal-box textarea,.modal-box select{width:100%;padding:12px;margin-bottom:10px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px;font-family:inherit}
-.modal-box textarea{min-height:100px;resize:vertical}
-.modal-box button{width:100%;padding:13px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;font-weight:bold;cursor:pointer;font-size:14px;margin-bottom:8px}
+.modal-box input{width:100%;padding:12px;margin-bottom:10px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px;font-family:inherit}
+.modal-box button{width:100%;padding:12px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;font-weight:bold;cursor:pointer;font-size:14px;margin-bottom:8px;font-family:inherit}
 .modal-box button.cancel{background:#334155}
+.receipt-view{max-width:100%;max-height:400px;border-radius:12px;border:1px solid #38bdf8;margin-bottom:12px}
 .splash{position:fixed;inset:0;background:radial-gradient(circle at 50% 50%,#1e293b,#0b1120);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s,visibility 0.6s}
 .splash.hide{opacity:0;visibility:hidden}
-.splash-logo{font-size:110px;line-height:1;animation:logoPop 1.2s cubic-bezier(0.68,-0.55,0.27,1.55);filter:drop-shadow(0 0 30px #a855f7);position:relative}
-.splash-logo::after{content:'';position:absolute;inset:-25px;border:3px solid transparent;border-top-color:#a855f7;border-right-color:#38bdf8;border-radius:50%;animation:ringSpin 1.5s linear infinite}
-@keyframes logoPop{0%{transform:scale(0) rotate(-180deg);opacity:0}50%{transform:scale(1.15) rotate(10deg);opacity:1}100%{transform:scale(1) rotate(0)}}
-@keyframes ringSpin{to{transform:rotate(360deg)}}
+.splash-logo{font-size:0;line-height:0;animation:splashIn 1s ease-out}
+.splash-logo img{width:140px;height:140px;object-fit:contain;filter:drop-shadow(0 0 30px rgba(168,85,247,0.5))}
+@keyframes splashIn{0%{opacity:0;transform:scale(0.85)}100%{opacity:1;transform:scale(1)}}
 .splash-title{margin-top:35px;font-size:26px;font-weight:bold;background:linear-gradient(135deg,#a855f7,#38bdf8,#ec4899);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradShift 2s ease infinite}
 @keyframes gradShift{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
 .splash-sub{margin-top:8px;font-size:13px;color:#94a3b8;letter-spacing:3px}
@@ -114,7 +110,7 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 <body>
 
 <div class="splash" id="splash">
-  <div class="splash-logo"><img src="https://i.imgur.com/iRwIfqs.png" style="width:140px;height:140px;object-fit:contain"></div>
+  <div class="splash-logo"><img src="https://i.imgur.com/iRwIfqs.png" alt="logo"></div>
   <div class="splash-title">ADMIN PANEL</div>
   <div class="splash-sub">SAFE ZONE</div>
   <div class="splash-loader"><div class="splash-bar"></div></div>
@@ -132,15 +128,15 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 <div id="panelBox" style="display:none">
   <div class="top">
     <div style="font-size:13px;color:#94a3b8">👤 <b id="who" style="color:#38bdf8"></b> <span id="roleTag"></span></div>
-    <div style="display:flex;gap:8px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
       <button onclick="exportData('users')" class="btn blue" style="margin-top:0">📥 Users</button>
       <button onclick="exportData('orders')" class="btn blue" style="margin-top:0">📥 Orders</button>
       <button onclick="exportData('deposits')" class="btn blue" style="margin-top:0">📥 Deps</button>
-      <button onclick="logout()" style="padding:8px 16px;background:rgba(127,29,29,0.9);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:bold;font-family:inherit">Logout</button>
+      <button onclick="logout()" style="padding:8px 14px;background:rgba(127,29,29,0.9);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:bold;font-family:inherit">Logout</button>
     </div>
   </div>
   <div class="tabs">
-    <button class="active" onclick="tab('dash',this)">📊 Dashboard</button>
+    <button class="active" onclick="tab('dash',this)">📊 Dash</button>
     <button onclick="tab('deps',this)">💰 Deposits</button>
     <button onclick="tab('ords',this)">📦 Orders</button>
     <button onclick="tab('chats',this)">💬 Chats <span class="badge" id="chatBadge" style="display:none">0</span></button>
@@ -151,55 +147,45 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     <button onclick="tab('settings',this)">⚙️ Settings</button>
   </div>
 
-  <!-- DASHBOARD -->
   <div class="panel active" id="dash">
     <div class="stats" id="statsGrid"></div>
     <div class="chart"><h3>📈 ၇ ရက်အတွင်း ဝင်ငွေ</h3><div class="bars" id="chartBars"></div></div>
   </div>
 
-  <!-- DEPOSITS -->
   <div class="panel" id="deps"></div>
 
-  <!-- ORDERS -->
   <div class="panel" id="ords">
     <div class="section">
       <h3>🎯 Bulk Actions</h3>
       <div class="row">
-        <button class="btn blue" style="margin-top:0" onclick="bulkOrderAction('processing')">⚙️ Bulk Processing</button>
-        <button class="btn" style="margin-top:0" onclick="bulkOrderAction('completed')">✅ Bulk Complete</button>
-        <button class="btn red" style="margin-top:0" onclick="bulkOrderAction('rejected')">❌ Bulk Reject</button>
-        <button class="btn gray" style="margin-top:0" onclick="selectAllOrders()">☑️ Select All</button>
-        <button class="btn gray" style="margin-top:0" onclick="deselectAllOrders()">⬜ Deselect</button>
+        <button class="btn blue" style="margin-top:0" onclick="bulkOrderAction('processing')">⚙️ Processing</button>
+        <button class="btn" style="margin-top:0" onclick="bulkOrderAction('completed')">✅ Complete</button>
+        <button class="btn red" style="margin-top:0" onclick="bulkOrderAction('rejected')">❌ Reject</button>
       </div>
     </div>
     <div id="ordList"></div>
   </div>
 
-  <!-- CHATS -->
   <div class="panel" id="chats">
     <div class="section">
       <h3>📢 Bulk Chat</h3>
       <div class="row">
-        <input id="bulkChatUsers" placeholder="Usernames (comma-separated)">
+        <input id="bulkChatUsers" placeholder="Usernames (comma) e.g. mgmg,aung">
         <button onclick="sendBulkChat()">💬 Send</button>
       </div>
-      <p style="font-size:12px;color:#94a3b8">ဥပမာ: mgmg,aungaung,susu</p>
     </div>
     <div id="chatsList"></div>
   </div>
 
-  <!-- PRODUCTS -->
   <div class="panel" id="prods">
     <div class="section">
-      <h3>➕ Product အသစ်ထည့်</h3>
+      <h3>➕ Product အသစ်</h3>
       <div class="row">
         <input id="npGame" placeholder="ဂိမ်းနာမည်">
         <input id="npName" placeholder="Package">
         <input id="npPrice" type="number" placeholder="ဈေး (Ks)">
         <input id="npImg" placeholder="Emoji (💎)">
-        <select id="npCat">
-          <option>MOBA</option><option>Battle Royale</option><option>Casual</option><option>Premium</option><option>Other</option>
-        </select>
+        <select id="npCat"><option>MOBA</option><option>Battle Royale</option><option>Casual</option><option>Premium</option><option>Other</option></select>
         <button onclick="addProduct()">ထည့်</button>
       </div>
     </div>
@@ -210,18 +196,16 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
         <input id="giUrl" placeholder="Image URL">
         <button onclick="saveGameImg()">Save</button>
       </div>
-      <div id="gameImgList" style="margin-top:12px"></div>
+      <div id="gameImgList" style="margin-top:10px"></div>
     </div>
     <div class="section"><h3>📦 Products စာရင်း</h3><div id="prodList"></div></div>
   </div>
 
-  <!-- USERS -->
   <div class="panel" id="users">
     <div class="search-box"><input id="userSearch" placeholder="🔍 Username / Phone ရှာပါ..." oninput="filterUsers()"></div>
     <div id="usersList"></div>
   </div>
 
-  <!-- COUPONS -->
   <div class="panel" id="coupons">
     <div class="section">
       <h3>🎟️ Coupon အသစ်</h3>
@@ -235,10 +219,9 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     <div class="section"><h3>📋 Coupons စာရင်း</h3><div id="couponList"></div></div>
   </div>
 
-  <!-- ADMINS -->
   <div class="panel" id="admins">
     <div class="section">
-      <h3>➕ Admin အသစ်ထည့် (Super Only)</h3>
+      <h3>➕ Admin အသစ် (Super)</h3>
       <div class="row">
         <input id="newAdminU" placeholder="Username">
         <input id="newAdminP" type="password" placeholder="Password">
@@ -249,18 +232,17 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     <div id="adminList"></div>
   </div>
 
-  <!-- SETTINGS -->
   <div class="panel" id="settings">
     <div class="section" style="border:2px solid #ef4444">
       <h3>🔧 Maintenance Mode</h3>
-      <div style="display:flex;justify-content:space-between;align-items:center;padding:15px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:12px">
         <div>
           <div style="font-weight:bold;font-size:14px">Website Status</div>
           <div id="maintStatus" style="font-size:12px;color:#94a3b8;margin-top:3px">Checking...</div>
         </div>
-        <button id="maintToggleBtn" onclick="toggleMaintenance()" style="padding:10px 20px;background:#334155;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-family:inherit">⏳</button>
+        <button id="maintToggleBtn" onclick="toggleMaintenance()" style="padding:10px 18px;background:#334155;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-family:inherit">⏳</button>
       </div>
-      <div class="row"><input id="maintMsgInput" placeholder="Message ပြသရန်"></div>
+      <div class="row"><input id="maintMsgInput" placeholder="Message"></div>
       <div class="row"><button onclick="saveMaintMsg()">💾 Message Save</button></div>
     </div>
 
@@ -271,36 +253,28 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
       <div class="row"><input id="cfgPayName" placeholder="Owner Name"></div>
       <div class="row"><input id="cfgTgToken" placeholder="Telegram Bot Token"></div>
       <div class="row"><input id="cfgTgChat" placeholder="Telegram Chat ID (Admin)"></div>
-      <div class="row"><input id="cfgWa" placeholder="WhatsApp Number"></div>
-      <div class="row"><input id="cfgVb" placeholder="Viber Number"></div>
+      <div class="row"><input id="cfgWa" placeholder="WhatsApp"></div>
+      <div class="row"><input id="cfgVb" placeholder="Viber"></div>
       <div class="row"><input id="cfgTt" placeholder="TikTok URL"></div>
       <div class="row"><input id="cfgFb" placeholder="Facebook URL"></div>
       <div class="row"><button onclick="saveConfig()">💾 Save All</button></div>
-    </div>
-
-    <div class="section">
-      <h3>📜 Terms & Privacy</h3>
-      <div class="row"><textarea id="cfgTerms" placeholder="Terms"></textarea></div>
-      <div class="row"><textarea id="cfgPrivacy" placeholder="Privacy"></textarea></div>
-      <div class="row"><button onclick="saveLegal()">💾 Save</button></div>
+      <p style="font-size:12px;color:#94a3b8;margin-top:10px">💡 @BotFather → token · @userinfobot → chat id</p>
     </div>
 
     <div class="section">
       <h3>🎨 Banners</h3>
       <div id="bannerList"></div>
-      <button class="btn" onclick="saveBanners()" style="margin-top:8px">💾 Save</button>
+      <button class="btn" onclick="saveBanners()" style="margin-top:8px">💾 Save Banners</button>
     </div>
 
     <div class="section">
-      <h3>📢 Broadcast Message</h3>
+      <h3>📢 Broadcast</h3>
       <div class="row"><textarea id="bcText" placeholder="User အားလုံးဆီ ပို့မယ့် စာ"></textarea></div>
-      <div class="row"><button onclick="sendBroadcast()">📢 Broadcast ပို့</button></div>
-      <p style="font-size:12px;color:#94a3b8">⚠️ User အားလုံးရဲ့ Chat ထဲ ပို့သွားမယ်</p>
+      <div class="row"><button onclick="sendBroadcast()">📢 Broadcast</button></div>
     </div>
   </div>
 </div>
 
-<!-- Chat Window -->
 <div class="chat-window" id="chatWindow">
   <div class="head">
     <h3 id="chatTitle">Chat</h3>
@@ -313,7 +287,14 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
   </div>
 </div>
 
-<!-- User History Modal -->
+<div class="modal" id="receiptModal">
+  <div class="modal-box">
+    <h3>📸 Receipt</h3>
+    <img id="receiptView" class="receipt-view" src="">
+    <button class="cancel" onclick="closeModal('receiptModal')">Close</button>
+  </div>
+</div>
+
 <div class="modal" id="historyModal">
   <div class="modal-box">
     <h3 id="histTitle">User History</h3>
@@ -322,11 +303,10 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
   </div>
 </div>
 
-<!-- Edit Balance Modal -->
 <div class="modal" id="balanceModal">
   <div class="modal-box">
     <h3>✏️ Balance ပြင်</h3>
-    <input id="editBalanceUser" placeholder="Username" readonly>
+    <input id="editBalanceUser" readonly>
     <input id="editBalanceValue" type="number" placeholder="Balance အသစ်">
     <button onclick="saveBalance()">💾 Save</button>
     <button class="cancel" onclick="closeModal('balanceModal')">Cancel</button>
@@ -334,11 +314,10 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 </div>
 
 <script>
-// ===== SPLASH =====
 setTimeout(() => {
   const s = document.getElementById('splash');
   if (s) { s.classList.add('hide'); setTimeout(() => s.remove(), 700); }
-}, 2200);
+}, 1800);
 
 let au = localStorage.getItem('adminU') || 'admin';
 let ap = localStorage.getItem('adminP') || '';
@@ -346,10 +325,7 @@ let me = null, activeChatUser = null, chatPollInterval = null;
 let allUsers = [], allOrders = [], selectedOrders = new Set();
 
 async function api(url, opts={}) {
-  const r = await fetch(url, {
-    ...opts,
-    headers: {'Content-Type':'application/json','x-admin-user':au,'x-admin-pass':ap, ...(opts.headers||{})}
-  });
+  const r = await fetch(url, {...opts, headers:{'Content-Type':'application/json','x-admin-user':au,'x-admin-pass':ap, ...(opts.headers||{})}});
   if (r.status === 401) { alert('Username/Password မှား'); localStorage.removeItem('adminP'); location.reload(); }
   return r.json();
 }
@@ -361,6 +337,8 @@ function login(){
   showPanel();
 }
 function logout(){ localStorage.removeItem('adminP'); location.reload(); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 
 async function showPanel(){
   document.getElementById('loginBox').style.display = 'none';
@@ -369,10 +347,9 @@ async function showPanel(){
   try {
     const admins = await api('/api/admin/admins');
     me = admins.find(a => a.username === au);
-    if (me) document.getElementById('roleTag').innerHTML = `<span class="role-badge role-${me.role}">${me.role}</span>`;
+    if (me) document.getElementById('roleTag').innerHTML = '<span class="role-badge role-' + me.role + '">' + me.role + '</span>';
   } catch(e){}
-  loadDash(); loadDeps(); loadOrds(); loadChats(); loadProductsAdmin();
-  loadUsers(); loadCoupons(); loadAdmins(); loadConfig(); loadBanners(); loadMaintStatus();
+  loadDash(); loadDeps(); loadOrds(); loadChats(); loadProductsAdmin(); loadUsers(); loadCoupons(); loadAdmins(); loadConfig(); loadBanners(); loadMaintStatus();
   setInterval(refreshBadges, 5000);
 }
 function tab(name, btn){
@@ -392,116 +369,97 @@ async function refreshBadges(){
   } catch(e){}
 }
 
-// ===== EXPORT CSV (Feature 31) =====
 function exportData(type){
-  const url = `/api/admin/export/${type}`;
-  fetch(url, { headers: { 'x-admin-user': au, 'x-admin-pass': ap } })
+  fetch('/api/admin/export/' + type, { headers: { 'x-admin-user': au, 'x-admin-pass': ap } })
     .then(r => r.blob())
     .then(blob => {
       const a = document.createElement('a');
       a.href = URL.createObjectURL(blob);
-      a.download = `${type}-${Date.now()}.csv`;
+      a.download = type + '-' + Date.now() + '.csv';
       a.click();
       setTimeout(() => URL.revokeObjectURL(a.href), 2000);
     });
 }
 
-// ===== DASHBOARD =====
 async function loadDash(){
   const d = await api('/api/admin/stats');
   const cards = [
     {label:'👥 Users', value:d.totalUsers, cls:'blue'},
     {label:'📦 Orders', value:d.totalOrders, cls:''},
-    {label:'💰 Total Revenue', value:d.totalRevenue.toLocaleString()+' Ks', cls:'green'},
+    {label:'💰 Total', value:d.totalRevenue.toLocaleString()+' Ks', cls:'green'},
     {label:'📅 Today', value:d.todayRevenue.toLocaleString()+' Ks', cls:'green'},
     {label:'⏳ Pending Deps', value:d.pendingDeps, cls:'orange'},
     {label:'⏳ Pending Ords', value:d.pendingOrders, cls:'orange'},
-    {label:'💬 Unread Chat', value:d.unreadChats, cls:'orange'},
-    {label:'🚫 Banned', value:d.bannedUsers || 0, cls:'red'}
+    {label:'💬 Unread', value:d.unreadChats, cls:'orange'},
+    {label:'🛒 Today Orders', value:d.todayOrders, cls:'blue'}
   ];
-  document.getElementById('statsGrid').innerHTML = cards.map(c=>`
-    <div class="stat-card ${c.cls}"><div class="label">${c.label}</div><div class="value">${c.value}</div></div>`).join('');
+  document.getElementById('statsGrid').innerHTML = cards.map(c=>'<div class="stat-card '+c.cls+'"><div class="label">'+c.label+'</div><div class="value">'+c.value+'</div></div>').join('');
   const max = Math.max(...d.chart.map(x=>x.value), 1);
   document.getElementById('chartBars').innerHTML = d.chart.map(x=>{
     const h = Math.max(3, (x.value/max)*100);
-    return `<div class="bar-wrap"><div class="bar-val">${x.value>0?(x.value/1000).toFixed(0)+'k':''}</div><div class="bar" style="height:${h}%"></div><div class="bar-label">${x.label}</div></div>`;
+    return '<div class="bar-wrap"><div class="bar-val">'+(x.value>0?(x.value/1000).toFixed(0)+'k':'')+'</div><div class="bar" style="height:'+h+'%"></div><div class="bar-label">'+x.label+'</div></div>';
   }).join('');
 }
 
-// ===== DEPOSITS =====
 async function loadDeps(){
   const d = await api('/api/admin/deposits');
-  document.getElementById('deps').innerHTML = d.length ? d.map(x=>`
-    <div class="item ${x.status}">
-      <b>${x.username}</b> - ${x.amount.toLocaleString()} Ks (${x.method}) [${x.status}]
-      <div class="meta">Ref: ${x.ref} | ${x.id} | ${new Date(x.createdAt).toLocaleString()}</div>
-      ${x.status==='pending' ? `<div>
-        <button class="btn" onclick="approveDep('${x.id}')">✅ Approve</button>
-        <button class="btn red" onclick="rejectDep('${x.id}')">❌ Reject</button>
-      </div>` : ''}
-    </div>`).join('') : '<p class="empty">မရှိပါ</p>';
+  document.getElementById('deps').innerHTML = d.length ? d.map(x=>{
+    const receiptHtml = x.receipt ? '<div style="margin-top:8px"><button class="btn blue" onclick="viewReceipt(\''+x.receipt.substring(0,20)+'\',\''+x.id+'\')">📸 Receipt ကြည့်</button></div>' : '';
+    window['_receipt_' + x.id] = x.receipt || '';
+    return '<div class="item '+x.status+'">' +
+      '<b>'+x.username+'</b> - '+x.amount.toLocaleString()+' Ks ('+x.method+') ['+x.status+']' +
+      '<div class="meta">'+x.id+' | '+new Date(x.createdAt).toLocaleString()+'</div>' +
+      receiptHtml +
+      (x.status==='pending' ? '<div><button class="btn" onclick="approveDep(\''+x.id+'\')">✅ Approve</button><button class="btn red" onclick="rejectDep(\''+x.id+'\')">❌ Reject</button></div>' : '') +
+      '</div>';
+  }).join('') : '<p class="empty">မရှိပါ</p>';
+}
+function viewReceipt(_, id){
+  const r = window['_receipt_' + id];
+  if (!r) return alert('Receipt မရှိပါ');
+  document.getElementById('receiptView').src = r;
+  document.getElementById('receiptModal').classList.add('show');
 }
 
-// ===== ORDERS (with Bulk) =====
 async function loadOrds(){
   const d = await api('/api/admin/orders');
   allOrders = d;
   selectedOrders.clear();
-  document.getElementById('ordList').innerHTML = d.length ? d.map(x=>`
-    <div class="item ${x.status}">
-      <label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer">
-        <input type="checkbox" onchange="toggleOrderSelect('${x.id}',this.checked)">
-        <div style="flex:1">
-          <b>${x.username}</b> → ${x.game} - ${x.product} [${x.status}]
-          <div class="meta">Player: ${x.playerId} | ${x.price.toLocaleString()} Ks | ${x.id}</div>
-        </div>
-      </label>
-      <div style="margin-top:8px">
-        ${x.status==='pending' ? `<button class="btn blue" onclick="updateOrd('${x.id}','processing')">⚙️ Processing</button>` : ''}
-        ${(x.status==='pending'||x.status==='processing') ? `<button class="btn" onclick="updateOrd('${x.id}','completed')">✅ Complete</button>` : ''}
-        ${x.status!=='rejected' && x.status!=='completed' ? `<button class="btn red" onclick="updateOrd('${x.id}','rejected')">❌ Reject</button>` : ''}
-      </div>
-    </div>`).join('') : '<p class="empty">မရှိပါ</p>';
+  document.getElementById('ordList').innerHTML = d.length ? d.map(x=>{
+    const sid = x.serverId ? ' · S:'+x.serverId : '';
+    return '<div class="item '+x.status+'">' +
+      '<label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer">' +
+      '<input type="checkbox" onchange="toggleOrderSelect(\''+x.id+'\',this.checked)">' +
+      '<div style="flex:1"><b>'+x.username+'</b> → '+x.game+' - '+x.product+' ['+x.status+']' +
+      '<div class="meta">Player: '+x.playerId+sid+' | '+x.price.toLocaleString()+' Ks | '+x.id+'</div></div></label>' +
+      '<div style="margin-top:8px">' +
+      (x.status==='pending' ? '<button class="btn blue" onclick="updateOrd(\''+x.id+'\',\'processing\')">⚙️ Processing</button>' : '') +
+      ((x.status==='pending'||x.status==='processing') ? '<button class="btn" onclick="updateOrd(\''+x.id+'\',\'completed\')">✅ Complete</button>' : '') +
+      ((x.status!=='rejected' && x.status!=='completed') ? '<button class="btn red" onclick="updateOrd(\''+x.id+'\',\'rejected\')">❌ Reject</button>' : '') +
+      '</div></div>';
+  }).join('') : '<p class="empty">မရှိပါ</p>';
 }
 function toggleOrderSelect(id, checked){
   if (checked) selectedOrders.add(id); else selectedOrders.delete(id);
 }
-function selectAllOrders(){
-  selectedOrders.clear();
-  allOrders.filter(o => o.status === 'pending' || o.status === 'processing').forEach(o => selectedOrders.add(o.id));
-  document.querySelectorAll('#ordList input[type="checkbox"]').forEach((c,i) => {
-    const item = c.closest('.item');
-    if (item.querySelector('.btn')) c.checked = true;
-  });
-  alert(`✅ ${selectedOrders.size} order ရွေးပြီး`);
-}
-function deselectAllOrders(){
-  selectedOrders.clear();
-  document.querySelectorAll('#ordList input[type="checkbox"]').forEach(c => c.checked = false);
-}
 async function bulkOrderAction(status){
-  if (selectedOrders.size === 0) return alert('Order တစ်ခုမှ မရွေးထားဘူး');
-  if (status === 'rejected' && !confirm(`${selectedOrders.size} order ပယ်ဖျက်မယ်။ User တွေဆီ ငွေပြန်အမ်းမယ်။ သေချာလား?`)) return;
-  const d = await api('/api/admin/bulk-order-status', {
-    method:'POST', body: JSON.stringify({orderIds: [...selectedOrders], status})
-  });
-  if (d.success) { alert(`✅ ${d.count} order update ပြီး`); loadOrds(); loadDash(); }
+  if (selectedOrders.size === 0) return alert('Order မရွေးထားဘူး');
+  if (status === 'rejected' && !confirm(selectedOrders.size + ' order ပယ်ဖျက်မယ်။ သေချာလား?')) return;
+  const d = await api('/api/admin/bulk-order-status', {method:'POST', body: JSON.stringify({orderIds: [...selectedOrders], status})});
+  if (d.success) { alert('✅ '+d.count+' order update ပြီး'); loadOrds(); loadDash(); }
   else alert('❌ ' + d.error);
 }
 
-// ===== CHATS =====
 async function loadChats(){
   const list = await api('/api/admin/chats');
-  document.getElementById('chatsList').innerHTML = list.length ? list.map(c=>`
-    <div class="chat-list-item" onclick="openChatWindow('${c.userId}','${c.username}')">
-      <div>
-        <b style="color:#38bdf8">${c.username}</b>
-        <div class="meta">${c.last ? escapeHtml(String(c.last.text).slice(0,50)) : ''}</div>
-      </div>
-      ${c.unread > 0 ? `<span class="chat-unread">${c.unread}</span>` : ''}
-    </div>`).join('') : '<p class="empty">Chat မရှိသေးပါ</p>';
+  document.getElementById('chatsList').innerHTML = list.length ? list.map(c=>{
+    const preview = c.last ? escapeHtml(String(c.last.text || '[Media]').slice(0,50)) : '';
+    return '<div class="chat-list-item" onclick="openChatWindow(\''+c.userId+'\',\''+c.username+'\')">' +
+      '<div><b style="color:#38bdf8">'+c.username+'</b><div class="meta">'+preview+'</div></div>' +
+      (c.unread > 0 ? '<span class="chat-unread">'+c.unread+'</span>' : '') +
+      '</div>';
+  }).join('') : '<p class="empty">Chat မရှိပါ</p>';
 }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 async function openChatWindow(userId, username){
   activeChatUser = userId;
   document.getElementById('chatTitle').textContent = '💬 ' + username;
@@ -519,12 +477,7 @@ async function loadChatMsgs(){
   if (!activeChatUser) return;
   const list = await api('/api/admin/chat/' + activeChatUser);
   const box = document.getElementById('chatMsgs');
-  box.innerHTML = list.map(m=>`
-    <div class="bubble ${m.from}">
-      ${m.image ? `<img src="${m.image}" alt="img">` : ''}
-      ${m.text ? escapeHtml(m.text) : ''}
-      <div class="t">${new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
-    </div>`).join('') || '<p class="empty">စာ မရှိပါ</p>';
+  box.innerHTML = list.map(m=>'<div class="bubble '+m.from+'">' + (m.image ? '<img src="'+m.image+'">' : '') + (m.text ? escapeHtml(m.text) : '') + '<div class="t">'+new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'</div></div>').join('') || '<p class="empty">စာ မရှိပါ</p>';
   box.scrollTop = box.scrollHeight;
 }
 async function sendAdminChat(){
@@ -537,50 +490,43 @@ async function sendAdminChat(){
 }
 async function sendBulkChat(){
   const usernames = document.getElementById('bulkChatUsers').value.split(',').map(s=>s.trim()).filter(Boolean);
-  const text = prompt('ပို့မယ့် စာ ရိုက်ပါ:');
+  const text = prompt('ပို့မယ့် စာ:');
   if (!text || !usernames.length) return;
   const d = await api('/api/admin/bulk-chat', {method:'POST', body: JSON.stringify({usernames, text})});
-  if (d.success) { alert(`✅ ${d.sent} ယောက်ဆီ ပို့ပြီး`); document.getElementById('bulkChatUsers').value = ''; }
+  if (d.success) { alert('✅ '+d.sent+' ယောက်ဆီ ပို့ပြီး'); document.getElementById('bulkChatUsers').value = ''; }
   else alert('❌ ' + d.error);
 }
 
-// ===== USERS (Feature 35 Search + 32 Ban + 36 Edit + 37 History) =====
 async function loadUsers(){
   allUsers = await api('/api/admin/users');
   filterUsers();
 }
 function filterUsers(){
   const term = (document.getElementById('userSearch').value || '').toLowerCase();
-  const filtered = allUsers.filter(u =>
-    u.username.toLowerCase().includes(term) || (u.phone||'').includes(term)
-  );
-  document.getElementById('usersList').innerHTML = filtered.length ? filtered.map(u=>`
-    <div class="user-card ${u.banned?'banned':''}">
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">
-        <div>
-          <b style="color:#38bdf8;font-size:15px">${u.username}</b>
-          <span class="vip-badge vip-${u.vip}">${u.vip}</span>
-          ${u.banned ? '<span class="vip-badge" style="background:#ef4444">BANNED</span>' : ''}
-          ${u.telegramId ? ' 🔗' : ''}
-        </div>
-        <b style="color:#22c55e">${u.balance.toLocaleString()} Ks</b>
-      </div>
-      <div class="meta">📱 ${u.phone||'-'} | ⭐ ${u.points||0} pts | 💸 ${(u.cashback||0).toLocaleString()} cashback</div>
-      <div class="meta">🎁 ${u.referralCode||'-'} | 💰 Spent: ${(u.totalSpent||0).toLocaleString()} Ks</div>
-      <div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">
-        <button class="btn blue" style="margin-top:0;font-size:12px;padding:6px 10px" onclick="viewHistory('${u.username}')">📸 History</button>
-        <button class="btn orange" style="margin-top:0;font-size:12px;padding:6px 10px" onclick="openEditBalance('${u.username}',${u.balance})">✏️ Balance</button>
-        ${u.banned
-          ? `<button class="btn" style="margin-top:0;font-size:12px;padding:6px 10px" onclick="toggleBan('${u.username}',false)">🔓 Unban</button>`
-          : `<button class="btn red" style="margin-top:0;font-size:12px;padding:6px 10px" onclick="toggleBan('${u.username}',true)">🚫 Ban</button>`}
-      </div>
-    </div>`).join('') : '<p class="empty">မတွေ့ပါ</p>';
+  const filtered = allUsers.filter(u => u.username.toLowerCase().includes(term) || (u.phone||'').includes(term));
+  document.getElementById('usersList').innerHTML = filtered.length ? filtered.map(u=>{
+    const linkIcon = u.telegramId ? ' 🔗' : '';
+    const banLabel = u.banned ? '<span class="vip-badge" style="background:#ef4444;color:#fff">BANNED</span>' : '';
+    return '<div class="user-card '+(u.banned?'banned':'')+'">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">' +
+      '<div><b style="color:#38bdf8;font-size:15px">'+u.username+'</b>' + linkIcon +
+      '<span class="vip-badge vip-'+(u.vip||'Bronze')+'">'+(u.vip||'Bronze')+'</span> ' + banLabel + '</div>' +
+      '<b style="color:#22c55e">'+u.balance.toLocaleString()+' Ks</b></div>' +
+      '<div class="meta">📱 '+(u.phone||'-')+' | ⭐ '+(u.points||0)+' pts | 💰 Spent: '+(u.totalSpent||0).toLocaleString()+' Ks</div>' +
+      '<div class="meta">🎁 '+(u.referralCode||'-')+'</div>' +
+      '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">' +
+      '<button class="btn blue" style="margin-top:0;font-size:11px;padding:6px 10px" onclick="viewHistory(\''+u.username+'\')">📸 History</button>' +
+      '<button class="btn orange" style="margin-top:0;font-size:11px;padding:6px 10px" onclick="openEditBalance(\''+u.username+'\','+u.balance+')">✏️ Balance</button>' +
+      (u.banned
+        ? '<button class="btn" style="margin-top:0;font-size:11px;padding:6px 10px" onclick="toggleBan(\''+u.username+'\',false)">🔓 Unban</button>'
+        : '<button class="btn red" style="margin-top:0;font-size:11px;padding:6px 10px" onclick="toggleBan(\''+u.username+'\',true)">🚫 Ban</button>') +
+      '</div></div>';
+  }).join('') : '<p class="empty">မတွေ့ပါ</p>';
 }
 async function toggleBan(username, ban){
-  if (!confirm(`${ban?'Ban':'Unban'} ${username}?`)) return;
+  if (!confirm((ban?'Ban ':'Unban ')+username+'?')) return;
   const d = await api('/api/admin/ban', {method:'POST', body: JSON.stringify({username, ban})});
-  if (d.success) { loadUsers(); alert('✅ ပြီးပါပြီ'); }
-  else alert('❌ ' + d.error);
+  if (d.success) loadUsers(); else alert('❌ ' + d.error);
 }
 function openEditBalance(username, balance){
   document.getElementById('editBalanceUser').value = username;
@@ -591,52 +537,46 @@ async function saveBalance(){
   const username = document.getElementById('editBalanceUser').value;
   const balance = document.getElementById('editBalanceValue').value;
   const d = await api('/api/admin/edit-balance', {method:'POST', body: JSON.stringify({username, balance})});
-  if (d.success) { alert('✅ Balance ပြင်ပြီး'); closeModal('balanceModal'); loadUsers(); }
+  if (d.success) { alert('✅ ပြီး'); closeModal('balanceModal'); loadUsers(); }
   else alert('❌ ' + d.error);
 }
 async function viewHistory(username){
   const d = await api('/api/admin/user-history/' + username);
   if (d.error) return alert('❌ ' + d.error);
   const u = d.user;
-  document.getElementById('histTitle').innerHTML = `📸 ${u.username} History`;
-  document.getElementById('histContent').innerHTML = `
-    <div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:10px;margin-bottom:12px;font-size:13px">
-      <div style="display:flex;justify-content:space-between"><span>💰 Balance</span><b style="color:#22c55e">${u.balance.toLocaleString()} Ks</b></div>
-      <div style="display:flex;justify-content:space-between;margin-top:5px"><span>📱 Phone</span><b>${u.phone||'-'}</b></div>
-      <div style="display:flex;justify-content:space-between;margin-top:5px"><span>💎 VIP</span><b>${u.vip}</b></div>
-      <div style="display:flex;justify-content:space-between;margin-top:5px"><span>💰 Total Spent</span><b>${(u.totalSpent||0).toLocaleString()} Ks</b></div>
-      <div style="display:flex;justify-content:space-between;margin-top:5px"><span>📅 Joined</span><b>${new Date(u.createdAt).toLocaleDateString()}</b></div>
-      <div style="display:flex;justify-content:space-between;margin-top:5px"><span>💬 Chat messages</span><b>${d.chats}</b></div>
-    </div>
-    <div style="font-size:13px;font-weight:bold;color:#38bdf8;margin:12px 0 8px">📦 Orders (${d.orders.length})</div>
-    ${d.orders.slice(0,5).map(o=>`<div style="font-size:12px;padding:8px;background:rgba(15,23,42,0.5);border-radius:8px;margin-bottom:6px">${o.game} - ${o.product} [${o.status}] · ${o.price.toLocaleString()} Ks</div>`).join('') || '<div style="font-size:12px;color:#64748b">မရှိပါ</div>'}
-    <div style="font-size:13px;font-weight:bold;color:#38bdf8;margin:12px 0 8px">💰 Deposits (${d.deposits.length})</div>
-    ${d.deposits.slice(0,5).map(dep=>`<div style="font-size:12px;padding:8px;background:rgba(15,23,42,0.5);border-radius:8px;margin-bottom:6px">${dep.amount.toLocaleString()} Ks [${dep.status}] · ${dep.method}</div>`).join('') || '<div style="font-size:12px;color:#64748b">မရှိပါ</div>'}
-  `;
+  let html = '<div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:10px;margin-bottom:12px;font-size:13px">';
+  html += '<div style="display:flex;justify-content:space-between"><span>💰 Balance</span><b style="color:#22c55e">'+u.balance.toLocaleString()+' Ks</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;margin-top:5px"><span>📱 Phone</span><b>'+(u.phone||'-')+'</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;margin-top:5px"><span>💎 VIP</span><b>'+(u.vip||'Bronze')+'</b></div>';
+  html += '</div>';
+  html += '<div style="font-size:13px;font-weight:bold;color:#38bdf8;margin:12px 0 8px">📦 Orders ('+d.orders.length+')</div>';
+  html += d.orders.slice(0,5).map(o=>'<div style="font-size:12px;padding:8px;background:rgba(15,23,42,0.5);border-radius:8px;margin-bottom:6px">'+o.game+' - '+o.product+' ['+o.status+'] · '+o.price.toLocaleString()+' Ks</div>').join('') || '<div style="font-size:12px;color:#64748b">မရှိပါ</div>';
+  html += '<div style="font-size:13px;font-weight:bold;color:#38bdf8;margin:12px 0 8px">💰 Deposits ('+d.deposits.length+')</div>';
+  html += d.deposits.slice(0,5).map(dep=>'<div style="font-size:12px;padding:8px;background:rgba(15,23,42,0.5);border-radius:8px;margin-bottom:6px">'+dep.amount.toLocaleString()+' Ks ['+dep.status+'] · '+dep.method+'</div>').join('') || '<div style="font-size:12px;color:#64748b">မရှိပါ</div>';
+  document.getElementById('histTitle').textContent = '📸 ' + username;
+  document.getElementById('histContent').innerHTML = html;
   document.getElementById('historyModal').classList.add('show');
 }
-function closeModal(id){ document.getElementById(id).classList.remove('show'); }
 
-// ===== PRODUCTS =====
 async function loadProductsAdmin(){
   const d = await api('/api/admin/products');
-  document.getElementById('prodList').innerHTML = d.map(p=>`
-    <div class="prod-row">
-      <input value="${p.image||'🎮'}" onchange="updateProd(${p.id},'image',this.value)" style="text-align:center;font-size:16px">
-      <input value="${p.game}" onchange="updateProd(${p.id},'game',this.value)">
-      <input value="${p.name}" onchange="updateProd(${p.id},'name',this.value)">
-      <input type="number" value="${p.price}" onchange="updateProd(${p.id},'price',this.value)">
-      <select onchange="updateProd(${p.id},'category',this.value)">
-        ${['MOBA','Battle Royale','Casual','Premium','Other'].map(c=>`<option ${p.category===c?'selected':''}>${c}</option>`).join('')}
-      </select>
-      <button class="del" onclick="delProduct(${p.id})">✕</button>
-    </div>`).join('') || '<p class="empty">Product မရှိပါ</p>';
+  document.getElementById('prodList').innerHTML = d.map(p=>{
+    const cats = ['MOBA','Battle Royale','Casual','Premium','Other'];
+    return '<div class="prod-row">' +
+      '<input value="'+(p.image||'🎮')+'" onchange="updateProd('+p.id+',\'image\',this.value)" style="text-align:center;font-size:15px">' +
+      '<input value="'+p.game+'" onchange="updateProd('+p.id+',\'game\',this.value)">' +
+      '<input value="'+p.name+'" onchange="updateProd('+p.id+',\'name\',this.value)">' +
+      '<input type="number" value="'+p.price+'" onchange="updateProd('+p.id+',\'price\',this.value)">' +
+      '<select onchange="updateProd('+p.id+',\'category\',this.value)">' +
+      cats.map(c=>'<option '+(p.category===c?'selected':'')+'>'+c+'</option>').join('') + '</select>' +
+      '<button class="del" onclick="delProduct('+p.id+')">✕</button>' +
+      '</div>';
+  }).join('') || '<p class="empty">Product မရှိပါ</p>';
   const imgs = await api('/api/admin/gameImages');
-  document.getElementById('gameImgList').innerHTML = Object.entries(imgs).map(([g,u])=>`
-    <div class="admin-item">
-      <div><b style="color:#38bdf8">${g}</b><div class="meta" style="font-size:11px;word-break:break-all">${u}</div></div>
-      <button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delGameImg('${g}')">✕</button>
-    </div>`).join('') || '<p class="empty" style="font-size:12px">မရှိပါ</p>';
+  document.getElementById('gameImgList').innerHTML = Object.entries(imgs).map(([g,u])=>
+    '<div class="admin-item"><div><b style="color:#38bdf8">'+g+'</b><div class="meta" style="font-size:11px;word-break:break-all">'+u+'</div></div>' +
+    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delGameImg(\''+g+'\')">✕</button></div>'
+  ).join('') || '<p class="empty" style="font-size:12px">မရှိပါ</p>';
 }
 async function addProduct(){
   const game = document.getElementById('npGame').value.trim();
@@ -654,7 +594,7 @@ async function updateProd(id, field, value){
   await api('/api/admin/products/' + id, {method:'PUT', body: JSON.stringify(body)});
 }
 async function delProduct(id){
-  if (!confirm('ဖျက်မှာသေချာလား?')) return;
+  if (!confirm('ဖျက်မှာလား?')) return;
   await api('/api/admin/products/' + id, {method:'DELETE'});
   loadProductsAdmin();
 }
@@ -672,17 +612,12 @@ async function delGameImg(game){
   loadProductsAdmin();
 }
 
-// ===== COUPONS =====
 async function loadCoupons(){
   const c = await api('/api/admin/coupons');
-  document.getElementById('couponList').innerHTML = Object.entries(c).map(([code, data])=>`
-    <div class="admin-item">
-      <div>
-        <b style="color:#38bdf8">${code}</b>
-        <div class="meta">${data.amount.toLocaleString()} Ks · Used: ${data.uses - data.usesLeft}/${data.uses}</div>
-      </div>
-      <button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delCoupon('${code}')">✕</button>
-    </div>`).join('') || '<p class="empty">Coupon မရှိပါ</p>';
+  document.getElementById('couponList').innerHTML = Object.entries(c).map(([code, data])=>
+    '<div class="admin-item"><div><b style="color:#38bdf8">'+code+'</b><div class="meta">'+data.amount.toLocaleString()+' Ks · Used: '+(data.uses - data.usesLeft)+'/'+data.uses+'</div></div>' +
+    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delCoupon(\''+code+'\')">✕</button></div>'
+  ).join('') || '<p class="empty">Coupon မရှိပါ</p>';
 }
 async function addCoupon(){
   const code = document.getElementById('cCode').value.trim().toUpperCase();
@@ -699,7 +634,6 @@ async function delCoupon(code){
   loadCoupons();
 }
 
-// ===== ADMINS =====
 async function addAdmin(){
   const username = document.getElementById('newAdminU').value.trim();
   const password = document.getElementById('newAdminP').value;
@@ -712,11 +646,11 @@ async function addAdmin(){
 async function loadAdmins(){
   try {
     const d = await api('/api/admin/admins');
-    document.getElementById('adminList').innerHTML = d.map(a=>`
-      <div class="admin-item">
-        <div><b style="color:#38bdf8">${a.username}</b> <span class="role-badge role-${a.role}" style="margin-left:6px">${a.role}</span></div>
-        ${a.username !== au ? `<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delAdmin('${a.username}')">Delete</button>` : '<span style="font-size:11px;color:#94a3b8">(You)</span>'}
-      </div>`).join('');
+    document.getElementById('adminList').innerHTML = d.map(a=>
+      '<div class="admin-item"><div><b style="color:#38bdf8">'+a.username+'</b> <span class="role-badge role-'+a.role+'" style="margin-left:6px">'+a.role+'</span></div>' +
+      (a.username !== au ? '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delAdmin(\''+a.username+'\')">Delete</button>' : '<span style="font-size:11px;color:#94a3b8">(You)</span>') +
+      '</div>'
+    ).join('');
   } catch(e){ document.getElementById('adminList').innerHTML = '<p class="empty">Super admin သာ</p>'; }
 }
 async function delAdmin(u){
@@ -725,16 +659,14 @@ async function delAdmin(u){
   if (d.success) loadAdmins(); else alert('❌ ' + d.error);
 }
 
-// ===== CONFIG =====
 async function loadConfig(){
   try {
     const c = await api('/api/admin/config');
-    ['Name','PayNum','PayName','TgToken','TgChat','Wa','Vb','Tt','Fb'].forEach(k => {
+    const map = {Name:'siteName',PayNum:'payNumber',PayName:'payName',TgToken:'telegramBotToken',TgChat:'telegramChatId',Wa:'whatsapp',Vb:'viber',Tt:'tiktok',Fb:'facebook'};
+    Object.entries(map).forEach(([k,v]) => {
       const el = document.getElementById('cfg' + k);
-      if (el) el.value = c[{Name:'siteName',PayNum:'payNumber',PayName:'payName',TgToken:'telegramBotToken',TgChat:'telegramChatId',Wa:'whatsapp',Vb:'viber',Tt:'tiktok',Fb:'facebook'}[k]] || '';
+      if (el) el.value = c[v] || '';
     });
-    document.getElementById('cfgTerms').value = c.terms || '';
-    document.getElementById('cfgPrivacy').value = c.privacy || '';
   } catch(e){}
 }
 async function saveConfig(){
@@ -752,13 +684,6 @@ async function saveConfig(){
   const d = await api('/api/admin/config', {method:'POST', body: JSON.stringify(body)});
   if (d.success) alert('✅ သိမ်းပြီး'); else alert('❌ ' + d.error);
 }
-async function saveLegal(){
-  const body = { terms: document.getElementById('cfgTerms').value, privacy: document.getElementById('cfgPrivacy').value };
-  const d = await api('/api/admin/config', {method:'POST', body: JSON.stringify(body)});
-  if (d.success) alert('✅ သိမ်းပြီး'); else alert('❌ ' + d.error);
-}
-
-// ===== MAINTENANCE =====
 async function loadMaintStatus(){
   try {
     const c = await api('/api/admin/config');
@@ -779,7 +704,7 @@ async function toggleMaintenance(){
   const c = await api('/api/admin/config');
   const cur = c.maintenance?.enabled || false;
   const newState = !cur;
-  const msg = document.getElementById('maintMsgInput').value.trim() || '🔧 ပြုပြင်နေပါသည်။ မကြာမီ ပြန်လည်ဖွင့်ပါမည်။';
+  const msg = document.getElementById('maintMsgInput').value.trim() || '🔧 ပြုပြင်နေပါသည်။';
   const d = await api('/api/admin/maintenance', {method:'POST', body: JSON.stringify({enabled:newState, message:msg})});
   if (d.success) { await loadMaintStatus(); alert(newState?'🔴 ပိတ်ပြီး':'🟢 ပြန်ဖွင့်ပြီး'); }
   else alert('❌ ' + d.error);
@@ -790,33 +715,30 @@ async function saveMaintMsg(){
   const d = await api('/api/admin/maintenance', {method:'POST', body: JSON.stringify({message:msg})});
   if (d.success) alert('✅ သိမ်းပြီး'); else alert('❌ ' + d.error);
 }
-
-// ===== BROADCAST (Feature 33) =====
 async function sendBroadcast(){
   const text = document.getElementById('bcText').value.trim();
   if (!text) return alert('စာ ရေးပါ');
   if (!confirm('User အားလုံးဆီ ပို့မယ်။ သေချာလား?')) return;
   const d = await api('/api/admin/broadcast', {method:'POST', body: JSON.stringify({text})});
-  if (d.success){ alert(`✅ ${d.sent} ယောက်ဆီ ပို့ပြီး`); document.getElementById('bcText').value=''; }
+  if (d.success){ alert('✅ '+d.sent+' ယောက်ဆီ ပို့ပြီး'); document.getElementById('bcText').value=''; }
   else alert('❌ ' + d.error);
 }
 
-// ===== BANNERS =====
 let bannerData = [];
 async function loadBanners(){
   bannerData = await api('/api/admin/banners');
-  document.getElementById('bannerList').innerHTML = bannerData.map((b,i)=>`
-    <div class="prod-row" style="grid-template-columns:1fr 1fr">
-      <input value="${b.title}" onchange="bannerData[${i}].title=this.value" placeholder="Title">
-      <input value="${b.subtitle}" onchange="bannerData[${i}].subtitle=this.value" placeholder="Subtitle">
-    </div>`).join('');
+  document.getElementById('bannerList').innerHTML = bannerData.map((b,i)=>
+    '<div class="prod-row" style="grid-template-columns:1fr 1fr">' +
+    '<input value="'+b.title+'" onchange="bannerData['+i+'].title=this.value" placeholder="Title">' +
+    '<input value="'+b.subtitle+'" onchange="bannerData['+i+'].subtitle=this.value" placeholder="Subtitle">' +
+    '</div>'
+  ).join('');
 }
 async function saveBanners(){
   const d = await api('/api/admin/banners', {method:'POST', body: JSON.stringify({banners:bannerData})});
   if (d.success) alert('✅ သိမ်းပြီး'); else alert('❌ ' + d.error);
 }
 
-// ===== ACTIONS =====
 async function approveDep(id){ await api('/api/admin/approve-deposit',{method:'POST',body:JSON.stringify({depositId:id})}); loadDeps(); loadDash(); loadUsers(); }
 async function rejectDep(id){ if(!confirm('Reject?')) return; await api('/api/admin/reject-deposit',{method:'POST',body:JSON.stringify({depositId:id})}); loadDeps(); loadDash(); }
 async function updateOrd(id, status){
