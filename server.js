@@ -35,7 +35,7 @@ const DB_FILE = 'db.json';
 
 function defaultDB() {
   return {
-    users: [], orders: [], deposits: [], sessions: {}, chats: [], notifications: [],
+    users: [], orders: [], deposits: [], sessions: {}, chats: [], notifications: [], activityLog: [],
     otps: {}, banned: [], broadcasts: [], coupons: {}, cashbacks: {},
     boxesOpened: {}, missions: {}, reviews: [],
     products: [
@@ -69,7 +69,8 @@ function defaultDB() {
       facebook: 'https://facebook.com/safezone',
       terms: 'Safe Zone Game Topup ကို အသုံးပြုခြင်းဖြင့် အောက်ပါ စည်းကမ်းချက်များကို လက်ခံပါသည်:\n\n1. User သည် မှန်ကန်သော အချက်အလက်များ ဖြည့်ရမည်\n2. Deposit လုပ်သောအခါ Ref No. မှန်ရမည်\n3. Order Reject ဖြစ်ပါက 100% ပြန်အမ်းပါမည်\n4. Fraud ဖြစ်ပါက Account ပိတ်ပါမည်\n5. ငွေလွှဲပြီးမှသာ Balance ဝင်ပါမည်\n6. မည်သည့် Dispute မဆို Admin ဆုံးဖြတ်ချက်သည် အတည်ဖြစ်သည်',
       privacy: 'Safe Zone သည် သင့် Data များကို လုံခြုံစွာ ထိန်းသိမ်းပါသည်။ Phone number ကို Admin သာ မြင်နိုင်သည်။ Password ကို encrypt မလုပ်ထားပါ (Demo) — Production အတွက် bcrypt သုံးပါ။',
-      maintenance: { enabled: false, message: '🔧 ပြုပြင်နေပါသည်။ မကြာမီ ပြန်လည်ဖွင့်ပါမည်။' },
+      adsBanner: { enabled: false, text: '' }, logoUrl: 'https://i.imgur.com/iRwIfqs.png', customSound: '',
+      autoReply: {}, maintenance: { enabled: false, message: '🔧 ပြုပြင်နေပါသည်။ မကြာမီ ပြန်လည်ဖွင့်ပါမည်။' },
       coupons: { 'WELCOME100': { amount: 100, uses: 1000, usesLeft: 1000, expires: 0 } }
     },
     banners: [
@@ -96,6 +97,11 @@ function loadDB() {
   } catch(e) { return defaultDB(); }
 }
 function saveDB() { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2)); }
+function logActivity(admin, action, detail) {
+  if (!db.activityLog) db.activityLog = [];
+  db.activityLog.push({ id:'A'+Date.now(), admin, action, detail: detail||'', at: Date.now() });
+  if (db.activityLog.length > 500) db.activityLog = db.activityLog.slice(-500);
+}
 let db = loadDB();
 
 function auth(req, res, next) {
@@ -125,7 +131,8 @@ app.get('/api/site', (req, res) => res.json({
   payNumber: db.config.payNumber, payName: db.config.payName,
   gameImages: db.gameImages,
   whatsapp: db.config.whatsapp, viber: db.config.viber,
-  tiktok: db.config.tiktok, facebook: db.config.facebook, botUsername: db.config.botUsername || null, botUsername: db.config.botUsername || null,
+  tiktok: db.config.tiktok, facebook: db.config.facebook, botUsername: db.config.botUsername || null,
+  adsBanner: db.config.adsBanner || {enabled:false,text:''}, logoUrl: db.config.logoUrl || 'https://i.imgur.com/iRwIfqs.png', customSound: db.config.customSound || '' botUsername: db.config.botUsername || null,
   trustBadge: { users: db.users.length, orders: db.orders.length, completed: db.orders.filter(o=>o.status==='completed').length }
 }));
 app.get('/api/terms', (req, res) => res.json({terms: db.config.terms, privacy: db.config.privacy}));
@@ -170,7 +177,11 @@ app.post('/api/login', rateLimit(60000, 10), (req, res) => {
     delete db.otps[username];
   }
   const token = crypto.randomBytes(32).toString('hex');
-  db.sessions[token] = user.id; saveDB();
+  db.sessions[token] = user.id;
+  if (!user.loginHistory) user.loginHistory = [];
+  user.loginHistory.push({ ip: req.ip || 'unknown', ua: (req.headers['user-agent']||'').substring(0,80), at: Date.now() });
+  if (user.loginHistory.length > 20) user.loginHistory = user.loginHistory.slice(-20);
+  saveDB();
   res.json({success:true, token, username: user.username});
 });
 app.post('/api/toggle-2fa', auth, (req, res) => {
@@ -600,6 +611,39 @@ app.delete('/api/admin/coupons/:code', adminAuth, superAdmin, (req, res) => {
 });
 
 // ADMINS
+app.get('/api/admin/activity', adminAuth, (req, res) => res.json((db.activityLog||[]).slice(-100).reverse()));
+app.post('/api/admin/auto-reply', adminAuth, superAdmin, (req, res) => {
+  db.config.autoReply = req.body.autoReply || {};
+  saveDB(); logActivity(req.admin.username, 'update-auto-reply', ''); res.json({success:true});
+});
+app.get('/api/admin/auto-reply', adminAuth, (req, res) => res.json(db.config.autoReply || {}));
+app.post('/api/admin/user-bonus', adminAuth, superAdmin, (req, res) => {
+  const { username, amount, reason } = req.body;
+  const u = db.users.find(x => x.username === username);
+  if (!u) return res.status(404).json({error:'User မတွေ့'});
+  u.balance = (u.balance||0) + Number(amount||0);
+  if (!db.notifications) db.notifications = [];
+  db.notifications.push({ id:'N'+Date.now(), userId: u.id, message: '🎁 Admin Bonus: +' + Number(amount).toLocaleString() + ' Ks' + (reason ? ' (' + reason + ')' : ''), read:false, createdAt: Date.now() });
+  saveDB(); logActivity(req.admin.username, 'user-bonus', username + ' +' + amount);
+  res.json({success:true, balance: u.balance});
+});
+app.get('/api/admin/user-report/:username', adminAuth, (req, res) => {
+  const u = db.users.find(x => x.username === req.params.username);
+  if (!u) return res.status(404).json({error:'User မတွေ့'});
+  const orders = db.orders.filter(o => o.userId === u.id);
+  const deps = db.deposits.filter(d => d.userId === u.id);
+  res.json({
+    user: { username: u.username, balance: u.balance, points: u.points||0, vip: u.vip||'Bronze', phone: u.phone||'', createdAt: u.createdAt, loginHistory: u.loginHistory||[], telegramId: !!u.telegramId, twoFA: u.twoFA||false },
+    stats: {
+      totalOrders: orders.length, completedOrders: orders.filter(o=>o.status==='completed').length,
+      rejectedOrders: orders.filter(o=>o.status==='rejected').length,
+      totalDeposited: deps.filter(d=>d.status==='approved').reduce((s,d)=>s+d.amount,0),
+      totalSpent: orders.filter(o=>o.status==='completed').reduce((s,o)=>s+o.price,0),
+      chats: db.chats.filter(c=>c.userId===u.id).length
+    },
+    orders: orders.slice(0,10), deposits: deps.slice(0,10)
+  });
+});
 app.get('/api/admin/admins', adminAuth, superAdmin, (req, res) => res.json(db.admins.map(a => ({username:a.username, role:a.role, createdAt:a.createdAt}))));
 app.post('/api/admin/admins', adminAuth, superAdmin, (req, res) => {
   const { username, password, role } = req.body;

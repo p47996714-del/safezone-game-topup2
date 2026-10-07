@@ -144,6 +144,9 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     <button onclick="tab('users',this)">👥 Users</button>
     <button onclick="tab('coupons',this)">🎟️ Coupons</button>
     <button onclick="tab('admins',this)">🔑 Admins</button>
+    <button onclick="tab('adv',this)">📈 Advanced</button>
+    <button onclick="tab('log',this)">📋 Log</button>
+    <button onclick="tab('autoreply',this)">🤖 Auto Reply</button>
     <button onclick="tab('settings',this)">⚙️ Settings</button>
   </div>
 
@@ -167,6 +170,11 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
   </div>
 
   <div class="panel" id="chats">
+    <div class="section">
+      <h3>⚡ Quick Replies</h3>
+      <div id="qrList" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:8px"></div>
+      <div class="row"><input id="qrNew" placeholder="New quick reply template"><button onclick="addQR()">➕</button></div>
+    </div>
     <div class="section">
       <h3>📢 Bulk Chat</h3>
       <div class="row">
@@ -232,7 +240,59 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     <div id="adminList"></div>
   </div>
 
-  <div class="panel" id="settings">
+  
+<div class="panel" id="adv">
+  <div class="section">
+    <h3>📈 Advanced Dashboard</h3>
+    <div class="row">
+      <button class="btn blue" style="margin-top:0" onclick="switchChart(7)">📅 7 ရက်</button>
+      <button class="btn blue" style="margin-top:0" onclick="switchChart(30)">📆 30 ရက်</button>
+      <button class="btn blue" style="margin-top:0" onclick="switchChart(90)">🗓 90 ရက်</button>
+    </div>
+    <div class="stats" id="advStats" style="margin-top:15px"></div>
+    <div class="chart" style="margin-top:15px"><h3 id="advChartTitle">📊 ဝင်ငွေ</h3><div class="bars" id="advBars"></div></div>
+  </div>
+  <div class="section">
+    <h3>🔍 User Report</h3>
+    <div class="row">
+      <input id="reportUser" placeholder="Username">
+      <button onclick="loadUserReport()">📊 Report</button>
+    </div>
+    <div id="reportBox" style="margin-top:12px"></div>
+  </div>
+  <div class="section">
+    <h3>🎁 User Bonus</h3>
+    <div class="row">
+      <input id="bonusUser" placeholder="Username">
+      <input id="bonusAmt" type="number" placeholder="Amount (Ks)">
+      <input id="bonusReason" placeholder="Reason (Optional)">
+      <button onclick="giveBonus()">🎁 Give</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="log">
+  <div class="section">
+    <h3>📋 Admin Activity Log</h3>
+    <div id="logList"></div>
+  </div>
+</div>
+
+<div class="panel" id="autoreply">
+  <div class="section">
+    <h3>🤖 Auto Reply Keywords</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:10px">User စာထဲ keyword ပါရင် auto reply ပြ</p>
+    <div id="arList"></div>
+    <div class="row" style="margin-top:10px">
+      <input id="arKeyword" placeholder="Keyword (e.g. deposit)">
+      <input id="arReply" placeholder="Auto reply text">
+      <button onclick="addAR()">➕ Add</button>
+    </div>
+  </div>
+</div>
+
+<div class="panel" id="settings-placeholder-removed"></div>
+<div class="panel" id="settings">
     <div class="section" style="border:2px solid #ef4444">
       <h3>🔧 Maintenance Mode</h3>
       <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:12px">
@@ -257,6 +317,15 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
       <div class="row"><input id="cfgVb" placeholder="Viber"></div>
       <div class="row"><input id="cfgTt" placeholder="TikTok URL"></div>
       <div class="row"><input id="cfgFb" placeholder="Facebook URL"></div>
+      <div class="row"><input id="cfgLogo" placeholder="Logo URL"></div>
+      <div class="row"><input id="cfgSound" placeholder="Custom Sound URL (Optional)"></div>
+      <div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <b style="font-size:14px">📢 Ads Banner</b>
+          <input type="checkbox" id="cfgAdsEnabled" style="width:auto;accent-color:#38bdf8;transform:scale(1.3)">
+        </div>
+        <input id="cfgAdsText" placeholder="Ads text (e.g. 10% off MLBB today!)" style="width:100%;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff">
+      </div>
       <div class="row"><button onclick="saveConfig()">💾 Save All</button></div>
       <p style="font-size:12px;color:#94a3b8;margin-top:10px">💡 @BotFather → token · @userinfobot → chat id</p>
     </div>
@@ -281,6 +350,7 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     <button onclick="closeChatWindow()" style="background:none;border:none;color:#94a3b8;font-size:24px;cursor:pointer;font-family:inherit">✕</button>
   </div>
   <div class="msgs" id="chatMsgs"></div>
+  <div id="chatQR" style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;padding-top:8px;border-top:1px solid #334155"></div>
   <div class="chat-input">
     <input type="text" id="chatText" placeholder="Reply..." onkeypress="if(event.key==='Enter')sendAdminChat()">
     <button onclick="sendAdminChat()">➤</button>
@@ -351,6 +421,7 @@ async function showPanel(){
   } catch(e){}
   loadDash(); loadDeps(); loadOrds(); loadChats(); loadProductsAdmin(); loadUsers(); loadCoupons(); loadAdmins(); loadConfig(); loadBanners(); loadMaintStatus();
   setInterval(refreshBadges, 5000);
+  setTimeout(renderQR, 500);
 }
 function tab(name, btn){
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
@@ -679,7 +750,10 @@ async function saveConfig(){
     whatsapp: document.getElementById('cfgWa').value,
     viber: document.getElementById('cfgVb').value,
     tiktok: document.getElementById('cfgTt').value,
-    facebook: document.getElementById('cfgFb').value
+    facebook: document.getElementById('cfgFb').value,
+    logoUrl: document.getElementById('cfgLogo').value,
+    customSound: document.getElementById('cfgSound').value,
+    adsBanner: { enabled: document.getElementById('cfgAdsEnabled').checked, text: document.getElementById('cfgAdsText').value }
   };
   const d = await api('/api/admin/config', {method:'POST', body: JSON.stringify(body)});
   if (d.success) alert('✅ သိမ်းပြီး'); else alert('❌ ' + d.error);
@@ -746,6 +820,146 @@ async function updateOrd(id, status){
   await api('/api/admin/update-order-status',{method:'POST',body:JSON.stringify({orderId:id,status})});
   loadOrds(); loadDash();
 }
+
+
+// ============ NEW FEATURES ============
+
+// Advanced chart
+let advDays = 7;
+async function switchChart(days){
+  advDays = days;
+  document.getElementById('advChartTitle').textContent = '📊 ဝင်ငွေ (' + days + ' ရက်)';
+  const d = await api('/api/admin/stats');
+  const allDays = [];
+  for (let i = days-1; i >= 0; i--) {
+    const dt = new Date(Date.now() - i*86400000);
+    allDays.push({ label: dt.toLocaleDateString('en', {weekday:'short', day:'numeric'}), value: i < d.chart.length ? (d.chart[6-i]?.value || 0) : 0 });
+  }
+  const total = allDays.reduce((s,x) => s + x.value, 0);
+  const avg = Math.round(total / days);
+  const max = Math.max(...allDays.map(x=>x.value), 1);
+  document.getElementById('advStats').innerHTML = 
+    '<div class="stat-card green"><div class="label">💰 Total</div><div class="value">' + total.toLocaleString() + ' Ks</div></div>' +
+    '<div class="stat-card blue"><div class="label">📊 Avg/Day</div><div class="value">' + avg.toLocaleString() + ' Ks</div></div>' +
+    '<div class="stat-card orange"><div class="label">📅 Days</div><div class="value">' + days + '</div></div>';
+  document.getElementById('advBars').innerHTML = allDays.map(x => {
+    const h = Math.max(3, (x.value/max)*100);
+    return '<div class="bar-wrap"><div class="bar-val">' + (x.value>0 ? (x.value/1000).toFixed(0)+'k' : '') + '</div><div class="bar" style="height:' + h + '%"></div><div class="bar-label" style="font-size:8px">' + x.label + '</div></div>';
+  }).join('');
+}
+async function loadUserReport(){
+  const username = document.getElementById('reportUser').value.trim();
+  if (!username) return alert('Username ဖြည့်ပါ');
+  const d = await api('/api/admin/user-report/' + username);
+  if (d.error) return alert('❌ ' + d.error);
+  const u = d.user, s = d.stats;
+  let html = '<div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:12px;font-size:13px">';
+  html += '<div style="display:flex;justify-content:space-between"><span>👤 User</span><b style="color:#38bdf8">' + u.username + '</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;margin-top:5px"><span>💰 Balance</span><b style="color:#22c55e">' + u.balance.toLocaleString() + ' Ks</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;margin-top:5px"><span>💎 VIP</span><b>' + u.vip + '</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;margin-top:5px"><span>⭐ Points</span><b>' + u.points + '</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;margin-top:5px"><span>📅 Joined</span><b>' + new Date(u.createdAt).toLocaleDateString() + '</b></div>';
+  html += '</div>';
+  html += '<div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:12px;font-size:13px;margin-top:10px">';
+  html += '<div style="font-weight:bold;color:#38bdf8;margin-bottom:6px">📊 Stats</div>';
+  html += '<div>📦 Orders: <b>' + s.totalOrders + '</b> (✅ ' + s.completedOrders + ' | ❌ ' + s.rejectedOrders + ')</div>';
+  html += '<div style="margin-top:4px">💰 Deposited: <b>' + s.totalDeposited.toLocaleString() + ' Ks</b></div>';
+  html += '<div style="margin-top:4px">💎 Spent: <b>' + s.totalSpent.toLocaleString() + ' Ks</b></div>';
+  html += '<div style="margin-top:4px">💬 Chats: <b>' + s.chats + '</b></div>';
+  html += '</div>';
+  if (u.loginHistory && u.loginHistory.length) {
+    html += '<div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:12px;font-size:12px;margin-top:10px">';
+    html += '<div style="font-weight:bold;color:#38bdf8;margin-bottom:6px">🔐 Login History (Last 5)</div>';
+    html += u.loginHistory.slice(-5).reverse().map(h => '<div style="padding:5px 0;border-bottom:1px solid #334155">' + new Date(h.at).toLocaleString() + ' · ' + h.ip + '</div>').join('');
+    html += '</div>';
+  }
+  document.getElementById('reportBox').innerHTML = html;
+}
+async function giveBonus(){
+  const username = document.getElementById('bonusUser').value.trim();
+  const amount = document.getElementById('bonusAmt').value;
+  const reason = document.getElementById('bonusReason').value.trim();
+  if (!username || !amount) return alert('ဖြည့်ပါ');
+  if (!confirm(username + ' ကို +' + amount + ' Ks ပေးမယ်။ သေချာလား?')) return;
+  const d = await api('/api/admin/user-bonus', {method:'POST', body: JSON.stringify({username, amount, reason})});
+  if (d.success) { alert('✅ ပေးပြီး
+New: ' + d.balance.toLocaleString() + ' Ks'); ['bonusUser','bonusAmt','bonusReason'].forEach(id => document.getElementById(id).value = ''); }
+  else alert('❌ ' + d.error);
+}
+
+async function loadActivityLog(){
+  const d = await api('/api/admin/activity');
+  document.getElementById('logList').innerHTML = d.length ? d.map(x =>
+    '<div class="admin-item"><div><b style="color:#38bdf8">' + x.admin + '</b> · <span style="color:#f59e0b">' + x.action + '</span>' +
+    (x.detail ? '<div class="meta">' + escapeHtml(x.detail) + '</div>' : '') + '</div>' +
+    '<span style="font-size:11px;color:#64748b">' + new Date(x.at).toLocaleString() + '</span></div>'
+  ).join('') : '<p class="empty">Activity မရှိပါ</p>';
+}
+
+let autoReply = {};
+async function loadAutoReply(){
+  autoReply = await api('/api/admin/auto-reply');
+  renderAR();
+}
+function renderAR(){
+  const list = Object.entries(autoReply);
+  document.getElementById('arList').innerHTML = list.length ? list.map(([k,v]) =>
+    '<div class="admin-item"><div><b style="color:#38bdf8">' + k + '</b><div class="meta">' + escapeHtml(v) + '</div></div>' +
+    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delAR(\'' + k.replace(/'/g,"\\'") + '\')">✕</button></div>'
+  ).join('') : '<p class="empty">Auto reply မရှိပါ</p>';
+}
+async function addAR(){
+  const k = document.getElementById('arKeyword').value.trim();
+  const v = document.getElementById('arReply').value.trim();
+  if (!k || !v) return alert('ဖြည့်ပါ');
+  autoReply[k.toLowerCase()] = v;
+  const d = await api('/api/admin/auto-reply', {method:'POST', body: JSON.stringify({autoReply})});
+  if (d.success) { alert('✅ ထည့်ပြီး'); document.getElementById('arKeyword').value=''; document.getElementById('arReply').value=''; loadAutoReply(); }
+  else alert('❌ ' + d.error);
+}
+async function delAR(k){
+  delete autoReply[k];
+  const d = await api('/api/admin/auto-reply', {method:'POST', body: JSON.stringify({autoReply})});
+  if (d.success) loadAutoReply();
+}
+
+// Quick Replies
+let quickReplies = JSON.parse(localStorage.getItem('quickReplies') || '["မင်္ဂလာပါ","Order ရပါပြီ","ခဏစောင့်ပါ","Deposit အတည်ပြုပြီးပါပြီ","ကျေးဇူးတင်ပါတယ်"]');
+function renderQR(){
+  const list = document.getElementById('qrList');
+  if (list) list.innerHTML = quickReplies.map((t,i) =>
+    '<div style="background:rgba(56,189,248,0.15);color:#38bdf8;padding:6px 10px;border-radius:16px;font-size:12px;cursor:pointer;border:1px solid #38bdf8;position:relative" onclick="useQR(\'' + t.replace(/'/g,"\\'") + '\')">' + escapeHtml(t) +
+    '<span style="margin-left:8px;color:#ef4444" onclick="event.stopPropagation();delQR(' + i + ')">✕</span></div>'
+  ).join('');
+  const chatQR = document.getElementById('chatQR');
+  if (chatQR) chatQR.innerHTML = quickReplies.map((t,i) =>
+    '<button onclick="useQR(\'' + t.replace(/'/g,"\\'") + '\')" style="padding:6px 12px;border-radius:16px;background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;font-size:11px;cursor:pointer;font-family:inherit;margin:0">' + escapeHtml(t) + '</button>'
+  ).join('');
+}
+function useQR(text){ const t = document.getElementById('chatText'); if (t) { t.value = text; t.focus(); } }
+function addQR(){
+  const v = document.getElementById('qrNew').value.trim();
+  if (!v) return;
+  quickReplies.push(v);
+  localStorage.setItem('quickReplies', JSON.stringify(quickReplies));
+  document.getElementById('qrNew').value = '';
+  renderQR();
+}
+function delQR(i){
+  quickReplies.splice(i,1);
+  localStorage.setItem('quickReplies', JSON.stringify(quickReplies));
+  renderQR();
+}
+
+// Hook tab
+const _origTab = tab;
+tab = function(name, btn){
+  _origTab(name, btn);
+  if (name==='adv') switchChart(advDays);
+  if (name==='log') loadActivityLog();
+  if (name==='autoreply') loadAutoReply();
+  if (name==='chats') renderQR();
+};
 
 if (ap) showPanel();
 </script>

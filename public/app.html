@@ -5,6 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0b1120">
 <link rel="manifest" href="/manifest.json">
+<link rel="preconnect" href="https://i.imgur.com">
+<link rel="preconnect" href="https://api.qrserver.com">
 <title>Safe Zone Game Topup</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
@@ -165,6 +167,32 @@ body.light .faq-item{background:#fff}
 .toast.info{background:linear-gradient(135deg,#38bdf8,#3b82f6)}
 .confetti{position:fixed;width:10px;height:10px;z-index:10001;pointer-events:none;animation:confetti 3s linear forwards}
 @keyframes confetti{to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+
+.progress-bar-wrap{margin-top:8px;height:6px;background:#0f172a;border-radius:3px;overflow:hidden}
+.progress-bar{height:100%;background:linear-gradient(90deg,#eab308,#3b82f6,#22c55e);border-radius:3px;transition:width 0.5s;width:0}
+.progress-bar[data-stage="pending"]{width:33%}
+.progress-bar[data-stage="processing"]{width:66%}
+.progress-bar[data-stage="completed"]{width:100%}
+.progress-bar[data-stage="rejected"]{width:100%;background:linear-gradient(90deg,#ef4444,#dc2626)}
+.typing-ind{display:none;padding:8px 14px;background:#1e293b;border-radius:14px;align-self:flex-start;font-size:12px;color:#94a3b8;font-style:italic}
+.typing-ind.show{display:block}
+.typing-ind span{animation:blink 1.4s infinite}
+.typing-ind span:nth-child(2){animation-delay:0.2s}
+.typing-ind span:nth-child(3){animation-delay:0.4s}
+@keyframes blink{0%,60%,100%{opacity:0.3}30%{opacity:1}}
+.read-receipt{font-size:9px;color:#94a3b8;margin-left:4px}
+.read-receipt.read{color:#38bdf8}
+.ads-banner{margin:10px 15px;padding:12px 15px;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:12px;font-size:13px;font-weight:bold;text-align:center;display:none}
+.ads-banner.show{display:block}
+.theme-color-row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+.theme-color-dot{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:0.2s}
+.theme-color-dot.active{border-color:#fff;transform:scale(1.1)}
+.settings-toggle{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px}
+.toggle-switch{position:relative;width:46px;height:26px;background:#334155;border-radius:13px;cursor:pointer;transition:0.3s}
+.toggle-switch.on{background:#22c55e}
+.toggle-switch::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:3px;left:3px;transition:0.3s}
+.toggle-switch.on::after{left:23px}
+
 </style>
 </head>
 <body>
@@ -204,6 +232,7 @@ body.light .faq-item{background:#fff}
   <div class="header-actions">
     <button class="bell-btn" onclick="openNotif()">🔔<span class="bell-badge" id="notifBadge" style="display:none">0</span></button>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button class="theme-btn" onclick="openSettings()" style="font-size:16px">⚙️</button>
     <button class="logout-btn" onclick="logout()">Logout</button>
   </div>
 </div>
@@ -268,6 +297,7 @@ body.light .faq-item{background:#fff}
       <div><div class="admin-name">Admin Support</div><div class="admin-status">🟢 Online</div></div>
     </div>
     <div class="chat-messages" id="chatMessages"></div>
+    <div class="typing-ind" id="typingInd"><span>.</span><span>.</span><span>.</span> Admin ရေးနေသည်</div>
     <div class="chat-input-row">
       <input type="text" id="chatInput" placeholder="စာ ရေးပါ..." onkeypress="if(event.key==='Enter')sendChat()">
       <button onclick="sendChat()">➤</button>
@@ -341,6 +371,26 @@ body.light .faq-item{background:#fff}
   <button class="cancel" onclick="closeModal('achModal')">Close</button>
 </div></div>
 
+
+<div class="modal" id="settingsModal"><div class="modal-box">
+  <h3>⚙️ Settings</h3>
+  <div class="settings-toggle">
+    <div><b style="font-size:14px">🔊 Sound</b><div style="font-size:11px;color:#94a3b8">Sound Effect</div></div>
+    <div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div>
+  </div>
+  <div class="settings-toggle">
+    <div><b style="font-size:14px">📳 Haptic</b><div style="font-size:11px;color:#94a3b8">တုန်ခါမှု</div></div>
+    <div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div>
+  </div>
+  <div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px">
+    <b style="font-size:14px">🎨 Theme Color</b>
+    <div class="theme-color-row" id="themeColorRow"></div>
+  </div>
+  <button onclick="shareApp()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">📤 Share App</button>
+  <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
+</div></div>
+
+<div class="ads-banner" id="adsBanner" onclick="if(this.dataset.link)window.open(this.dataset.link,'_blank')"></div>
 <div class="modal" id="notifModal"><div class="modal-box">
   <h3>🔔 Notifications</h3>
   <div id="notifList"></div>
@@ -371,7 +421,9 @@ setTimeout(() => {
 
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
+let customAudio = new Audio();
 function playSound(type){
+  if (soundOn && siteData && siteData.customSound) { try { customAudio.src = siteData.customSound; customAudio.volume = 0.3; customAudio.play().catch(()=>{}); return; } catch(e){} }
   try {
     if (!audioCtx) audioCtx = new AudioCtx();
     const osc = audioCtx.createOscillator();
@@ -417,6 +469,95 @@ async function installPWA(){
 }
 if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
 
+
+// Sound/Haptic toggles
+let soundOn = localStorage.getItem('soundOn') !== 'off';
+let hapticOn = localStorage.getItem('hapticOn') !== 'off';
+function updateToggles(){
+  const st = document.getElementById('soundToggle');
+  const ht = document.getElementById('hapticToggle');
+  if (st) st.classList.toggle('on', soundOn);
+  if (ht) ht.classList.toggle('on', hapticOn);
+}
+function toggleSound(){ soundOn = !soundOn; localStorage.setItem('soundOn', soundOn?'on':'off'); updateToggles(); playSound('click'); haptic(20); }
+function toggleHaptic(){ hapticOn = !hapticOn; localStorage.setItem('hapticOn', hapticOn?'on':'off'); updateToggles(); haptic(30); }
+
+// Override playSound & haptic
+const _origPlaySound = playSound;
+playSound = function(type){ if (!soundOn) return; _origPlaySound(type); };
+const _origHaptic = haptic;
+haptic = function(ms){ if (!hapticOn) return; _origHaptic(ms); };
+
+// Share
+function shareApp(){
+  const url = location.origin;
+  if (navigator.share) {
+    navigator.share({ title:'Safe Zone Game Topup', text:'\uD83C\uDFAE Safe Zone - Game Topup\n\uD83D\uDCB0 MLBB, PUBG, Magic Chess', url })
+      .catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(url).then(()=>showToast('\u2705 Link \u1000\u1030\u1038\u1015\u103C\u102E\u1038\u1015\u102B\u1015\u103C\u102E', 'success'));
+  }
+}
+
+// Theme colors
+const THEME_COLORS = [
+  {name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},
+  {name:'Green', primary:'#10b981', secondary:'#3b82f6'},
+  {name:'Red', primary:'#ef4444', secondary:'#f59e0b'},
+  {name:'Pink', primary:'#ec4899', secondary:'#a855f7'},
+  {name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},
+  {name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}
+];
+function openSettings(){
+  document.getElementById('settingsModal').classList.add('show');
+  updateToggles();
+  const cur = localStorage.getItem('themeColor') || 'Blue';
+  document.getElementById('themeColorRow').innerHTML = THEME_COLORS.map(c =>
+    '<div class="theme-color-dot ' + (cur===c.name?'active':'') + '" style="background:linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')" onclick="setThemeColor(\'' + c.name + '\')" title="' + c.name + '"></div>'
+  ).join('');
+}
+function setThemeColor(name){
+  const c = THEME_COLORS.find(x => x.name === name);
+  if (!c) return;
+  document.documentElement.style.setProperty('--accent1', c.primary);
+  document.documentElement.style.setProperty('--accent2', c.secondary);
+  localStorage.setItem('themeColor', name);
+  document.querySelectorAll('button.main').forEach(b => b.style.background = 'linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')');
+  showToast('\u2705 ' + name + ' Theme', 'success');
+  haptic(30);
+}
+function applyTheme(){
+  const name = localStorage.getItem('themeColor') || 'Blue';
+  setThemeColor(name);
+}
+applyTheme();
+
+// Ads banner
+async function loadAdsBanner(){
+  if (!siteData || !siteData.adsBanner || !siteData.adsBanner.enabled || !siteData.adsBanner.text) return;
+  const b = document.getElementById('adsBanner');
+  b.textContent = '\uD83D\uDCE2 ' + siteData.adsBanner.text;
+  b.classList.add('show');
+}
+
+// Read receipt display
+function renderReadReceipt(m){
+  if (m.from !== 'user') return '';
+  return '<span class="read-receipt ' + (m.read ? 'read' : '') + '">' + (m.read ? '\u2713\u2713' : '\u2713') + '</span>';
+}
+
+// Typing indicator logic
+let lastMsgCount = 0;
+function checkTyping(list){
+  const ind = document.getElementById('typingInd');
+  if (!ind) return;
+  // Show if last message from user and admin hasn't replied within 3s
+  if (list.length && list[list.length-1].from === 'user' && Date.now() - list[list.length-1].createdAt < 3000) {
+    ind.classList.add('show');
+    setTimeout(() => ind.classList.remove('show'), 2500);
+  }
+}
+
 async function api(url, opts={}) {
   const r = await fetch(url, {...opts, headers: {...H, ...(opts.headers||{})}});
   if (r.status === 401) { localStorage.clear(); location.href='/'; return {error:'unauth'}; }
@@ -450,6 +591,7 @@ async function loadSite(){
     dotsBox.appendChild(dot);
   });
   document.getElementById('payName').textContent = siteData.payName + ' — ' + siteData.payNumber;
+  loadAdsBanner();
   const pays = [
     {name:'KBZ Pay', cls:'kbz', label:'KBZ'},
     {name:'Wave Money', cls:'wave', label:'Wave'},
@@ -575,6 +717,7 @@ async function loadOrders(){
       </div>
       <div>${x.product}</div>
       <div style="font-size:12px;color:#94a3b8;margin-top:4px">ID: ${x.playerId}${x.serverId?' · S:'+x.serverId:''} · ${x.price.toLocaleString()} Ks</div>
+      <div class="progress-bar-wrap"><div class="progress-bar" data-stage="${x.status}"></div></div>
       <button onclick="reorder('${x.id}')" style="margin-top:8px;padding:8px 14px;background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;border-radius:10px;font-size:12px;font-weight:bold;cursor:pointer">🔄 Reorder</button>
     </div>`).join('') : '<div class="empt...' + '' + 'y">မှတ်တမ်း မရှိပါ</div>';
 }
@@ -583,14 +726,17 @@ async function loadChat(){
   const list = await api('/api/chat');
   if (list.error) return;
   const box = document.getElementById('chatMessages');
-  box.innerHTML = list.length ? list.map(m=>`
-    <div class="chat-bubble ${m.from}">
-      ${m.image ? '<img src="'+m.image+'" style="max-width:100%;border-radius:8px">' : ''}
-      ${m.text ? escapeHtml(m.text) : ''}
-      <div class="time">${new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
-    </div>`).join('') : '<div class="empty">Admin ဆီ စာ ရေးလို့ရပါပြီ 👋</div>';
+  box.innerHTML = list.length ? list.map(m=>{
+    let html = '<div class="chat-bubble ' + m.from + '">';
+    if (m.image) html += '<img src="' + m.image + '" style="max-width:100%;border-radius:8px">';
+    html += (m.text ? escapeHtml(m.text) : '');
+    html += '<div class="time">' + new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + (m.from === 'user' ? renderReadReceipt(m) : '') + '</div>';
+    html += '</div>';
+    return html;
+  }).join('') : '<div class="empty">Admin \u1006\u102E \u1005\u102C \u101B\u1031\u1038\u101C\u102D\u102F\u1037\u101B\u1015\u102B\u1015\u103C\u102E \uD83D\uDC4B</div>';
   const last = list[list.length-1];
   if (last && last.id !== lastChatId) { lastChatId = last.id; box.scrollTop = box.scrollHeight; }
+  checkTyping(list);
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 async function sendChat(){
