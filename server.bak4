@@ -71,45 +71,6 @@ function defaultDB() {
       privacy: 'Safe Zone သည် သင့် Data များကို လုံခြုံစွာ ထိန်းသိမ်းပါသည်။ Phone number ကို Admin သာ မြင်နိုင်သည်။ Password ကို encrypt မလုပ်ထားပါ (Demo) — Production အတွက် bcrypt သုံးပါ။',
       adsBanner: { enabled: false, text: '' }, logoUrl: 'https://i.imgur.com/iRwIfqs.png', customSound: '',
       autoReply: {}, maintenance: { enabled: false, message: '🔧 ပြုပြင်နေပါသည်။ မကြာမီ ပြန်လည်ဖွင့်ပါမည်။' },
-      logoUrl: 'https://i.imgur.com/iRwIfqs.png',
-      hero: {
-        title: 'Safe Zone Topup',
-        subtitle: '⚡ Instant Delivery · 24/7 Service',
-        videoUrl: 'https://cdn.pixabay.com/video/2023/10/20/185683-876929862_tiny.mp4'
-      },
-      theme: { primary: '#38bdf8', secondary: '#a855f7' },
-      payments: [
-        { name: 'KBZ Pay', short: 'KBZ', cls: 'kbz' },
-        { name: 'Wave Money', short: 'Wave', cls: 'wave' },
-        { name: 'UAB Pay', short: 'UAB', cls: 'uab' },
-        { name: 'AYA Pay', short: 'AYA', cls: 'aya' }
-      ],
-      social: {
-        facebook: 'https://facebook.com/safezone',
-        tiktok: 'https://tiktok.com/@safezone',
-        whatsapp: '09763442881',
-        viber: '09763442881',
-        telegram: ''
-      },
-      trustBadges: [
-        { icon: '✅', text: 'Verified Shop' },
-        { icon: '⚡', text: 'Fast Delivery' },
-        { icon: '🛡️', text: 'Safe Payment' }
-      ],
-      labels: {
-        balance: '💰 လက်ကျန်ငွေ',
-        gamesTitle: '🎮 ဂိမ်းများ',
-        searchPlaceholder: '🔍 ဂိမ်း ရှာပါ...',
-        popularTitle: '🔥 Popular Games',
-        quickActions: '⚡ Quick Actions',
-        paymentTitle: '💰 Wallet ဖြည့်ရန်'
-      },
-      faq: [
-        { q: '💰 Deposit တင်ပြီး ဘယ်လောက်ကြာမလဲ?', a: 'ပုံမှန် ၅-၁၅ မိနစ်အတွင်း approve လုပ်ပေးပါတယ်။' },
-        { q: '❌ Order Reject ဖြစ်ရင် ငွေပြန်ရလား?', a: 'ရပါတယ်။ Balance ကို အလိုအလျောက် ပြန်အမ်းပါတယ်။' },
-        { q: '🆔 Server ID ဆိုတာ ဘာလဲ?', a: 'MLBB/Magic Chess မှာ Player ID နဲ့အတူ Server ID လိုအပ်ပါတယ်။' },
-        { q: '💬 Live Chat ဖွင့်ချိန်?', a: '၂၄ နာရီ ဖွင့်ပါတယ်။' }
-      ],
       coupons: { 'WELCOME100': { amount: 100, uses: 1000, usesLeft: 1000, expires: 0 } }
     },
     banners: [
@@ -126,10 +87,6 @@ function loadDB() {
     const def = defaultDB();
     return { ...def, ...d,
       config: {...def.config, ...(d.config||{}),
-        hero: {...def.config.hero, ...((d.config||{}).hero||{})},
-        theme: {...def.config.theme, ...((d.config||{}).theme||{})},
-        social: {...def.config.social, ...((d.config||{}).social||{})},
-        labels: {...def.config.labels, ...((d.config||{}).labels||{})},
         maintenance: {...def.config.maintenance, ...((d.config||{}).maintenance||{})}},
       admins: d.admins || def.admins, products: d.products || def.products,
       gameImages: d.gameImages || def.gameImages, banners: d.banners || def.banners,
@@ -180,21 +137,7 @@ app.get('/api/site', (req, res) => res.json({
   gameImages: db.gameImages,
   whatsapp: db.config.whatsapp, viber: db.config.viber,
   tiktok: db.config.tiktok, facebook: db.config.facebook, botUsername: db.config.botUsername || null,
-  adsBanner: db.config.adsBanner || {enabled:false,text:''},
-  logoUrl: db.config.logoUrl || 'https://i.imgur.com/iRwIfqs.png',
-  customSound: db.config.customSound || '',
-  hero: db.config.hero || {title:'Safe Zone Topup', subtitle:'⚡ Instant Delivery', videoUrl:''},
-  theme: db.config.theme || {primary:'#38bdf8', secondary:'#a855f7'},
-  payments: db.config.payments || [
-    {name:'KBZ Pay', short:'KBZ', cls:'kbz'},
-    {name:'Wave Money', short:'Wave', cls:'wave'},
-    {name:'UAB Pay', short:'UAB', cls:'uab'},
-    {name:'AYA Pay', short:'AYA', cls:'aya'}
-  ],
-  social: db.config.social || {facebook:'',tiktok:'',whatsapp:'',viber:'',telegram:''},
-  trustBadges: db.config.trustBadges || [],
-  labels: db.config.labels || {},
-  faq: db.config.faq || [], botUsername: db.config.botUsername || null,
+  adsBanner: db.config.adsBanner || {enabled:false,text:''}, logoUrl: db.config.logoUrl || 'https://i.imgur.com/iRwIfqs.png', customSound: db.config.customSound || '', botUsername: db.config.botUsername || null,
   trustBadge: { users: db.users.length, orders: db.orders.length, completed: db.orders.filter(o=>o.status==='completed').length }
 }));
 app.get('/api/terms', (req, res) => res.json({terms: db.config.terms, privacy: db.config.privacy}));
@@ -748,18 +691,6 @@ app.delete('/api/admin/admins/:username', adminAuth, superAdmin, (req, res) => {
 
 // CONFIG
 app.get('/api/admin/config', adminAuth, (req, res) => res.json(db.config));
-app.post('/api/admin/config/section', adminAuth, superAdmin, (req, res) => {
-  const { section, value } = req.body;
-  if (!section) return res.status(400).json({error:'Section လိုတယ်'});
-  if (!db.config) db.config = {};
-  db.config[section] = value;
-  saveDB();
-  logActivity(req.admin.username, 'config-update', section);
-  res.json({success:true});
-});
-app.get('/api/admin/config/section/:name', adminAuth, (req, res) => {
-  res.json(db.config[req.params.name] || null);
-});
 app.post('/api/admin/config', adminAuth, superAdmin, (req, res) => {
   const { maintenance, coupons, ...rest } = req.body;
   db.config = {...db.config, ...rest};
