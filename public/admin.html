@@ -1422,6 +1422,16 @@ setTimeout(function() {
   }
 }, 2000);
 
+
+// ===== SERVICE WORKER REGISTRATION =====
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/sw.js').then(function(reg) {
+      console.log('SW registered for admin:', reg.scope);
+    }).catch(function(e) { console.log('SW err:', e.message); });
+  });
+}
+
 if (ap) showPanel();
 setTimeout(function(){ try { loadBackupConfig(); } catch(e){} }, 1200);
 </script>
