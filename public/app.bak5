@@ -920,22 +920,17 @@ async function loadSite(){
   });
   document.getElementById('payName').textContent = siteData.payName + ' — ' + siteData.payNumber;
   loadAdsBanner();
-  const pays = (siteData.payments && siteData.payments.length) ? siteData.payments : [
+  const pays = [
     {name:'KBZ Pay', cls:'kbz', label:'KBZ'},
     {name:'Wave Money', cls:'wave', label:'Wave'},
     {name:'UAB Pay', cls:'uab', label:'UAB'},
     {name:'AYA Pay', cls:'aya', label:'AYA'}
   ];
-  if (pays.length && !pays.find(p => p.name === selectedPay)) selectedPay = pays[0].name;
-  document.getElementById('paymentList').innerHTML = pays.map(p=>{
-    const logoHtml = p.image
-      ? '<div class="pay-logo" style="background:#fff;padding:4px;overflow:hidden"><img src="' + p.image + '" style="width:100%;height:100%;object-fit:contain;border-radius:6px"></div>'
-      : '<div class="pay-logo ' + (p.cls || 'kbz') + '">' + (p.short || p.label || p.name.substring(0, 4)) + '</div>';
-    return '<div class="payment-method ' + (p.name===selectedPay?'selected':'') + '" onclick="selectPay(\'' + p.name + '\',this)">' +
-      logoHtml +
-      '<div class="pay-info"><div class="pay-name">' + p.name + '</div><div class="pay-num">' + siteData.payNumber + ' · ' + siteData.payName + '</div></div>' +
-      '</div>';
-  }).join('');
+  document.getElementById('paymentList').innerHTML = pays.map(p=>`
+    <div class="payment-method ${p.name===selectedPay?'selected':''}" onclick="selectPay('${p.name}',this)">
+      <div class="pay-logo ${p.cls}">${p.label}</div>
+      <div class="pay-info"><div class="pay-name">${p.name}</div><div class="pay-num">${siteData.payNumber} · ${siteData.payName}</div></div>
+    </div>`).join('');
 }
 function selectPay(name, el){
   selectedPay = name;

@@ -1002,40 +1002,10 @@ async function loadWebsiteConfig() {
 
 function renderPayments() {
   const list = wsConfig.payments || [];
-  if (!list.length) { document.getElementById('ws_paymentList').innerHTML = '<p class="empty">Payment method မရှိပါ</p>'; return; }
-  document.getElementById('ws_paymentList').innerHTML = list.map((p, i) => {
-    const preview = p.image
-      ? '<img src="' + p.image + '" style="width:50px;height:50px;object-fit:contain;border-radius:8px;background:#fff;padding:3px">'
-      : '<div style="width:50px;height:50px;border-radius:8px;background:#334155;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;color:#94a3b8">' + (p.short || '?') + '</div>';
-    return '<div class="admin-item" style="flex-wrap:wrap;gap:8px">' +
-      '<div style="display:flex;align-items:center;gap:10px;flex:1">' +
-        preview +
-        '<div><b style="color:#38bdf8">' + p.name + '</b><div class="meta">Short: ' + (p.short || '-') + ' · Class: ' + (p.cls || '-') + '</div></div>' +
-      '</div>' +
-      '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
-        '<button class="upload-btn" style="padding:6px 12px;font-size:11px" onclick="pickPayImg(' + i + ')">📸 ပုံ</button>' +
-        '<button class="btn red" style="margin:0;padding:6px 12px;font-size:11px" onclick="delPayment(' + i + ')">✕</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
-}
-
-// Pick image for specific payment
-function pickPayImg(index) {
-  _uploadContext = 'payment';
-  window._payIndex = index;
-  const inp = ensureFileInput();
-  inp.accept = 'image/*';
-  inp.value = '';
-  inp.click();
-}
-
-async function setPaymentImage(index, url) {
-  if (!wsConfig.payments || !wsConfig.payments[index]) return;
-  wsConfig.payments[index].image = url;
-  const d = await api('/api/admin/config/section', { method: 'POST', body: JSON.stringify({ section: 'payments', value: wsConfig.payments }) });
-  if (d.success) { alert('✅ Payment ပုံ သိမ်းပြီး'); renderPayments(); }
-  else alert('❌ Failed');
+  document.getElementById('ws_paymentList').innerHTML = list.map((p, i) =>
+    '<div class="admin-item"><div><b style="color:#38bdf8">' + p.name + '</b><div class="meta">Short: ' + p.short + ' · Class: ' + p.cls + '</div></div>' +
+    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delPayment(' + i + ')">✕</button></div>'
+  ).join('') || '<p class="empty">Payment method မရှိပါ</p>';
 }
 async function addPayment() {
   const name = document.getElementById('ws_payName').value.trim();
@@ -1247,8 +1217,6 @@ async function handleUploadSuccess(url, context) {
   } else if (context === 'manager') {
     loadUploads();
     alert('✅ Upload ပြီး');
-  } else if (context === 'payment') {
-    await setPaymentImage(window._payIndex, url);
   }
 }
 
