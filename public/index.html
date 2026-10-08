@@ -112,43 +112,24 @@ input[type="checkbox"]:checked {
 <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
 
 <div class="maint" id="maint">
-  <div class="maint-icon">🔧</div>
-  <h2>Website ပြုပြင်နေပါသည်</h2>
-  <p id="maintMsg">မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။</p>
-</div>
-
-<div class="box" id="mainBox">
-  <div class="logo"><div class="logo-icon"><img src="https://i.imgur.com/iRwIfqs.png" style="width:140px;height:140px;object-fit:contain"></div><h1><span>Safe Zone</span></h1><div class="subtitle">Game Topup Platform</div></div>
-  <div id="msg" class="msg"></div>
-
-  <div id="loginForm">
-    <div class="field"><input id="lu" placeholder="Username"></div>
-    <div class="field"><input id="lp" type="password" placeholder="Password"><button class="toggle-pw" onclick="togglePw('lp',this)">👁</button></div>
-    <button class="main" onclick="login(event)">🔐 Login</button>
-    <div class="switch">Account မရှိဘူးလား? <a onclick="show('reg')">Register</a></div>
+  <div class="maint-icon-wrap">
+    <div class="maint-icon-ring"></div>
+    <div class="maint-icon-ring-2"></div>
+    <div class="maint-icon">🔧</div>
   </div>
-
-  <div id="otpForm">
-    <div style="text-align:center;margin-bottom:15px;font-size:14px;color:#94a3b8">📱 Telegram ဆီ OTP ပို့ပြီးပါပြီ</div>
-    <div class="field"><input id="otpInput" placeholder="6-digit OTP" maxlength="6" style="text-align:center;font-size:24px;letter-spacing:8px;padding:16px"></div>
-    <button class="main" onclick="verifyOTP(event)">✅ Verify</button>
-    <div class="switch"><a onclick="show('login')">🔙 Back</a></div>
+  <div class="maint-title">Website ပြုပြင်နေပါသည်</div>
+  <div class="maint-sub">MAINTENANCE MODE</div>
+  <div class="maint-dots">
+    <div class="maint-dot"></div>
+    <div class="maint-dot"></div>
+    <div class="maint-dot"></div>
   </div>
-
-  <div id="regForm" style="display:none">
-    <div class="field"><input id="ru" placeholder="Username"></div>
-    <div class="field"><input id="rp" type="password" placeholder="Password" oninput="checkStrength()"><button class="toggle-pw" onclick="togglePw('rp',this)">👁</button></div>
-    <div id="strengthBar" class="hint"></div>
-    <div class="field"><input id="rp2" type="password" placeholder="Password ထပ်ရိုက်ပါ"><button class="toggle-pw" onclick="togglePw('rp2',this)">👁</button></div>
-    <div class="field"><input id="rph" placeholder="Phone (09xxxxxxxxx)"></div>
-    <div class="field"><input id="rref" placeholder="Referral Code (optional)"></div>
-    <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#94a3b8;margin-bottom:14px;padding:8px 0">
-      <input type="checkbox" id="rterms">
-      <label for="rterms" style="font-size:13px;color:#94a3b8;cursor:pointer;user-select:none"><a href="/terms.html" target="_blank" style="color:#38bdf8;text-decoration:none">Terms & Privacy</a> လက်ခံပါ</label>
-    </div>
-    <button class="main" onclick="register(event)">✨ Register</button>
-    <div class="switch">Account ရှိပြီးသားလား? <a onclick="show('login')">Login</a></div>
+  <div class="maint-msg" id="maintMsg">မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။</div>
+  <div class="maint-info">
+    <span class="maint-info-icon">⏳</span>
+    <span>Auto-refresh — ၃၀ စက္ကန့် တစ်ခါ</span>
   </div>
+  <button class="maint-refresh" onclick="location.reload()">🔄 Refresh Now</button>
 </div>
 
 <script>
