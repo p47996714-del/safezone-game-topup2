@@ -916,6 +916,38 @@ async function testPush() {
   else showToast('❌ Push failed', 'error');
 }
 
+
+// ===== iOS PWA HINT =====
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+function isInStandaloneMode() {
+  return ('standalone' in window.navigator) && window.navigator.standalone;
+}
+function isSafari() {
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+}
+function showIOSHint() {
+  if (!isIOS()) return;
+  if (isInStandaloneMode()) return; // Already installed
+  if (!isSafari()) return; // Chrome iOS - can't install
+  // Show hint after 5s
+  setTimeout(function() {
+    const hint = document.createElement('div');
+    hint.id = 'iosHint';
+    hint.style.cssText = 'position:fixed;bottom:90px;left:15px;right:15px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:16px;border-radius:16px;z-index:9999;box-shadow:0 12px 30px rgba(0,0,0,0.4);animation:slideUp 0.5s;';
+    hint.innerHTML = '<div style="display:flex;align-items:center;gap:12px">' +
+      '<div style="font-size:32px">📱</div>' +
+      '<div style="flex:1">' +
+      '<div style="font-weight:bold;font-size:14px;margin-bottom:3px">App အဖြစ် Install လုပ်ပါ</div>' +
+      '<div style="font-size:12px;opacity:0.95">Share (□↑) → "Add to Home Screen"</div>' +
+      '</div>' +
+      '<button onclick="this.parentElement.parentElement.remove()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px">✕</button>' +
+      '</div>';
+    document.body.appendChild(hint);
+  }, 5000);
+}
+
 async function api(url, opts={}) {
   const r = await fetch(url, {...opts, headers: {...H, ...(opts.headers||{})}});
   if (r.status === 401) { localStorage.clear(); location.href='/'; return {error:'unauth'}; }
@@ -1444,6 +1476,7 @@ setInterval(quickCheck, 3000);
   requestPushPermission();
   setTimeout(startTour, 2500);
   setTimeout(initPushNotifications, 2000);
+  showIOSHint();
   setInterval(loadMe, 5000);
   setInterval(async () => {
     try {
