@@ -333,8 +333,6 @@ button.main:active{transform:scale(0.97)}
 
   <div class="carousel" id="carousel"><div class="dots" id="dots"></div></div>
   <div class="quick-grid">
-    <div class="quick-card" onclick="openFaq()"><div class="icon">❓</div><div class="label">FAQ</div><div class="value blue">Help</div></div>
-    <div class="quick-card" onclick="openStats()"><div class="icon">📊</div><div class="label">My Stats</div><div class="value purple">View</div></div>
     <div class="quick-card" onclick="openCoupon()"><div class="icon">🎟️</div><div class="label">Coupon</div><div class="value red">Redeem</div></div>
     <div class="quick-card" onclick="openLeaderboard()"><div class="icon">🏆</div><div class="label">Leaderboard</div><div class="value blue">Top 10</div></div>
     <div class="quick-card" onclick="copyRef()"><div class="icon">🎯</div><div class="label">Referral</div><div class="value green">Copy</div></div>
@@ -508,6 +506,8 @@ button.main:active{transform:scale(0.97)}
   <button class="nav-item" onclick="switchTab('wallet',this)"><span class="nav-icon">💰</span>ငွေဖြည့်</button>
   <button class="nav-item" onclick="switchTab('orders',this)"><span class="nav-icon">📦</span>မှာတမ်း</button>
   <button class="nav-item" onclick="switchTab('chat',this)"><span class="nav-icon">💬</span>Chat</button>
+  <button class="nav-item" onclick="switchTab('faq',this)"><span class="nav-icon">❓</span>FAQ</button>
+  <button class="nav-item" onclick="switchTab('analytics',this)"><span class="nav-icon">📊</span>Stats</button>
   <button class="nav-item" onclick="switchTab('profile',this)"><span class="nav-icon">👤</span>Profile</button>
 </div>
 
@@ -1088,7 +1088,7 @@ function switchTab(name, btn){
   document.querySelectorAll('[id^="view-"]').forEach(v=>v.style.display='none');
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
   document.getElementById('view-'+name).style.display='block';
-  if (btn) btn.classList.add('active');
+  btn.classList.add('active');
   haptic(15);
   if (name==='wallet') loadDeposits();
   if (name==='orders') loadOrders();
@@ -1328,8 +1328,6 @@ function confetti(){
   }
 }
 
-function openFaq(){ switchTab('faq', document.querySelector('.nav-item')); }
-function openStats(){ switchTab('analytics', document.querySelector('.nav-item')); }
 async function logout(){
   if (!confirm('Logout လုပ်မှာသေချာလား?')) return;
   await api('/api/logout', {method:'POST'});
@@ -1341,6 +1339,8 @@ async function logout(){
   await loadSite();
   await loadMe();
   await loadProducts();
+  loadLiveStats();
+  setInterval(loadLiveStats, 30000);
   requestPushPermission();
   setTimeout(startTour, 2500);
   setInterval(loadMe, 15000);
