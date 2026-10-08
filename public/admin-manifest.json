@@ -1,7 +1,6 @@
 {
   "name": "Safe Zone Admin",
   "short_name": "SZ Admin",
-  "description": "Safe Zone Game Topup - Admin Panel",
   "start_url": "/admin.html",
   "scope": "/",
   "display": "standalone",
@@ -20,12 +19,6 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any"
-    },
-    {
-      "src": "/icons/admin-512.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "maskable"
     }
   ]
 }
