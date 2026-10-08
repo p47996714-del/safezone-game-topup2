@@ -78,12 +78,7 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 .chat-input{display:flex;gap:8px;margin-top:10px}
 .chat-input input[type=text]{flex:1;padding:12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff}
 .chat-input button{padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;font-weight:bold;cursor:pointer;font-family:inherit}
-.prod-row{display:grid;grid-template-columns:60px 1fr 1fr 90px 110px 35px;gap:6px;margin-bottom:10px;align-items:center;background:rgba(15,23,42,0.6);padding:10px;border-radius:12px;border:1px solid #334155;position:relative}
-.prod-img{width:50px;height:50px;border-radius:10px;background:#1e293b;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;border:2px solid #334155;overflow:hidden;transition:border-color 0.2s;position:relative}
-.prod-img:hover{border-color:#38bdf8}
-.prod-img img{width:100%;height:100%;object-fit:cover;display:block}
-.prod-img::after{content:'📸';position:absolute;top:-4px;right:-4px;background:#38bdf8;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center}
-.prod-img.has-img::after{content:'✏️'}
+.prod-row{display:grid;grid-template-columns:55px 1fr 1fr 85px 100px 35px;gap:5px;margin-bottom:8px;align-items:center;background:rgba(15,23,42,0.6);padding:8px;border-radius:10px;border:1px solid #334155}
 .prod-row input,.prod-row select{padding:7px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:12px;width:100%;font-family:inherit}
 .prod-row .del{background:#ef4444;color:#fff;border:none;border-radius:8px;cursor:pointer;padding:6px;font-size:12px}
 @media (max-width:700px){.prod-row{grid-template-columns:1fr 1fr}}
@@ -166,7 +161,7 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     <button onclick="tab('deps',this)">💰 Deposits</button>
     <button onclick="tab('ords',this)">📦 Orders</button>
     <button onclick="tab('chats',this)">💬 Chats <span class="badge" id="chatBadge" style="display:none">0</span></button>
-    <button onclick="tab('prods',this)">🎮 ဂိမ်းများ</button>
+    <button onclick="tab('prods',this)">🎮 Games</button>
     <button onclick="tab('users',this)">👥 Users</button>
     <button onclick="tab('coupons',this)">🎟️ Coupons</button>
     <button onclick="tab('admins',this)">🔑 Admins</button>
@@ -206,18 +201,18 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 
   <div class="panel" id="prods">
     <div class="section">
-      <h3>➕ Package အသစ် ထည့်</h3>
+      <h3>➕ Product အသစ်</h3>
       <div class="row">
         <input id="npGame" placeholder="ဂိမ်းနာမည်">
         <input id="npName" placeholder="Package">
         <input id="npPrice" type="number" placeholder="ဈေး (Ks)">
-        <input id="npImg" placeholder="Emoji (💎)" style="max-width:90px">
-        <select id="npCat"><option value="MOBA">⚔️ MOBA</option><option value="Battle Royale">🔫 Battle Royale</option><option value="Casual">♟️ Casual</option><option value="Premium">⭐ Premium</option><option value="Other">📦 အခြား</option></select>
+        <input id="npImg" placeholder="Emoji (💎)">
+        <select id="npCat"><option>MOBA</option><option>Battle Royale</option><option>Casual</option><option>Premium</option><option>Other</option></select>
         <button onclick="addProduct()">ထည့်</button>
       </div>
     </div>
     <div class="section">
-      <h3>🎮 ဂိမ်းပုံများ</h3>
+      <h3>🎮 Game Images</h3>
       <div class="row">
         <input id="giGame" placeholder="ဂိမ်းနာမည်">
         <input id="giUrl" placeholder="Image URL">
@@ -231,7 +226,7 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
       </div>
       <div id="gameImgList" style="margin-top:10px"></div>
     </div>
-    <div class="section"><h3>📦 ဂိမ်း Package များ</h3><div id="prodList"></div></div>
+    <div class="section"><h3>📦 Products စာရင်း</h3><div id="prodList"></div></div>
   </div>
 
   <div class="panel" id="users">
@@ -312,7 +307,7 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
       <input id="ws_payName" placeholder="Name (e.g. KBZ Pay)">
       <input id="ws_payShort" placeholder="Short (e.g. KBZ)">
       <input id="ws_payCls" placeholder="Class (kbz/wave/uab/aya)">
-      <button onclick="addPayment()">➕ ထည့်</button>
+      <button onclick="addPayment()">➕ Add</button>
     </div>
     <p style="font-size:12px;color:#94a3b8">Payment number ကို Settings tab မှာ ပြင်ပါ</p>
   </div>
@@ -728,48 +723,23 @@ async function viewHistory(username){
 
 async function loadProductsAdmin(){
   const d = await api('/api/admin/products');
-  const cats = ['MOBA','Battle Royale','Casual','Premium','Other'];
-  const catLabels = {MOBA:'⚔️ MOBA','Battle Royale':'🔫 Battle Royale','Casual':'♟️ Casual','Premium':'⭐ Premium','Other':'📦 အခြား'};
   document.getElementById('prodList').innerHTML = d.map(p=>{
-    const imgHtml = p.imgUrl
-      ? '<div class="prod-img has-img" onclick="pickProdImg(' + p.id + ')"><img src="' + p.imgUrl + '"></div>'
-      : '<div class="prod-img" onclick="pickProdImg(' + p.id + ')">' + (p.image||'🎮') + '</div>';
+    const cats = ['MOBA','Battle Royale','Casual','Premium','Other'];
     return '<div class="prod-row">' +
-      imgHtml +
-      '<input value="' + p.game + '" onchange="updateProd(' + p.id + ',\'game\',this.value)" placeholder="ဂိမ်းနာမည်">' +
-      '<input value="' + p.name + '" onchange="updateProd(' + p.id + ',\'name\',this.value)" placeholder="Package">' +
-      '<input type="number" value="' + p.price + '" onchange="updateProd(' + p.id + ',\'price\',this.value)" placeholder="ဈေး">' +
-      '<select onchange="updateProd(' + p.id + ',\'category\',this.value)">' +
-      cats.map(c=>'<option value="' + c + '" ' + (p.category===c?'selected':'') + '>' + (catLabels[c]||c) + '</option>').join('') +
-      '</select>' +
-      '<button class="del" onclick="delProduct(' + p.id + ')">✕</button>' +
+      '<input value="'+(p.image||'🎮')+'" onchange="updateProd('+p.id+',\'image\',this.value)" style="text-align:center;font-size:15px">' +
+      '<input value="'+p.game+'" onchange="updateProd('+p.id+',\'game\',this.value)">' +
+      '<input value="'+p.name+'" onchange="updateProd('+p.id+',\'name\',this.value)">' +
+      '<input type="number" value="'+p.price+'" onchange="updateProd('+p.id+',\'price\',this.value)">' +
+      '<select onchange="updateProd('+p.id+',\'category\',this.value)">' +
+      cats.map(c=>'<option '+(p.category===c?'selected':'')+'>'+c+'</option>').join('') + '</select>' +
+      '<button class="del" onclick="delProduct('+p.id+')">✕</button>' +
       '</div>';
-  }).join('') || '<p class="empty">Package မရှိပါ</p>';
-
+  }).join('') || '<p class="empty">Product မရှိပါ</p>';
   const imgs = await api('/api/admin/gameImages');
   document.getElementById('gameImgList').innerHTML = Object.entries(imgs).map(([g,u])=>
-    '<div class="admin-item"><div><b style="color:#38bdf8">' + g + '</b><div class="meta" style="font-size:11px;word-break:break-all">' + u + '</div></div>' +
-    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delGameImg(\'' + g + '\')">✕</button></div>'
+    '<div class="admin-item"><div><b style="color:#38bdf8">'+g+'</b><div class="meta" style="font-size:11px;word-break:break-all">'+u+'</div></div>' +
+    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delGameImg(\''+g+'\')">✕</button></div>'
   ).join('') || '<p class="empty" style="font-size:12px">မရှိပါ</p>';
-}
-
-// ===== PICK PRODUCT IMAGE =====
-let _prodImgTarget = null;
-function pickProdImg(id) {
-  _prodImgTarget = id;
-  _uploadContext = 'productImg';
-  const inp = ensureFileInput();
-  inp.accept = 'image/*';
-  inp.value = '';
-  inp.click();
-}
-
-async function setProdImage(id, url) {
-  const r = await api('/api/admin/products/' + id, { method: 'PUT', body: JSON.stringify({ imgUrl: url }) });
-  if (r && r.success) {
-    alert('✅ ပုံ ထည့်ပြီး');
-    loadProductsAdmin();
-  } else alert('❌ Failed');
 }
 async function addProduct(){
   const game = document.getElementById('npGame').value.trim();
@@ -1277,9 +1247,6 @@ async function handleUploadSuccess(url, context) {
   } else if (context === 'manager') {
     loadUploads();
     alert('✅ Upload ပြီး');
-  } else if (context === 'productImg') {
-    if (_prodImgTarget) await setProdImage(_prodImgTarget, url);
-    _prodImgTarget = null;
   } else if (context === 'payment') {
     await setPaymentImage(window._payIndex, url);
   }

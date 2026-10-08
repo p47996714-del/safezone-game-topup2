@@ -1097,17 +1097,14 @@ function openGameProducts(game){
   const vipDisc = {Bronze:0, Silver:2, Gold:5, Diamond:8}[userVip] || 0;
   const list = gProducts.map(p=>{
     const final = Math.round(p.price * (1 - vipDisc/100));
-    const disc = vipDisc > 0 ? '<div style="font-size:11px;color:#22c55e;margin-top:2px">-' + vipDisc + '% → ' + final.toLocaleString() + ' Ks</div>' : '';
-    const imgHtml = p.imgUrl
-      ? '<img src="' + p.imgUrl + '" style="width:50px;height:50px;object-fit:cover;border-radius:10px;border:1px solid #334155">'
-      : '<div style="font-size:26px">' + p.image + '</div>';
-    return '<div class="game-card" onclick="openModal(' + p.id + ')" style="cursor:pointer">' +
-      '<div style="padding:15px;text-align:center">' +
-        imgHtml +
-        '<div style="font-weight:bold;margin-top:5px;font-size:13px">' + p.name + '</div>' +
-        '<div style="color:#22c55e;margin-top:5px;font-weight:bold">' + p.price.toLocaleString() + ' Ks</div>' +
-        disc +
-      '</div></div>';
+    const disc = vipDisc > 0 ? `<div style="font-size:11px;color:#22c55e;margin-top:2px">-${vipDisc}% → ${final.toLocaleString()} Ks</div>` : '';
+    return `<div class="game-card" onclick="openModal(${p.id})" style="cursor:pointer">
+      <div style="padding:15px;text-align:center">
+        <div style="font-size:26px">${p.image}</div>
+        <div style="font-weight:bold;margin-top:5px;font-size:13px">${p.name}</div>
+        <div style="color:#22c55e;margin-top:5px;font-weight:bold">${p.price.toLocaleString()} Ks</div>
+        ${disc}
+      </div></div>`;
   }).join('');
   document.getElementById('productModalBox').innerHTML = `
     <h3>${game} - ရွေးပါ</h3>
