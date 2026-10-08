@@ -498,7 +498,7 @@ button.main:active{transform:scale(0.97)}
   <button class="cancel" onclick="closeModal('notifModal')">Close</button>
 </div></div>
 
-<button class="music-btn" id="musicBtn" onclick="toggleMusicWithCustom()">🎵</button>
+<button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
 
 <div class="bottom-nav">
   <button class="nav-item active" onclick="switchTab('home',this)"><span class="nav-icon">🏠</span>ပင်မ</button>
@@ -1594,43 +1594,6 @@ function playMelody() {
   musicTimer = setTimeout(() => {
     if (musicPlaying) playMelody();
   }, totalDelay + 500);
-}
-
-
-function startMusicWithCustom() {
-  const musicUrl = siteData && siteData.musicUrl;
-  if (musicUrl) {
-    try {
-      if (!_customMusicEl) {
-        _customMusicEl = new Audio(musicUrl);
-        _customMusicEl.loop = true;
-        _customMusicEl.volume = 0.3;
-      }
-      _customMusicEl.play().then(() => {
-        musicPlaying = true;
-        updateMusicBtn();
-        showToast('🎵 Music On', 'info');
-      }).catch(e => {
-        console.log('Play err:', e.message);
-        startMusic();
-      });
-      return;
-    } catch(e) { console.log('Custom music err:', e.message); }
-  }
-  startMusic();
-}
-
-function stopMusicWithCustom() {
-  if (_customMusicEl) {
-    try { _customMusicEl.pause(); _customMusicEl.currentTime = 0; } catch(e){}
-  }
-  stopMusic();
-}
-
-function toggleMusicWithCustom() {
-  if (musicPlaying) stopMusicWithCustom();
-  else startMusicWithCustom();
-  haptic(30);
 }
 
 function startMusic() {

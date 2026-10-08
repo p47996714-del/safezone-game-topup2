@@ -71,8 +71,7 @@ function defaultDB() {
       facebook: 'https://facebook.com/safezone',
       terms: 'Safe Zone Game Topup ကို အသုံးပြုခြင်းဖြင့် အောက်ပါ စည်းကမ်းချက်များကို လက်ခံပါသည်:\n\n1. User သည် မှန်ကန်သော အချက်အလက်များ ဖြည့်ရမည်\n2. Deposit လုပ်သောအခါ Ref No. မှန်ရမည်\n3. Order Reject ဖြစ်ပါက 100% ပြန်အမ်းပါမည်\n4. Fraud ဖြစ်ပါက Account ပိတ်ပါမည်\n5. ငွေလွှဲပြီးမှသာ Balance ဝင်ပါမည်\n6. မည်သည့် Dispute မဆို Admin ဆုံးဖြတ်ချက်သည် အတည်ဖြစ်သည်',
       privacy: 'Safe Zone သည် သင့် Data များကို လုံခြုံစွာ ထိန်းသိမ်းပါသည်။ Phone number ကို Admin သာ မြင်နိုင်သည်။ Password ကို encrypt မလုပ်ထားပါ (Demo) — Production အတွက် bcrypt သုံးပါ။',
-      adsBanner: { enabled: false, text: '' }, logoUrl: 'https://i.imgur.com/iRwIfqs.png',
-      musicUrl: '', customSound: '',
+      adsBanner: { enabled: false, text: '' }, logoUrl: 'https://i.imgur.com/iRwIfqs.png', customSound: '',
       autoReply: {}, maintenance: { enabled: false, message: '🔧 ပြုပြင်နေပါသည်။ မကြာမီ ပြန်လည်ဖွင့်ပါမည်။' },
       logoUrl: 'https://i.imgur.com/iRwIfqs.png',
       hero: {

@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="my">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - Safe Zone</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
+body{background:radial-gradient(circle at 20% 20%,#1e3a8a33,transparent),#0b1120;color:#fff;min-height:100vh;padding:15px}
+h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
+.login{max-width:340px;margin:60px auto;background:rgba(30,41,59,0.8);padding:30px;border-radius:20px;border:1px solid #334155;box-shadow:0 20px 60px rgba(0,0,0,0.5)}
+.login input{width:100%;padding:14px;margin-bottom:12px;border-radius:14px;border:1px solid #334155;background:#0f172a;color:#fff}
+.login input:focus{outline:none;border-color:#38bdf8}
+.login button{width:100%;padding:14px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:14px;font-weight:bold;cursor:pointer;font-family:inherit}
+.top{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;max-width:1000px;margin-left:auto;margin-right:auto;flex-wrap:wrap;gap:10px}
+.tabs{display:flex;gap:6px;margin-bottom:15px;justify-content:center;flex-wrap:wrap;max-width:1000px;margin-left:auto;margin-right:auto}
+.tabs button{padding:9px 14px;background:rgba(30,41,59,0.8);color:#94a3b8;border:1px solid #334155;border-radius:10px;cursor:pointer;font-weight:bold;font-size:12px;position:relative;font-family:inherit}
+.tabs button.active{background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border-color:transparent}
+.badge{position:absolute;top:-6px;right:-6px;background:#ef4444;color:#fff;font-size:10px;padding:2px 6px;border-radius:10px;font-weight:bold}
+.panel{display:none;max-width:1000px;margin:0 auto}
+.panel.active{display:block}
+.item{background:rgba(30,41,59,0.8);padding:15px;border-radius:14px;margin-bottom:10px;border:1px solid #334155;border-left:4px solid #eab308}
+.item.approved,.item.completed{border-left-color:#22c55e}
+.item.processing{border-left-color:#3b82f6}
+.item.rejected{border-left-color:#ef4444}
+.item b{color:#38bdf8}
+.item input[type=checkbox]{width:18px;height:18px;cursor:pointer;accent-color:#38bdf8;vertical-align:middle;margin-right:8px}
+.btn{background:#22c55e;color:#fff;border:none;padding:8px 14px;border-radius:10px;cursor:pointer;font-weight:bold;margin-right:6px;font-size:12px;margin-top:8px;font-family:inherit}
+.btn.red{background:#ef4444}
+.btn.blue{background:#3b82f6}
+.btn.gray{background:#334155}
+.btn.orange{background:#f59e0b}
+.meta{font-size:12px;color:#94a3b8;margin-top:5px}
+.empty{text-align:center;padding:30px;color:#64748b}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;max-width:1000px;margin:0 auto 15px}
+.stat-card{background:linear-gradient(135deg,#1e293b,#334155);padding:15px;border-radius:14px;border:1px solid #334155}
+.stat-card .label{font-size:12px;color:#94a3b8}
+.stat-card .value{font-size:20px;font-weight:bold;margin-top:5px}
+.stat-card.green .value{color:#22c55e}
+.stat-card.blue .value{color:#38bdf8}
+.stat-card.orange .value{color:#f59e0b}
+.stat-card.red .value{color:#ef4444}
+.chart{background:rgba(30,41,59,0.8);padding:15px;border-radius:16px;border:1px solid #334155;max-width:1000px;margin:0 auto 15px}
+.chart h3{color:#38bdf8;margin-bottom:12px;font-size:15px}
+.bars{display:flex;align-items:flex-end;gap:6px;height:130px;justify-content:space-around}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+.bar{width:100%;max-width:36px;background:linear-gradient(180deg,#38bdf8,#a855f7);border-radius:5px 5px 0 0;min-height:3px}
+.bar-label{font-size:10px;color:#94a3b8}
+.bar-val{font-size:10px;color:#38bdf8;font-weight:bold}
+.section{background:rgba(30,41,59,0.8);padding:15px;border-radius:16px;border:1px solid #334155;margin-bottom:15px}
+.section h3{color:#38bdf8;margin-bottom:12px;font-size:15px}
+.row{display:flex;gap:8px;margin-bottom:8px;flex-wrap:wrap}
+.row input,.row select,.row textarea{flex:1;min-width:120px;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:13px;font-family:inherit}
+.row textarea{min-height:70px;resize:vertical}
+.row input:focus,.row select:focus{outline:none;border-color:#38bdf8}
+.row button{padding:10px 16px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-size:13px;font-family:inherit}
+.admin-item{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:10px;margin-bottom:8px;border:1px solid #334155}
+.role-badge{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:bold}
+.role-super{background:#a855f722;color:#a855f7;border:1px solid #a855f755}
+.role-normal{background:#3b82f622;color:#3b82f6;border:1px solid #3b82f655}
+.vip-badge{padding:2px 8px;border-radius:10px;font-size:10px;font-weight:bold;margin-left:5px}
+.vip-Bronze{background:#cd7f32;color:#fff}
+.vip-Silver{background:#c0c0c0;color:#000}
+.vip-Gold{background:linear-gradient(135deg,#ffd700,#ffb700);color:#000}
+.vip-Diamond{background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff}
+.chat-list-item{display:flex;justify-content:space-between;align-items:center;padding:14px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px;border:1px solid #334155;cursor:pointer}
+.chat-unread{background:#ef4444;color:#fff;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:bold}
+.chat-window{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:300;display:none;flex-direction:column;padding:15px;max-width:600px;margin:0 auto}
+.chat-window.show{display:flex}
+.chat-window .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.chat-window .head h3{color:#38bdf8}
+.chat-window .msgs{flex:1;overflow-y:auto;padding:10px 0;display:flex;flex-direction:column;gap:8px}
+.bubble{max-width:75%;padding:10px 14px;border-radius:14px;font-size:13px;line-height:1.4;word-wrap:break-word}
+.bubble img{max-width:100%;border-radius:8px;margin-bottom:5px;display:block}
+.bubble.user{align-self:flex-start;background:#1e293b;border:1px solid #334155}
+.bubble.admin{align-self:flex-end;background:linear-gradient(135deg,#38bdf8,#3b82f6)}
+.bubble .t{font-size:10px;opacity:0.7;margin-top:4px}
+.chat-input{display:flex;gap:8px;margin-top:10px}
+.chat-input input[type=text]{flex:1;padding:12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff}
+.chat-input button{padding:12px 18px;border-radius:12px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;font-weight:bold;cursor:pointer;font-family:inherit}
+.prod-row{display:grid;grid-template-columns:60px 1fr 1fr 90px 110px 35px;gap:6px;margin-bottom:10px;align-items:center;background:rgba(15,23,42,0.6);padding:10px;border-radius:12px;border:1px solid #334155;position:relative}
+.prod-img{width:50px;height:50px;border-radius:10px;background:#1e293b;display:flex;align-items:center;justify-content:center;font-size:22px;cursor:pointer;border:2px solid #334155;overflow:hidden;transition:border-color 0.2s;position:relative}
+.prod-img:hover{border-color:#38bdf8}
+.prod-img img{width:100%;height:100%;object-fit:cover;display:block}
+.prod-img::after{content:'📸';position:absolute;top:-4px;right:-4px;background:#38bdf8;border-radius:50%;width:18px;height:18px;font-size:10px;display:flex;align-items:center;justify-content:center}
+.prod-img.has-img::after{content:'✏️'}
+.prod-row input,.prod-row select{padding:7px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:12px;width:100%;font-family:inherit}
+.prod-row .del{background:#ef4444;color:#fff;border:none;border-radius:8px;cursor:pointer;padding:6px;font-size:12px}
+@media (max-width:700px){.prod-row{grid-template-columns:1fr 1fr}}
+.search-box{margin-bottom:15px}
+.search-box input{width:100%;padding:12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px;font-family:inherit}
+.user-card{background:rgba(30,41,59,0.8);padding:15px;border-radius:14px;margin-bottom:10px;border:1px solid #334155;border-left:4px solid #38bdf8}
+.user-card.banned{border-left-color:#ef4444;opacity:0.7}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:center;justify-content:center;z-index:400;padding:20px}
+.modal.show{display:flex}
+.modal-box{background:#1e293b;padding:22px;border-radius:20px;width:100%;max-width:500px;max-height:85vh;overflow-y:auto;border:1px solid #334155}
+.modal-box h3{color:#38bdf8;margin-bottom:15px}
+.modal-box input{width:100%;padding:12px;margin-bottom:10px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px;font-family:inherit}
+.modal-box button{width:100%;padding:12px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;font-weight:bold;cursor:pointer;font-size:14px;margin-bottom:8px;font-family:inherit}
+.modal-box button.cancel{background:#334155}
+.receipt-view{max-width:100%;max-height:400px;border-radius:12px;border:1px solid #38bdf8;margin-bottom:12px}
+.splash{position:fixed;inset:0;background:radial-gradient(circle at 50% 50%,#1e293b,#0b1120);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s,visibility 0.6s}
+.splash.hide{opacity:0;visibility:hidden}
+.splash-logo{font-size:0;line-height:0;animation:splashIn 1s ease-out}
+.splash-logo img{width:140px;height:140px;object-fit:contain;filter:drop-shadow(0 0 30px rgba(168,85,247,0.5))}
+@keyframes splashIn{0%{opacity:0;transform:scale(0.85)}100%{opacity:1;transform:scale(1)}}
+.splash-title{margin-top:35px;font-size:26px;font-weight:bold;background:linear-gradient(135deg,#a855f7,#38bdf8,#ec4899);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradShift 2s ease infinite}
+@keyframes gradShift{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+.splash-sub{margin-top:8px;font-size:13px;color:#94a3b8;letter-spacing:3px}
+.splash-loader{margin-top:40px;width:180px;height:4px;background:#1e293b;border-radius:4px;overflow:hidden}
+.splash-bar{height:100%;background:linear-gradient(90deg,#a855f7,#38bdf8,#ec4899);border-radius:4px;animation:loadBar 2s ease-in-out forwards}
+@keyframes loadBar{0%{width:0}100%{width:100%}}
+
+.upload-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
+.upload-row input[type="text"]{flex:1;min-width:120px;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:13px;font-family:inherit}
+.upload-btn{padding:10px 14px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;font-weight:bold;cursor:pointer;font-size:13px;font-family:inherit;white-space:nowrap}
+.upload-btn.green{background:linear-gradient(135deg,#10b981,#059669)}
+.upload-btn.red{background:linear-gradient(135deg,#ef4444,#dc2626)}
+.upload-preview{margin-top:8px;padding:10px;background:rgba(15,23,42,0.6);border-radius:12px;border:1px dashed #38bdf8;text-align:center;display:none}
+.upload-preview img{max-width:100%;max-height:200px;border-radius:10px}
+.upload-preview.show{display:block}
+.upload-progress{margin-top:6px;height:4px;background:#1e293b;border-radius:2px;overflow:hidden;display:none}
+.upload-progress.show{display:block}
+.upload-progress-bar{height:100%;background:linear-gradient(90deg,#38bdf8,#a855f7);width:0;transition:width 0.3s}
+.upload-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(70px,1fr));gap:6px;margin-top:8px}
+.upload-grid-item{position:relative;background:rgba(15,23,42,0.6);border-radius:10px;overflow:hidden;border:1px solid #334155;aspect-ratio:1;cursor:pointer}
+.upload-grid-item img{width:100%;height:100%;object-fit:cover;display:block}
+.upload-grid-item .del{position:absolute;top:4px;right:4px;background:rgba(239,68,68,0.9);color:#fff;border:none;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
+.upload-zone{padding:10px 14px;border:2px dashed #38bdf8;border-radius:12px;text-align:center;background:rgba(56,189,248,0.05);cursor:pointer;transition:0.2s;display:flex;align-items:center;justify-content:center;gap:10px;flex-wrap:wrap}
+.upload-zone:hover{background:rgba(56,189,248,0.1);border-color:#a855f7}
+.upload-zone .icon{font-size:22px;margin:0}
+.upload-zone .text{font-size:12px;color:#94a3b8;margin:0}
+
+</style>
+</head>
+<body>
+
+<div class="splash" id="splash">
+  <div class="splash-logo"><img src="https://i.imgur.com/iRwIfqs.png" alt="logo"></div>
+  <div class="splash-title">ADMIN PANEL</div>
+  <div class="splash-sub">SAFE ZONE</div>
+  <div class="splash-loader"><div class="splash-bar"></div></div>
+</div>
+
+<div id="loginBox">
+  <div class="login">
+    <h1>🔐 Admin Panel</h1>
+    <input id="au" placeholder="Admin Username" value="admin">
+    <input id="ap" type="password" placeholder="Admin Password">
+    <button onclick="login()">ဝင်ရန်</button>
+  </div>
+</div>
+
+<div id="panelBox" style="display:none">
+  <div class="top">
+    <div style="font-size:13px;color:#94a3b8">👤 <b id="who" style="color:#38bdf8"></b> <span id="roleTag"></span></div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button onclick="exportData('users')" class="btn blue" style="margin-top:0">📥 Users</button>
+      <button onclick="exportData('orders')" class="btn blue" style="margin-top:0">📥 Orders</button>
+      <button onclick="exportData('deposits')" class="btn blue" style="margin-top:0">📥 Deps</button>
+      <button onclick="logout()" style="padding:8px 14px;background:rgba(127,29,29,0.9);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:bold;font-family:inherit">Logout</button>
+    </div>
+  </div>
+  <div class="tabs">
+    <button class="active" onclick="tab('dash',this)">📊 Dash</button>
+    <button onclick="tab('deps',this)">💰 Deposits</button>
+    <button onclick="tab('ords',this)">📦 Orders</button>
+    <button onclick="tab('chats',this)">💬 Chats <span class="badge" id="chatBadge" style="display:none">0</span></button>
+    <button onclick="tab('prods',this)">🎮 ဂိမ်းများ</button>
+    <button onclick="tab('users',this)">👥 Users</button>
+    <button onclick="tab('coupons',this)">🎟️ Coupons</button>
+    <button onclick="tab('admins',this)">🔑 Admins</button>
+    <button onclick="tab('site',this)">🌐 Website</button>
+    <button onclick="tab('settings',this)">⚙️ Settings</button>
+  </div>
+
+  <div class="panel active" id="dash">
+    <div class="stats" id="statsGrid"></div>
+    <div class="chart"><h3>📈 ၇ ရက်အတွင်း ဝင်ငွေ</h3><div class="bars" id="chartBars"></div></div>
+  </div>
+
+  <div class="panel" id="deps"></div>
+
+  <div class="panel" id="ords">
+    <div class="section">
+      <h3>🎯 Bulk Actions</h3>
+      <div class="row">
+        <button class="btn blue" style="margin-top:0" onclick="bulkOrderAction('processing')">⚙️ Processing</button>
+        <button class="btn" style="margin-top:0" onclick="bulkOrderAction('completed')">✅ Complete</button>
+        <button class="btn red" style="margin-top:0" onclick="bulkOrderAction('rejected')">❌ Reject</button>
+      </div>
+    </div>
+    <div id="ordList"></div>
+  </div>
+
+  <div class="panel" id="chats">
+    <div class="section">
+      <h3>📢 Bulk Chat</h3>
+      <div class="row">
+        <input id="bulkChatUsers" placeholder="Usernames (comma) e.g. mgmg,aung">
+        <button onclick="sendBulkChat()">💬 Send</button>
+      </div>
+    </div>
+    <div id="chatsList"></div>
+  </div>
+
+  <div class="panel" id="prods">
+    <div class="section">
+      <h3>➕ Package အသစ် ထည့်</h3>
+      <div class="row">
+        <input id="npGame" placeholder="ဂိမ်းနာမည်">
+        <input id="npName" placeholder="Package">
+        <input id="npPrice" type="number" placeholder="ဈေး (Ks)">
+        <input id="npImg" placeholder="Emoji (💎)" style="max-width:90px">
+        <select id="npCat"><option value="MOBA">⚔️ MOBA</option><option value="Battle Royale">🔫 Battle Royale</option><option value="Casual">♟️ Casual</option><option value="Premium">⭐ Premium</option><option value="Other">📦 အခြား</option></select>
+        <button onclick="addProduct()">ထည့်</button>
+      </div>
+    </div>
+    <div class="section">
+      <h3>🎮 ဂိမ်းပုံများ</h3>
+      <div class="row">
+        <input id="giGame" placeholder="ဂိမ်းနာမည်">
+        <input id="giUrl" placeholder="Image URL">
+        <button onclick="saveGameImg()">Save</button>
+      </div>
+      <div class="upload-row" style="margin-top:-4px">
+        <button class="upload-btn" onclick="pickGameImg()">📸 Gallery ကနေ ရွေး</button>
+      </div>
+      <div class="upload-preview" id="giPreview">
+        <img id="giPreviewImg" src="">
+      </div>
+      <div id="gameImgList" style="margin-top:10px"></div>
+    </div>
+    <div class="section"><h3>📦 ဂိမ်း Package များ</h3><div id="prodList"></div></div>
+  </div>
+
+  <div class="panel" id="users">
+    <div class="search-box"><input id="userSearch" placeholder="🔍 Username / Phone ရှာပါ..." oninput="filterUsers()"></div>
+    <div id="usersList"></div>
+  </div>
+
+  <div class="panel" id="coupons">
+    <div class="section">
+      <h3>🎟️ Coupon အသစ်</h3>
+      <div class="row">
+        <input id="cCode" placeholder="Code (WELCOME100)">
+        <input id="cAmount" type="number" placeholder="Amount (Ks)">
+        <input id="cUses" type="number" placeholder="Uses (100)">
+        <button onclick="addCoupon()">ထည့်</button>
+      </div>
+    </div>
+    <div class="section"><h3>📋 Coupons စာရင်း</h3><div id="couponList"></div></div>
+  </div>
+
+  <div class="panel" id="admins">
+    <div class="section">
+      <h3>➕ Admin အသစ် (Super)</h3>
+      <div class="row">
+        <input id="newAdminU" placeholder="Username">
+        <input id="newAdminP" type="password" placeholder="Password">
+        <select id="newAdminR"><option value="normal">Normal</option><option value="super">Super</option></select>
+        <button onclick="addAdmin()">ထည့်</button>
+      </div>
+    </div>
+    <div id="adminList"></div>
+  </div>
+
+  
+<div class="panel" id="site">
+  <!-- SITE INFO -->
+  <div class="section">
+    <h3>🌐 Site Info</h3>
+    <div class="row"><input id="ws_siteName" placeholder="Site Name"></div>
+    <div class="upload-row">
+      <input id="ws_logoUrl" type="text" placeholder="Logo URL">
+      <button class="upload-btn" onclick="pickFile('logo')">📸 Upload</button>
+      <button class="upload-btn red" onclick="clearLogo()">✕</button>
+    </div>
+    <div class="upload-preview" id="logoPreview">
+      <img id="logoPreviewImg" src="">
+    </div>
+    <div class="row"><input id="ws_heroTitle" placeholder="Hero Title"></div>
+    <div class="row"><input id="ws_heroSubtitle" placeholder="Hero Subtitle"></div>
+    <div class="upload-row">
+      <input id="ws_videoUrl" type="text" placeholder="Video URL (mp4)">
+      <button class="upload-btn" onclick="pickFile('video')">🎬 Upload</button>
+      <button class="upload-btn red" onclick="clearField('ws_videoUrl')">✕</button>
+    </div>
+    <div class="row">
+      <input id="ws_themePrimary" placeholder="Primary color (#38bdf8)">
+      <input id="ws_themeSecondary" placeholder="Secondary color (#a855f7)">
+    </div>
+    <div class="row"><button onclick="saveSiteInfo()">💾 Save Site Info</button></div>
+  </div>
+
+  <!-- LABELS -->
+  <div class="section">
+    <h3>🏷️ Text Labels</h3>
+    <div class="row"><input id="ws_lblBalance" placeholder="Balance label"></div>
+    <div class="row"><input id="ws_lblGames" placeholder="Games title"></div>
+    <div class="row"><input id="ws_lblSearch" placeholder="Search placeholder"></div>
+    <div class="row"><input id="ws_lblPopular" placeholder="Popular title"></div>
+    <div class="row"><input id="ws_lblPayment" placeholder="Payment title"></div>
+    <div class="row"><button onclick="saveLabels()">💾 Save Labels</button></div>
+  </div>
+
+  <!-- PAYMENT METHODS -->
+  <div class="section">
+    <h3>💳 Payment Methods</h3>
+    <div id="ws_paymentList"></div>
+    <div class="row" style="margin-top:10px">
+      <input id="ws_payName" placeholder="Name (e.g. KBZ Pay)">
+      <input id="ws_payShort" placeholder="Short (e.g. KBZ)">
+      <input id="ws_payCls" placeholder="Class (kbz/wave/uab/aya)">
+      <button onclick="addPayment()">➕ ထည့်</button>
+    </div>
+    <p style="font-size:12px;color:#94a3b8">Payment number ကို Settings tab မှာ ပြင်ပါ</p>
+  </div>
+
+  <!-- SOCIAL LINKS -->
+  <div class="section">
+    <h3>🔗 Social Links</h3>
+    <div class="row"><input id="ws_fb" placeholder="Facebook URL"></div>
+    <div class="row"><input id="ws_tt" placeholder="TikTok URL"></div>
+    <div class="row"><input id="ws_wa" placeholder="WhatsApp Number"></div>
+    <div class="row"><input id="ws_vb" placeholder="Viber Number"></div>
+    <div class="row"><input id="ws_tg" placeholder="Telegram URL"></div>
+    <div class="row"><button onclick="saveSocial()">💾 Save Social</button></div>
+  </div>
+
+  <!-- TRUST BADGES -->
+  <div class="section">
+    <h3>✅ Trust Badges</h3>
+    <div id="ws_badgeList"></div>
+    <div class="row" style="margin-top:10px">
+      <input id="ws_badgeIcon" placeholder="Icon (✅)" value="✅">
+      <input id="ws_badgeText" placeholder="Text (Verified Shop)">
+      <button onclick="addBadge()">➕ Add</button>
+    </div>
+  </div>
+
+  <!-- FAQ EDITOR -->
+  <div class="section">
+    <h3>❓ FAQ Editor</h3>
+    <div id="ws_faqList"></div>
+    <div class="row" style="margin-top:10px">
+      <input id="ws_faqQ" placeholder="Question">
+      <input id="ws_faqA" placeholder="Answer">
+      <button onclick="addFaq()">➕ Add</button>
+    </div>
+  </div>
+
+  <!-- TERMS & PRIVACY -->
+  <div class="section">
+    <h3>📜 Terms & Privacy</h3>
+    <div class="row"><textarea id="ws_terms" placeholder="Terms of Service"></textarea></div>
+    <div class="row"><textarea id="ws_privacy" placeholder="Privacy Policy"></textarea></div>
+    <div class="row"><button onclick="saveLegal2()">💾 Save Legal</button></div>
+  </div>
+</div>
+
+
+<div class="section">
+  <h3>📸 Upload Manager</h3>
+  <p style="font-size:12px;color:#94a3b8;margin-bottom:10px">ဖုန်း Gallery ကနေ ပုံတင်ပြီး — Game Image တွေမှာ သုံးလို့ရမယ်</p>
+  <div class="upload-zone" onclick="pickFile('manager')">
+    <div class="icon">📤</div>
+    <div class="text">ပုံ ရွေးရန် နှိပ်ပါ</div>
+    <div style="font-size:11px;color:#64748b;margin-top:5px">Max 3MB · JPG/PNG/GIF</div>
+  </div>
+  <div class="upload-progress" id="uploadProgress">
+    <div class="upload-progress-bar" id="uploadProgressBar"></div>
+  </div>
+  <div class="upload-grid" id="uploadGrid"></div>
+</div>
+
+<div class="panel" id="settings">
+    <div class="section" style="border:2px solid #ef4444">
+      <h3>🔧 Maintenance Mode</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:12px">
+        <div>
+          <div style="font-weight:bold;font-size:14px">Website Status</div>
+          <div id="maintStatus" style="font-size:12px;color:#94a3b8;margin-top:3px">Checking...</div>
+        </div>
+        <button id="maintToggleBtn" onclick="toggleMaintenance()" style="padding:10px 18px;background:#334155;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-family:inherit">⏳</button>
+      </div>
+      <div class="row"><input id="maintMsgInput" placeholder="Message"></div>
+      <div class="row"><button onclick="saveMaintMsg()">💾 Message Save</button></div>
+    </div>
+
+    <div class="section">
+      <h3>⚙️ Site Settings</h3>
+      <div class="row"><input id="cfgName" placeholder="Site Name"></div>
+      <div class="row"><input id="cfgPayNum" placeholder="Payment Number"></div>
+      <div class="row"><input id="cfgPayName" placeholder="Owner Name"></div>
+      <div class="row"><input id="cfgTgToken" placeholder="Telegram Bot Token"></div>
+      <div class="row"><input id="cfgTgChat" placeholder="Telegram Chat ID (Admin)"></div>
+      <div class="row"><input id="cfgWa" placeholder="WhatsApp"></div>
+      <div class="row"><input id="cfgVb" placeholder="Viber"></div>
+      <div class="row"><input id="cfgTt" placeholder="TikTok URL"></div>
+      <div class="row"><input id="cfgFb" placeholder="Facebook URL"></div>
+      <div class="row"><button onclick="saveConfig()">💾 Save All</button></div>
+      <p style="font-size:12px;color:#94a3b8;margin-top:10px">💡 @BotFather → token · @userinfobot → chat id</p>
+    </div>
+
+    <div class="section">
+      <h3>🎨 Banners</h3>
+      <div id="bannerList"></div>
+      <button class="btn" onclick="saveBanners()" style="margin-top:8px">💾 Save Banners</button>
+    </div>
+
+    <div class="section" style="border:2px solid #22c55e">
+      <h3>💾 GitHub Backup</h3>
+      <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:12px">
+        <div>
+          <div style="font-weight:bold;font-size:14px">Auto Backup</div>
+          <div id="bkStatus" style="font-size:12px;color:#94a3b8;margin-top:3px">Checking...</div>
+        </div>
+        <button id="bkToggleBtn" onclick="toggleBackup()" style="padding:10px 18px;background:#334155;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-family:inherit">...</button>
+      </div>
+      <div class="row"><input id="bkToken" type="password" placeholder="GitHub Token (ghp_...)"></div>
+      <div class="row"><input id="bkOwner" placeholder="GitHub Username"></div>
+      <div class="row"><input id="bkRepo" placeholder="Backup Repo Name"></div>
+      <div class="row">
+        <input id="bkBranch" placeholder="Branch" value="main">
+        <input id="bkInterval" type="number" placeholder="Min" value="5">
+      </div>
+      <div class="row">
+        <button onclick="saveBackupConfig()">💾 Save</button>
+        <button onclick="backupNow()" style="background:linear-gradient(135deg,#22c55e,#059669)">🚀 Backup Now</button>
+      </div>
+      <div class="row">
+        <button onclick="restoreNow()" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">⬇️ Restore</button>
+      </div>
+      <p style="font-size:12px;color:#94a3b8;margin-top:10px">Private Repo သုံးပါ။</p>
+    </div>
+
+    <div class="section">
+      <h3>📢 Broadcast</h3>
+      <div class="row"><textarea id="bcText" placeholder="User အားလုံးဆီ ပို့မယ့် စာ"></textarea></div>
+      <div class="row"><button onclick="sendBroadcast()">📢 Broadcast</button></div>
+    </div>
+  </div>
+</div>
+
+<div class="chat-window" id="chatWindow">
+  <div class="head">
+    <h3 id="chatTitle">Chat</h3>
+    <button onclick="closeChatWindow()" style="background:none;border:none;color:#94a3b8;font-size:24px;cursor:pointer;font-family:inherit">✕</button>
+  </div>
+  <div class="msgs" id="chatMsgs"></div>
+  <div class="chat-input">
+    <input type="text" id="chatText" placeholder="Reply..." onkeypress="if(event.key==='Enter')sendAdminChat()">
+    <button onclick="sendAdminChat()">➤</button>
+  </div>
+</div>
+
+<div class="modal" id="receiptModal">
+  <div class="modal-box">
+    <h3>📸 Receipt</h3>
+    <img id="receiptView" class="receipt-view" src="">
+    <button class="cancel" onclick="closeModal('receiptModal')">Close</button>
+  </div>
+</div>
+
+<div class="modal" id="historyModal">
+  <div class="modal-box">
+    <h3 id="histTitle">User History</h3>
+    <div id="histContent"></div>
+    <button class="cancel" onclick="closeModal('historyModal')">Close</button>
+  </div>
+</div>
+
+<div class="modal" id="balanceModal">
+  <div class="modal-box">
+    <h3>✏️ Balance ပြင်</h3>
+    <input id="editBalanceUser" readonly>
+    <input id="editBalanceValue" type="number" placeholder="Balance အသစ်">
+    <button onclick="saveBalance()">💾 Save</button>
+    <button class="cancel" onclick="closeModal('balanceModal')">Cancel</button>
+  </div>
+</div>
+
+<script>
+setTimeout(() => {
+  const s = document.getElementById('splash');
+  if (s) { s.classList.add('hide'); setTimeout(() => s.remove(), 700); }
+}, 1800);
+
+let au = localStorage.getItem('adminU') || 'admin';
+let ap = localStorage.getItem('adminP') || '';
+let me = null, activeChatUser = null, chatPollInterval = null;
+let allUsers = [], allOrders = [], selectedOrders = new Set();
+
+async function api(url, opts={}) {
+  const r = await fetch(url, {...opts, headers:{'Content-Type':'application/json','x-admin-user':au,'x-admin-pass':ap, ...(opts.headers||{})}});
+  if (r.status === 401) { localStorage.removeItem("adminP"); localStorage.removeItem("adminU"); if (!window._alerted) { window._alerted = true; alert("Wrong. Click OK then enter admin/2102002"); } }
+  return r.json();
+}
+function login(){
+  au = document.getElementById('au').value.trim();
+  ap = document.getElementById('ap').value;
+  if (!au || !ap) return alert('ဖြည့်ပါ');
+  localStorage.setItem('adminU', au); localStorage.setItem('adminP', ap);
+  showPanel();
+}
+function logout(){ localStorage.removeItem('adminP'); location.reload(); }
+function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+async function showPanel(){
+  document.getElementById('loginBox').style.display = 'none';
+  document.getElementById('panelBox').style.display = 'block';
+  document.getElementById('who').textContent = au;
+  try {
+    const admins = await api('/api/admin/admins');
+    me = admins.find(a => a.username === au);
+    if (me) document.getElementById('roleTag').innerHTML = '<span class="role-badge role-' + me.role + '">' + me.role + '</span>';
+  } catch(e){}
+  loadDash(); loadDeps(); loadOrds(); loadChats(); loadProductsAdmin(); loadUsers(); loadCoupons(); loadAdmins(); loadConfig(); loadBanners(); loadMaintStatus();
+  setInterval(refreshBadges, 5000);
+}
+function tab(name, btn){
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.remove('active'));
+  document.getElementById(name).classList.add('active'); btn.classList.add('active');
+  if (name==='chats') loadChats();
+  if (name==='users') loadUsers();
+  if (name==='coupons') loadCoupons();
+}
+async function refreshBadges(){
+  try {
+    const d = await api('/api/admin/stats');
+    const b = document.getElementById('chatBadge');
+    if (d.unreadChats > 0) { b.textContent = d.unreadChats; b.style.display='inline-block'; }
+    else b.style.display='none';
+  } catch(e){}
+}
+
+function exportData(type){
+  fetch('/api/admin/export/' + type, { headers: { 'x-admin-user': au, 'x-admin-pass': ap } })
+    .then(r => r.blob())
+    .then(blob => {
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = type + '-' + Date.now() + '.csv';
+      a.click();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    });
+}
+
+async function loadDash(){
+  const d = await api('/api/admin/stats');
+  const cards = [
+    {label:'👥 Users', value:d.totalUsers, cls:'blue'},
+    {label:'📦 Orders', value:d.totalOrders, cls:''},
+    {label:'💰 Total', value:d.totalRevenue.toLocaleString()+' Ks', cls:'green'},
+    {label:'📅 Today', value:d.todayRevenue.toLocaleString()+' Ks', cls:'green'},
+    {label:'⏳ Pending Deps', value:d.pendingDeps, cls:'orange'},
+    {label:'⏳ Pending Ords', value:d.pendingOrders, cls:'orange'},
+    {label:'💬 Unread', value:d.unreadChats, cls:'orange'},
+    {label:'🛒 Today Orders', value:d.todayOrders, cls:'blue'}
+  ];
+  document.getElementById('statsGrid').innerHTML = cards.map(c=>'<div class="stat-card '+c.cls+'"><div class="label">'+c.label+'</div><div class="value">'+c.value+'</div></div>').join('');
+  const max = Math.max(...d.chart.map(x=>x.value), 1);
+  document.getElementById('chartBars').innerHTML = d.chart.map(x=>{
+    const h = Math.max(3, (x.value/max)*100);
+    return '<div class="bar-wrap"><div class="bar-val">'+(x.value>0?(x.value/1000).toFixed(0)+'k':'')+'</div><div class="bar" style="height:'+h+'%"></div><div class="bar-label">'+x.label+'</div></div>';
+  }).join('');
+}
+
+async function loadDeps(){
+  const d = await api('/api/admin/deposits');
+  document.getElementById('deps').innerHTML = d.length ? d.map(x=>{
+    const receiptHtml = x.receipt ? '<div style="margin-top:8px"><button class="btn blue" onclick="viewReceipt(\''+x.receipt.substring(0,20)+'\',\''+x.id+'\')">📸 Receipt ကြည့်</button></div>' : '';
+    window['_receipt_' + x.id] = x.receipt || '';
+    return '<div class="item '+x.status+'">' +
+      '<b>'+x.username+'</b> - '+x.amount.toLocaleString()+' Ks ('+x.method+') ['+x.status+']' +
+      '<div class="meta">'+x.id+' | '+new Date(x.createdAt).toLocaleString()+'</div>' +
+      receiptHtml +
+      (x.status==='pending' ? '<div><button class="btn" onclick="approveDep(\''+x.id+'\')">✅ Approve</button><button class="btn red" onclick="rejectDep(\''+x.id+'\')">❌ Reject</button></div>' : '') +
+      '</div>';
+  }).join('') : '<p class="empty">မရှိပါ</p>';
+}
+function viewReceipt(_, id){
+  const r = window['_receipt_' + id];
+  if (!r) return alert('Receipt မရှိပါ');
+  document.getElementById('receiptView').src = r;
+  document.getElementById('receiptModal').classList.add('show');
+}
+
+async function loadOrds(){
+  const d = await api('/api/admin/orders');
+  allOrders = d;
+  selectedOrders.clear();
+  document.getElementById('ordList').innerHTML = d.length ? d.map(x=>{
+    const sid = x.serverId ? ' · S:'+x.serverId : '';
+    return '<div class="item '+x.status+'">' +
+      '<label style="display:flex;align-items:flex-start;gap:8px;cursor:pointer">' +
+      '<input type="checkbox" onchange="toggleOrderSelect(\''+x.id+'\',this.checked)">' +
+      '<div style="flex:1"><b>'+x.username+'</b> → '+x.game+' - '+x.product+' ['+x.status+']' +
+      '<div class="meta">Player: '+x.playerId+sid+' | '+x.price.toLocaleString()+' Ks | '+x.id+'</div></div></label>' +
+      '<div style="margin-top:8px">' +
+      (x.status==='pending' ? '<button class="btn blue" onclick="updateOrd(\''+x.id+'\',\'processing\')">⚙️ Processing</button>' : '') +
+      ((x.status==='pending'||x.status==='processing') ? '<button class="btn" onclick="updateOrd(\''+x.id+'\',\'completed\')">✅ Complete</button>' : '') +
+      ((x.status!=='rejected' && x.status!=='completed') ? '<button class="btn red" onclick="updateOrd(\''+x.id+'\',\'rejected\')">❌ Reject</button>' : '') +
+      '</div></div>';
+  }).join('') : '<p class="empty">မရှိပါ</p>';
+}
+function toggleOrderSelect(id, checked){
+  if (checked) selectedOrders.add(id); else selectedOrders.delete(id);
+}
+async function bulkOrderAction(status){
+  if (selectedOrders.size === 0) return alert('Order မရွေးထားဘူး');
+  if (status === 'rejected' && !confirm(selectedOrders.size + ' order ပယ်ဖျက်မယ်။ သေချာလား?')) return;
+  const d = await api('/api/admin/bulk-order-status', {method:'POST', body: JSON.stringify({orderIds: [...selectedOrders], status})});
+  if (d.success) { alert('✅ '+d.count+' order update ပြီး'); loadOrds(); loadDash(); }
+  else alert('❌ ' + d.error);
+}
+
+async function loadChats(){
+  const list = await api('/api/admin/chats');
+  document.getElementById('chatsList').innerHTML = list.length ? list.map(c=>{
+    const preview = c.last ? escapeHtml(String(c.last.text || '[Media]').slice(0,50)) : '';
+    return '<div class="chat-list-item" onclick="openChatWindow(\''+c.userId+'\',\''+c.username+'\')">' +
+      '<div><b style="color:#38bdf8">'+c.username+'</b><div class="meta">'+preview+'</div></div>' +
+      (c.unread > 0 ? '<span class="chat-unread">'+c.unread+'</span>' : '') +
+      '</div>';
+  }).join('') : '<p class="empty">Chat မရှိပါ</p>';
+}
+async function openChatWindow(userId, username){
+  activeChatUser = userId;
+  document.getElementById('chatTitle').textContent = '💬 ' + username;
+  document.getElementById('chatWindow').classList.add('show');
+  await loadChatMsgs();
+  if (chatPollInterval) clearInterval(chatPollInterval);
+  chatPollInterval = setInterval(loadChatMsgs, 3000);
+}
+function closeChatWindow(){
+  document.getElementById('chatWindow').classList.remove('show');
+  if (chatPollInterval) clearInterval(chatPollInterval);
+  loadChats(); refreshBadges();
+}
+async function loadChatMsgs(){
+  if (!activeChatUser) return;
+  const list = await api('/api/admin/chat/' + activeChatUser);
+  const box = document.getElementById('chatMsgs');
+  box.innerHTML = list.map(m=>'<div class="bubble '+m.from+'">' + (m.image ? '<img src="'+m.image+'">' : '') + (m.text ? escapeHtml(m.text) : '') + '<div class="t">'+new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})+'</div></div>').join('') || '<p class="empty">စာ မရှိပါ</p>';
+  box.scrollTop = box.scrollHeight;
+}
+async function sendAdminChat(){
+  const inp = document.getElementById('chatText');
+  const text = inp.value.trim();
+  if (!text || !activeChatUser) return;
+  inp.value = '';
+  await api('/api/admin/chat', {method:'POST', body: JSON.stringify({userId: activeChatUser, text})});
+  loadChatMsgs();
+}
+async function sendBulkChat(){
+  const usernames = document.getElementById('bulkChatUsers').value.split(',').map(s=>s.trim()).filter(Boolean);
+  const text = prompt('ပို့မယ့် စာ:');
+  if (!text || !usernames.length) return;
+  const d = await api('/api/admin/bulk-chat', {method:'POST', body: JSON.stringify({usernames, text})});
+  if (d.success) { alert('✅ '+d.sent+' ယောက်ဆီ ပို့ပြီး'); document.getElementById('bulkChatUsers').value = ''; }
+  else alert('❌ ' + d.error);
+}
+
+async function loadUsers(){
+  allUsers = await api('/api/admin/users');
+  filterUsers();
+}
+function filterUsers(){
+  const term = (document.getElementById('userSearch').value || '').toLowerCase();
+  const filtered = allUsers.filter(u => u.username.toLowerCase().includes(term) || (u.phone||'').includes(term));
+  document.getElementById('usersList').innerHTML = filtered.length ? filtered.map(u=>{
+    const linkIcon = u.telegramId ? ' 🔗' : '';
+    const banLabel = u.banned ? '<span class="vip-badge" style="background:#ef4444;color:#fff">BANNED</span>' : '';
+    return '<div class="user-card '+(u.banned?'banned':'')+'">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:8px">' +
+      '<div><b style="color:#38bdf8;font-size:15px">'+u.username+'</b>' + linkIcon +
+      '<span class="vip-badge vip-'+(u.vip||'Bronze')+'">'+(u.vip||'Bronze')+'</span> ' + banLabel + '</div>' +
+      '<b style="color:#22c55e">'+u.balance.toLocaleString()+' Ks</b></div>' +
+      '<div class="meta">📱 '+(u.phone||'-')+' | ⭐ '+(u.points||0)+' pts | 💰 Spent: '+(u.totalSpent||0).toLocaleString()+' Ks</div>' +
+      '<div class="meta">🎁 '+(u.referralCode||'-')+'</div>' +
+      '<div style="margin-top:10px;display:flex;gap:6px;flex-wrap:wrap">' +
+      '<button class="btn blue" style="margin-top:0;font-size:11px;padding:6px 10px" onclick="viewHistory(\''+u.username+'\')">📸 History</button>' +
+      '<button class="btn orange" style="margin-top:0;font-size:11px;padding:6px 10px" onclick="openEditBalance(\''+u.username+'\','+u.balance+')">✏️ Balance</button>' +
+      (u.banned
+        ? '<button class="btn" style="margin-top:0;font-size:11px;padding:6px 10px" onclick="toggleBan(\''+u.username+'\',false)">🔓 Unban</button>'
+        : '<button class="btn red" style="margin-top:0;font-size:11px;padding:6px 10px" onclick="toggleBan(\''+u.username+'\',true)">🚫 Ban</button>') +
+      '</div></div>';
+  }).join('') : '<p class="empty">မတွေ့ပါ</p>';
+}
+async function toggleBan(username, ban){
+  if (!confirm((ban?'Ban ':'Unban ')+username+'?')) return;
+  const d = await api('/api/admin/ban', {method:'POST', body: JSON.stringify({username, ban})});
+  if (d.success) loadUsers(); else alert('❌ ' + d.error);
+}
+function openEditBalance(username, balance){
+  document.getElementById('editBalanceUser').value = username;
+  document.getElementById('editBalanceValue').value = balance;
+  document.getElementById('balanceModal').classList.add('show');
+}
+async function saveBalance(){
+  const username = document.getElementById('editBalanceUser').value;
+  const balance = document.getElementById('editBalanceValue').value;
+  const d = await api('/api/admin/edit-balance', {method:'POST', body: JSON.stringify({username, balance})});
+  if (d.success) { alert('✅ ပြီး'); closeModal('balanceModal'); loadUsers(); }
+  else alert('❌ ' + d.error);
+}
+async function viewHistory(username){
+  const d = await api('/api/admin/user-history/' + username);
+  if (d.error) return alert('❌ ' + d.error);
+  const u = d.user;
+  let html = '<div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:10px;margin-bottom:12px;font-size:13px">';
+  html += '<div style="display:flex;justify-content:space-between"><span>💰 Balance</span><b style="color:#22c55e">'+u.balance.toLocaleString()+' Ks</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;margin-top:5px"><span>📱 Phone</span><b>'+(u.phone||'-')+'</b></div>';
+  html += '<div style="display:flex;justify-content:space-between;margin-top:5px"><span>💎 VIP</span><b>'+(u.vip||'Bronze')+'</b></div>';
+  html += '</div>';
+  html += '<div style="font-size:13px;font-weight:bold;color:#38bdf8;margin:12px 0 8px">📦 Orders ('+d.orders.length+')</div>';
+  html += d.orders.slice(0,5).map(o=>'<div style="font-size:12px;padding:8px;background:rgba(15,23,42,0.5);border-radius:8px;margin-bottom:6px">'+o.game+' - '+o.product+' ['+o.status+'] · '+o.price.toLocaleString()+' Ks</div>').join('') || '<div style="font-size:12px;color:#64748b">မရှိပါ</div>';
+  html += '<div style="font-size:13px;font-weight:bold;color:#38bdf8;margin:12px 0 8px">💰 Deposits ('+d.deposits.length+')</div>';
+  html += d.deposits.slice(0,5).map(dep=>'<div style="font-size:12px;padding:8px;background:rgba(15,23,42,0.5);border-radius:8px;margin-bottom:6px">'+dep.amount.toLocaleString()+' Ks ['+dep.status+'] · '+dep.method+'</div>').join('') || '<div style="font-size:12px;color:#64748b">မရှိပါ</div>';
+  document.getElementById('histTitle').textContent = '📸 ' + username;
+  document.getElementById('histContent').innerHTML = html;
+  document.getElementById('historyModal').classList.add('show');
+}
+
+async function loadProductsAdmin(){
+  const d = await api('/api/admin/products');
+  const cats = ['MOBA','Battle Royale','Casual','Premium','Other'];
+  const catLabels = {MOBA:'⚔️ MOBA','Battle Royale':'🔫 Battle Royale','Casual':'♟️ Casual','Premium':'⭐ Premium','Other':'📦 အခြား'};
+  document.getElementById('prodList').innerHTML = d.map(p=>{
+    const imgHtml = p.imgUrl
+      ? '<div class="prod-img has-img" onclick="pickProdImg(' + p.id + ')"><img src="' + p.imgUrl + '"></div>'
+      : '<div class="prod-img" onclick="pickProdImg(' + p.id + ')">' + (p.image||'🎮') + '</div>';
+    return '<div class="prod-row">' +
+      imgHtml +
+      '<input value="' + p.game + '" onchange="updateProd(' + p.id + ',\'game\',this.value)" placeholder="ဂိမ်းနာမည်">' +
+      '<input value="' + p.name + '" onchange="updateProd(' + p.id + ',\'name\',this.value)" placeholder="Package">' +
+      '<input type="number" value="' + p.price + '" onchange="updateProd(' + p.id + ',\'price\',this.value)" placeholder="ဈေး">' +
+      '<select onchange="updateProd(' + p.id + ',\'category\',this.value)">' +
+      cats.map(c=>'<option value="' + c + '" ' + (p.category===c?'selected':'') + '>' + (catLabels[c]||c) + '</option>').join('') +
+      '</select>' +
+      '<button class="del" onclick="delProduct(' + p.id + ')">✕</button>' +
+      '</div>';
+  }).join('') || '<p class="empty">Package မရှိပါ</p>';
+
+  const imgs = await api('/api/admin/gameImages');
+  document.getElementById('gameImgList').innerHTML = Object.entries(imgs).map(([g,u])=>
+    '<div class="admin-item"><div><b style="color:#38bdf8">' + g + '</b><div class="meta" style="font-size:11px;word-break:break-all">' + u + '</div></div>' +
+    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delGameImg(\'' + g + '\')">✕</button></div>'
+  ).join('') || '<p class="empty" style="font-size:12px">မရှိပါ</p>';
+}
+
+// ===== PICK PRODUCT IMAGE =====
+let _prodImgTarget = null;
+function pickProdImg(id) {
+  _prodImgTarget = id;
+  _uploadContext = 'productImg';
+  const inp = ensureFileInput();
+  inp.accept = 'image/*';
+  inp.value = '';
+  inp.click();
+}
+
+async function setProdImage(id, url) {
+  const r = await api('/api/admin/products/' + id, { method: 'PUT', body: JSON.stringify({ imgUrl: url }) });
+  if (r && r.success) {
+    alert('✅ ပုံ ထည့်ပြီး');
+    loadProductsAdmin();
+  } else alert('❌ Failed');
+}
+async function addProduct(){
+  const game = document.getElementById('npGame').value.trim();
+  const name = document.getElementById('npName').value.trim();
+  const price = document.getElementById('npPrice').value;
+  const image = document.getElementById('npImg').value.trim() || '🎮';
+  const category = document.getElementById('npCat').value;
+  if (!game || !name || !price) return alert('ဖြည့်ပါ');
+  const d = await api('/api/admin/products', {method:'POST', body: JSON.stringify({game, name, price, image, category})});
+  if (d.success){ alert('✅ ထည့်ပြီး'); ['npGame','npName','npPrice','npImg'].forEach(id=>document.getElementById(id).value=''); loadProductsAdmin(); }
+  else alert('❌ ' + d.error);
+}
+async function updateProd(id, field, value){
+  const body = {}; body[field] = value;
+  await api('/api/admin/products/' + id, {method:'PUT', body: JSON.stringify(body)});
+}
+async function delProduct(id){
+  if (!confirm('ဖျက်မှာလား?')) return;
+  await api('/api/admin/products/' + id, {method:'DELETE'});
+  loadProductsAdmin();
+}
+async function saveGameImg(){
+  const game = document.getElementById('giGame').value.trim();
+  const url = document.getElementById('giUrl').value.trim();
+  if (!game) return alert('ဂိမ်းနာမည် ဖြည့်ပါ');
+  const d = await api('/api/admin/gameImages', {method:'POST', body: JSON.stringify({game, url})});
+  if (d.success){ alert('✅ သိမ်းပြီး'); document.getElementById('giGame').value=''; document.getElementById('giUrl').value=''; loadProductsAdmin(); }
+  else alert('❌ ' + d.error);
+}
+async function delGameImg(game){
+  if (!confirm(game + ' ဖျက်မှာလား?')) return;
+  await api('/api/admin/gameImages', {method:'POST', body: JSON.stringify({game})});
+  loadProductsAdmin();
+}
+
+async function loadCoupons(){
+  const c = await api('/api/admin/coupons');
+  document.getElementById('couponList').innerHTML = Object.entries(c).map(([code, data])=>
+    '<div class="admin-item"><div><b style="color:#38bdf8">'+code+'</b><div class="meta">'+data.amount.toLocaleString()+' Ks · Used: '+(data.uses - data.usesLeft)+'/'+data.uses+'</div></div>' +
+    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delCoupon(\''+code+'\')">✕</button></div>'
+  ).join('') || '<p class="empty">Coupon မရှိပါ</p>';
+}
+async function addCoupon(){
+  const code = document.getElementById('cCode').value.trim().toUpperCase();
+  const amount = document.getElementById('cAmount').value;
+  const uses = document.getElementById('cUses').value || 100;
+  if (!code || !amount) return alert('ဖြည့်ပါ');
+  const d = await api('/api/admin/coupons', {method:'POST', body: JSON.stringify({code, amount, uses})});
+  if (d.success){ alert('✅ ထည့်ပြီး'); ['cCode','cAmount','cUses'].forEach(id=>document.getElementById(id).value=''); loadCoupons(); }
+  else alert('❌ ' + d.error);
+}
+async function delCoupon(code){
+  if (!confirm('ဖျက်မှာလား?')) return;
+  await api('/api/admin/coupons/' + code, {method:'DELETE'});
+  loadCoupons();
+}
+
+async function addAdmin(){
+  const username = document.getElementById('newAdminU').value.trim();
+  const password = document.getElementById('newAdminP').value;
+  const role = document.getElementById('newAdminR').value;
+  if (!username || !password) return alert('ဖြည့်ပါ');
+  const d = await api('/api/admin/admins', {method:'POST', body: JSON.stringify({username, password, role})});
+  if (d.success){ alert('✅ ထည့်ပြီး'); document.getElementById('newAdminU').value=''; document.getElementById('newAdminP').value=''; loadAdmins(); }
+  else alert('❌ ' + d.error);
+}
+async function loadAdmins(){
+  try {
+    const d = await api('/api/admin/admins');
+    document.getElementById('adminList').innerHTML = d.map(a=>
+      '<div class="admin-item"><div><b style="color:#38bdf8">'+a.username+'</b> <span class="role-badge role-'+a.role+'" style="margin-left:6px">'+a.role+'</span></div>' +
+      (a.username !== au ? '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delAdmin(\''+a.username+'\')">Delete</button>' : '<span style="font-size:11px;color:#94a3b8">(You)</span>') +
+      '</div>'
+    ).join('');
+  } catch(e){ document.getElementById('adminList').innerHTML = '<p class="empty">Super admin သာ</p>'; }
+}
+async function delAdmin(u){
+  if (!confirm(u + ' ဖျက်မှာလား?')) return;
+  const d = await api('/api/admin/admins/' + u, {method:'DELETE'});
+  if (d.success) loadAdmins(); else alert('❌ ' + d.error);
+}
+
+async function loadConfig(){
+  try {
+    const c = await api('/api/admin/config');
+    const map = {Name:'siteName',PayNum:'payNumber',PayName:'payName',TgToken:'telegramBotToken',TgChat:'telegramChatId',Wa:'whatsapp',Vb:'viber',Tt:'tiktok',Fb:'facebook'};
+    Object.entries(map).forEach(([k,v]) => {
+      const el = document.getElementById('cfg' + k);
+      if (el) el.value = c[v] || '';
+    });
+  } catch(e){}
+}
+async function saveConfig(){
+  const body = {
+    siteName: document.getElementById('cfgName').value,
+    payNumber: document.getElementById('cfgPayNum').value,
+    payName: document.getElementById('cfgPayName').value,
+    telegramBotToken: document.getElementById('cfgTgToken').value,
+    telegramChatId: document.getElementById('cfgTgChat').value,
+    whatsapp: document.getElementById('cfgWa').value,
+    viber: document.getElementById('cfgVb').value,
+    tiktok: document.getElementById('cfgTt').value,
+    facebook: document.getElementById('cfgFb').value
+  };
+  const d = await api('/api/admin/config', {method:'POST', body: JSON.stringify(body)});
+  if (d.success) alert('✅ သိမ်းပြီး'); else alert('❌ ' + d.error);
+}
+async function loadMaintStatus(){
+  try {
+    const c = await api('/api/admin/config');
+    const m = c.maintenance || {enabled:false, message:''};
+    const st = document.getElementById('maintStatus');
+    const btn = document.getElementById('maintToggleBtn');
+    if (m.enabled) {
+      st.innerHTML = '<span style="color:#ef4444;font-weight:bold">🔴 ပိတ်ထားသည်</span>';
+      btn.textContent = '🟢 ပြန်ဖွင့်'; btn.style.background = '#22c55e';
+    } else {
+      st.innerHTML = '<span style="color:#22c55e;font-weight:bold">🟢 ဖွင့်ထားသည်</span>';
+      btn.textContent = '🔴 ပိတ်မည်'; btn.style.background = '#ef4444';
+    }
+    document.getElementById('maintMsgInput').value = m.message || '';
+  } catch(e){}
+}
+async function toggleMaintenance(){
+  const c = await api('/api/admin/config');
+  const cur = c.maintenance?.enabled || false;
+  const newState = !cur;
+  const msg = document.getElementById('maintMsgInput').value.trim() || '🔧 ပြုပြင်နေပါသည်။';
+  const d = await api('/api/admin/maintenance', {method:'POST', body: JSON.stringify({enabled:newState, message:msg})});
+  if (d.success) { await loadMaintStatus(); alert(newState?'🔴 ပိတ်ပြီး':'🟢 ပြန်ဖွင့်ပြီး'); }
+  else alert('❌ ' + d.error);
+}
+async function saveMaintMsg(){
+  const msg = document.getElementById('maintMsgInput').value.trim();
+  if (!msg) return alert('စာ ဖြည့်ပါ');
+  const d = await api('/api/admin/maintenance', {method:'POST', body: JSON.stringify({message:msg})});
+  if (d.success) alert('✅ သိမ်းပြီး'); else alert('❌ ' + d.error);
+}
+async function sendBroadcast(){
+  const text = document.getElementById('bcText').value.trim();
+  if (!text) return alert('စာ ရေးပါ');
+  if (!confirm('User အားလုံးဆီ ပို့မယ်။ သေချာလား?')) return;
+  const d = await api('/api/admin/broadcast', {method:'POST', body: JSON.stringify({text})});
+  if (d.success){ alert('✅ '+d.sent+' ယောက်ဆီ ပို့ပြီး'); document.getElementById('bcText').value=''; }
+  else alert('❌ ' + d.error);
+}
+
+let bannerData = [];
+async function loadBanners(){
+  bannerData = await api('/api/admin/banners');
+  document.getElementById('bannerList').innerHTML = bannerData.map((b,i)=>
+    '<div class="prod-row" style="grid-template-columns:1fr 1fr">' +
+    '<input value="'+b.title+'" onchange="bannerData['+i+'].title=this.value" placeholder="Title">' +
+    '<input value="'+b.subtitle+'" onchange="bannerData['+i+'].subtitle=this.value" placeholder="Subtitle">' +
+    '</div>'
+  ).join('');
+}
+async function saveBanners(){
+  const d = await api('/api/admin/banners', {method:'POST', body: JSON.stringify({banners:bannerData})});
+  if (d.success) alert('✅ သိမ်းပြီး'); else alert('❌ ' + d.error);
+}
+
+async function approveDep(id){ await api('/api/admin/approve-deposit',{method:'POST',body:JSON.stringify({depositId:id})}); loadDeps(); loadDash(); loadUsers(); }
+async function rejectDep(id){ if(!confirm('Reject?')) return; await api('/api/admin/reject-deposit',{method:'POST',body:JSON.stringify({depositId:id})}); loadDeps(); loadDash(); }
+async function updateOrd(id, status){
+  if (status === 'rejected' && !confirm('User ဆီ ငွေပြန်အမ်းမယ်။ သေချာလား?')) return;
+  await api('/api/admin/update-order-status',{method:'POST',body:JSON.stringify({orderId:id,status})});
+  loadOrds(); loadDash();
+}
+
+async function loadBackupConfig(){
+  try {
+    const c = await api('/api/admin/backup-config');
+    document.getElementById('bkOwner').value = c.owner || '';
+    document.getElementById('bkRepo').value = c.repo || '';
+    document.getElementById('bkBranch').value = c.branch || 'main';
+    document.getElementById('bkInterval').value = c.intervalMin || 5;
+    const st = document.getElementById('bkStatus');
+    const btn = document.getElementById('bkToggleBtn');
+    if (c.enabled && c.hasToken) {
+      const last = c.lastBackup ? new Date(c.lastBackup).toLocaleString() : 'Never';
+      st.innerHTML = '<span style="color:#22c55e;font-weight:bold">🟢 Enabled</span> · ' + last;
+      btn.textContent = 'Disable'; btn.style.background = '#ef4444';
+    } else {
+      st.innerHTML = '<span style="color:#94a3b8">⚪ Disabled</span>';
+      btn.textContent = 'Enable'; btn.style.background = '#22c55e';
+    }
+  } catch(e){}
+}
+async function toggleBackup(){
+  const c = await api('/api/admin/backup-config');
+  const enabled = !c.enabled;
+  if (enabled && (!c.hasToken || !c.owner || !c.repo)) return alert('Token + Owner + Repo ဖြည့်ပါ');
+  const d = await api('/api/admin/backup-config', {method:'POST', body: JSON.stringify({enabled})});
+  if (d.success) { loadBackupConfig(); alert(enabled ? '🟢 ON' : '🔴 OFF'); }
+}
+async function saveBackupConfig(){
+  const body = {
+    token: document.getElementById('bkToken').value.trim(),
+    owner: document.getElementById('bkOwner').value.trim(),
+    repo: document.getElementById('bkRepo').value.trim(),
+    branch: document.getElementById('bkBranch').value.trim() || 'main',
+    intervalMin: Number(document.getElementById('bkInterval').value) || 5
+  };
+  const d = await api('/api/admin/backup-config', {method:'POST', body: JSON.stringify(body)});
+  if (d.success) { alert('✅ Saved'); document.getElementById('bkToken').value=''; loadBackupConfig(); }
+  else alert('❌ Failed');
+}
+async function backupNow(){
+  if (!confirm('Backup now?')) return;
+  const d = await api('/api/admin/backup-now', {method:'POST'});
+  if (d.success) { alert('✅ ' + d.sha.substring(0,7)); loadBackupConfig(); }
+  else alert('❌ ' + (d.error || 'Failed'));
+}
+async function restoreNow(){
+  if (!confirm('⚠️ Overwrite current data?')) return;
+  const d = await api('/api/admin/restore', {method:'POST'});
+  if (d.success) { alert('✅ Restored'); location.reload(); }
+  else alert('❌ Failed');
+}
+
+
+// ===== WEBSITE EDITOR =====
+let wsConfig = {};
+
+async function loadWebsiteConfig() {
+  try {
+    const c = await api('/api/admin/config');
+    wsConfig = c;
+    // Site
+    document.getElementById('ws_siteName').value = c.siteName || '';
+    document.getElementById('ws_logoUrl').value = c.logoUrl || '';
+    document.getElementById('ws_heroTitle').value = c.hero?.title || '';
+    document.getElementById('ws_heroSubtitle').value = c.hero?.subtitle || '';
+    document.getElementById('ws_videoUrl').value = c.hero?.videoUrl || '';
+    document.getElementById('ws_musicUrl').value = c.musicUrl || '';
+    if (c.musicUrl) {
+      const pv = document.getElementById('musicPreview');
+      const pl = document.getElementById('musicPreviewPlayer');
+      if (pv && pl) { pv.classList.add('show'); pl.src = c.musicUrl; }
+    }
+    document.getElementById('ws_themePrimary').value = c.theme?.primary || '';
+    document.getElementById('ws_themeSecondary').value = c.theme?.secondary || '';
+    // Labels
+    const L = c.labels || {};
+    document.getElementById('ws_lblBalance').value = L.balance || '';
+    document.getElementById('ws_lblGames').value = L.gamesTitle || '';
+    document.getElementById('ws_lblSearch').value = L.searchPlaceholder || '';
+    document.getElementById('ws_lblPopular').value = L.popularTitle || '';
+    document.getElementById('ws_lblPayment').value = L.paymentTitle || '';
+    // Social
+    const S = c.social || {};
+    document.getElementById('ws_fb').value = S.facebook || '';
+    document.getElementById('ws_tt').value = S.tiktok || '';
+    document.getElementById('ws_wa').value = S.whatsapp || '';
+    document.getElementById('ws_vb').value = S.viber || '';
+    document.getElementById('ws_tg').value = S.telegram || '';
+    // Legal
+    document.getElementById('ws_terms').value = c.terms || '';
+    document.getElementById('ws_privacy').value = c.privacy || '';
+    renderPayments();
+    renderBadges();
+    renderFaq();
+  } catch(e){ console.log('loadWebsiteConfig err', e.message); }
+}
+
+function renderPayments() {
+  const list = wsConfig.payments || [];
+  if (!list.length) { document.getElementById('ws_paymentList').innerHTML = '<p class="empty">Payment method မရှိပါ</p>'; return; }
+  document.getElementById('ws_paymentList').innerHTML = list.map((p, i) => {
+    const preview = p.image
+      ? '<img src="' + p.image + '" style="width:50px;height:50px;object-fit:contain;border-radius:8px;background:#fff;padding:3px">'
+      : '<div style="width:50px;height:50px;border-radius:8px;background:#334155;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;color:#94a3b8">' + (p.short || '?') + '</div>';
+    return '<div class="admin-item" style="flex-wrap:wrap;gap:8px">' +
+      '<div style="display:flex;align-items:center;gap:10px;flex:1">' +
+        preview +
+        '<div><b style="color:#38bdf8">' + p.name + '</b><div class="meta">Short: ' + (p.short || '-') + ' · Class: ' + (p.cls || '-') + '</div></div>' +
+      '</div>' +
+      '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
+        '<button class="upload-btn" style="padding:6px 12px;font-size:11px" onclick="pickPayImg(' + i + ')">📸 ပုံ</button>' +
+        '<button class="btn red" style="margin:0;padding:6px 12px;font-size:11px" onclick="delPayment(' + i + ')">✕</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+// Pick image for specific payment
+function pickPayImg(index) {
+  _uploadContext = 'payment';
+  window._payIndex = index;
+  const inp = ensureFileInput();
+  inp.accept = 'image/*';
+  inp.value = '';
+  inp.click();
+}
+
+async function setPaymentImage(index, url) {
+  if (!wsConfig.payments || !wsConfig.payments[index]) return;
+  wsConfig.payments[index].image = url;
+  const d = await api('/api/admin/config/section', { method: 'POST', body: JSON.stringify({ section: 'payments', value: wsConfig.payments }) });
+  if (d.success) { alert('✅ Payment ပုံ သိမ်းပြီး'); renderPayments(); }
+  else alert('❌ Failed');
+}
+async function addPayment() {
+  const name = document.getElementById('ws_payName').value.trim();
+  const short = document.getElementById('ws_payShort').value.trim();
+  const cls = document.getElementById('ws_payCls').value.trim();
+  if (!name || !short) return alert('Name + Short ဖြည့်ပါ');
+  if (!wsConfig.payments) wsConfig.payments = [];
+  wsConfig.payments.push({ name, short, cls: cls || 'kbz' });
+  const d = await api('/api/admin/config/section', {method:'POST', body: JSON.stringify({section:'payments', value: wsConfig.payments})});
+  if (d.success) {
+    alert('✅ ထည့်ပြီး');
+    ['ws_payName','ws_payShort','ws_payCls'].forEach(id => document.getElementById(id).value = '');
+    renderPayments();
+  }
+}
+async function delPayment(i) {
+  if (!confirm('ဖျက်မှာလား?')) return;
+  wsConfig.payments.splice(i, 1);
+  const d = await api('/api/admin/config/section', {method:'POST', body: JSON.stringify({section:'payments', value: wsConfig.payments})});
+  if (d.success) renderPayments();
+}
+
+function renderBadges() {
+  const list = wsConfig.trustBadges || [];
+  document.getElementById('ws_badgeList').innerHTML = list.map((b, i) =>
+    '<div class="admin-item"><div><b style="color:#38bdf8">' + b.icon + ' ' + b.text + '</b></div>' +
+    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delBadge(' + i + ')">✕</button></div>'
+  ).join('') || '<p class="empty">Badge မရှိပါ</p>';
+}
+async function addBadge() {
+  const icon = document.getElementById('ws_badgeIcon').value.trim() || '✅';
+  const text = document.getElementById('ws_badgeText').value.trim();
+  if (!text) return alert('Text ဖြည့်ပါ');
+  if (!wsConfig.trustBadges) wsConfig.trustBadges = [];
+  wsConfig.trustBadges.push({ icon, text });
+  const d = await api('/api/admin/config/section', {method:'POST', body: JSON.stringify({section:'trustBadges', value: wsConfig.trustBadges})});
+  if (d.success) { document.getElementById('ws_badgeText').value = ''; renderBadges(); }
+}
+async function delBadge(i) {
+  if (!confirm('ဖျက်မှာလား?')) return;
+  wsConfig.trustBadges.splice(i, 1);
+  const d = await api('/api/admin/config/section', {method:'POST', body: JSON.stringify({section:'trustBadges', value: wsConfig.trustBadges})});
+  if (d.success) renderBadges();
+}
+
+function renderFaq() {
+  const list = wsConfig.faq || [];
+  document.getElementById('ws_faqList').innerHTML = list.map((f, i) =>
+    '<div class="admin-item"><div><b style="color:#38bdf8">' + f.q + '</b><div class="meta">' + String(f.a).substring(0, 80) + '</div></div>' +
+    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delFaq(' + i + ')">✕</button></div>'
+  ).join('') || '<p class="empty">FAQ မရှိပါ</p>';
+}
+async function addFaq() {
+  const q = document.getElementById('ws_faqQ').value.trim();
+  const a = document.getElementById('ws_faqA').value.trim();
+  if (!q || !a) return alert('Q + A ဖြည့်ပါ');
+  if (!wsConfig.faq) wsConfig.faq = [];
+  wsConfig.faq.push({ q, a });
+  const d = await api('/api/admin/config/section', {method:'POST', body: JSON.stringify({section:'faq', value: wsConfig.faq})});
+  if (d.success) {
+    alert('✅ ထည့်ပြီး');
+    document.getElementById('ws_faqQ').value = '';
+    document.getElementById('ws_faqA').value = '';
+    renderFaq();
+  }
+}
+async function delFaq(i) {
+  if (!confirm('ဖျက်မှာလား?')) return;
+  wsConfig.faq.splice(i, 1);
+  const d = await api('/api/admin/config/section', {method:'POST', body: JSON.stringify({section:'faq', value: wsConfig.faq})});
+  if (d.success) renderFaq();
+}
+
+async function saveSiteInfo() {
+  const name = document.getElementById('ws_siteName').value.trim();
+  const logo = document.getElementById('ws_logoUrl').value.trim();
+  const hero = {
+    title: document.getElementById('ws_heroTitle').value.trim(),
+    subtitle: document.getElementById('ws_heroSubtitle').value.trim(),
+    videoUrl: document.getElementById('ws_videoUrl').value.trim()
+  };
+  const theme = {
+    primary: document.getElementById('ws_themePrimary').value.trim() || '#38bdf8',
+    secondary: document.getElementById('ws_themeSecondary').value.trim() || '#a855f7'
+  };
+  let ok = 0;
+  if (name) { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'siteName', value:name})}); if (r.success) ok++; }
+  if (logo) { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'logoUrl', value:logo})}); if (r.success) ok++; }
+  const music = document.getElementById('ws_musicUrl').value.trim();
+  { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'musicUrl', value:music})}); if (r.success) ok++; }
+  { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'hero', value:hero})}); if (r.success) ok++; }
+  { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'theme', value:theme})}); if (r.success) ok++; }
+  alert('✅ Site info သိမ်းပြီး (' + ok + '/4)');
+}
+async function saveLabels() {
+  const labels = {
+    balance: document.getElementById('ws_lblBalance').value,
+    gamesTitle: document.getElementById('ws_lblGames').value,
+    searchPlaceholder: document.getElementById('ws_lblSearch').value,
+    popularTitle: document.getElementById('ws_lblPopular').value,
+    paymentTitle: document.getElementById('ws_lblPayment').value
+  };
+  const d = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'labels', value: labels})});
+  if (d.success) alert('✅ Labels သိမ်းပြီး'); else alert('❌ Failed');
+}
+async function saveSocial() {
+  const social = {
+    facebook: document.getElementById('ws_fb').value,
+    tiktok: document.getElementById('ws_tt').value,
+    whatsapp: document.getElementById('ws_wa').value,
+    viber: document.getElementById('ws_vb').value,
+    telegram: document.getElementById('ws_tg').value
+  };
+  const d = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'social', value: social})});
+  if (d.success) alert('✅ Social သိမ်းပြီး'); else alert('❌ Failed');
+}
+async function saveLegal2() {
+  const terms = document.getElementById('ws_terms').value;
+  const privacy = document.getElementById('ws_privacy').value;
+  const r1 = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'terms', value:terms})});
+  const r2 = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'privacy', value:privacy})});
+  if (r1.success && r2.success) alert('✅ Legal သိမ်းပြီး'); else alert('❌ Failed');
+}
+
+// Hook tab
+const _origTab2 = tab;
+tab = function(name, btn){
+  _origTab2(name, btn);
+  if (name==='site') loadWebsiteConfig();
+};
+
+
+// ===== IMAGE UPLOAD SYSTEM =====
+let _hiddenFileInput = null;
+let _uploadContext = null;
+
+function ensureFileInput() {
+  if (_hiddenFileInput) return _hiddenFileInput;
+  _hiddenFileInput = document.createElement('input');
+  _hiddenFileInput.type = 'file';
+  _hiddenFileInput.accept = 'image/*,video/mp4';
+  _hiddenFileInput.style.display = 'none';
+  _hiddenFileInput.addEventListener('change', onFileSelected);
+  document.body.appendChild(_hiddenFileInput);
+  return _hiddenFileInput;
+}
+
+function pickFile(context) {
+  _uploadContext = context;
+  const inp = ensureFileInput();
+  if (context === 'video') inp.accept = 'video/mp4,video/*';
+  else if (context === 'music') inp.accept = 'audio/mpeg,audio/mp3,audio/*';
+  else inp.accept = 'image/*';
+  inp.value = '';
+  inp.click();
+}
+
+function pickGameImg() {
+  _uploadContext = 'gameImg';
+  const inp = ensureFileInput();
+  inp.accept = 'image/*';
+  inp.value = '';
+  inp.click();
+}
+
+async function onFileSelected(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const maxSize = (_uploadContext === 'music' || _uploadContext === 'video') ? 5 * 1024 * 1024 : 3 * 1024 * 1024;
+  if (file.size > maxSize) { alert('❌ File အလွန်ကြီး (' + Math.round(maxSize/1024/1024) + 'MB အောက်သာ)'); return; }
+  const reader = new FileReader();
+  const prog = document.getElementById('uploadProgress');
+  const bar = document.getElementById('uploadProgressBar');
+  if (prog) { prog.classList.add('show'); bar.style.width = '30%'; }
+  reader.onload = async (ev) => {
+    const dataUrl = ev.target.result;
+    if (bar) bar.style.width = '70%';
+    try {
+      const r = await api('/api/admin/upload', { method: 'POST', body: JSON.stringify({ dataUrl }) });
+      if (bar) bar.style.width = '100%';
+      setTimeout(() => { if (prog) prog.classList.remove('show'); if (bar) bar.style.width = '0'; }, 400);
+      if (!r || !r.success) { alert('❌ Upload failed: ' + ((r && r.error) || 'Unknown')); return; }
+      handleUploadSuccess(r.url, _uploadContext);
+    } catch (err) {
+      if (prog) prog.classList.remove('show');
+      alert('❌ ' + err.message);
+    }
+  };
+  reader.readAsDataURL(file);
+}
+
+async function handleUploadSuccess(url, context) {
+  if (context === 'logo') {
+    const inp = document.getElementById('ws_logoUrl');
+    if (inp) inp.value = url;
+    const pv = document.getElementById('logoPreview');
+    const pi = document.getElementById('logoPreviewImg');
+    if (pi) pi.src = url;
+    if (pv) pv.classList.add('show');
+    alert('✅ Logo တင်ပြီး — Site Info Save နှိပ်ပါ');
+  } else if (context === 'video') {
+    const inp = document.getElementById('ws_videoUrl');
+    if (inp) inp.value = url;
+    alert('✅ Video တင်ပြီး — Site Info Save နှိပ်ပါ');
+  } else if (context === 'music') {
+    const inp = document.getElementById('ws_musicUrl');
+    if (inp) inp.value = url;
+    const pv = document.getElementById('musicPreview');
+    const pl = document.getElementById('musicPreviewPlayer');
+    if (pv && pl) { pv.classList.add('show'); pl.src = url; }
+    alert('✅ Music တင်ပြီး — Site Info Save နှိပ်ပါ');
+  } else if (context === 'gameImg') {
+    const inp = document.getElementById('giUrl');
+    if (inp) inp.value = url;
+    const pv = document.getElementById('giPreview');
+    const pi = document.getElementById('giPreviewImg');
+    if (pi) pi.src = url;
+    if (pv) pv.classList.add('show');
+    alert('✅ Game image တင်ပြီး — ဂိမ်းနာမည်ထည့်ပြီး Save နှိပ်ပါ');
+  } else if (context === 'manager') {
+    loadUploads();
+    alert('✅ Upload ပြီး');
+  } else if (context === 'productImg') {
+    if (_prodImgTarget) await setProdImage(_prodImgTarget, url);
+    _prodImgTarget = null;
+  } else if (context === 'payment') {
+    await setPaymentImage(window._payIndex, url);
+  }
+}
+
+function clearLogo() {
+  const inp = document.getElementById('ws_logoUrl');
+  if (inp) inp.value = '';
+  const pv = document.getElementById('logoPreview');
+  if (pv) pv.classList.remove('show');
+}
+function clearField(id) {
+  const el = document.getElementById(id);
+  if (el) el.value = '';
+}
+
+async function loadUploads() {
+  try {
+    const list = await api('/api/admin/uploads');
+    const grid = document.getElementById('uploadGrid');
+    if (!grid) return;
+    if (!list || !list.length) { grid.innerHTML = '<p class="empty" style="font-size:12px;grid-column:1/-1">ပုံ မရှိသေးပါ</p>'; return; }
+    grid.innerHTML = list.map(u =>
+      '<div class="upload-grid-item" title="Click to copy URL">' +
+      '<img src="' + u.url + '" onclick="copyUploadUrl(\'' + u.url + '\')">' +
+      '<button class="del" onclick="event.stopPropagation();delUpload(\'' + u.id + '\')">✕</button>' +
+      '</div>'
+    ).join('');
+  } catch (e) { console.log('loadUploads err', e.message); }
+}
+
+function copyUploadUrl(url) {
+  const full = location.origin + url;
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(full).then(() => alert('✅ URL ကူးပြီး:\n' + full)).catch(() => prompt('URL:', full));
+  } else prompt('URL:', full);
+}
+
+async function delUpload(id) {
+  if (!confirm('ပုံ ဖျက်မှာလား?')) return;
+  const r = await api('/api/admin/uploads/' + id, { method: 'DELETE' });
+  if (r.success) loadUploads(); else alert('❌ Failed');
+}
+
+// Hook tab switch to load uploads
+const _origTab3 = tab;
+tab = function(name, btn) {
+  _origTab3(name, btn);
+  if (name === 'site') {
+    setTimeout(() => {
+      loadUploads();
+      const logo = document.getElementById('ws_logoUrl');
+      if (logo && logo.value) {
+        const pv = document.getElementById('logoPreview');
+        const pi = document.getElementById('logoPreviewImg');
+        if (pi) pi.src = logo.value;
+        if (pv) pv.classList.add('show');
+      }
+    }, 300);
+  }
+};
+
+if (ap) showPanel();
+setTimeout(function(){ try { loadBackupConfig(); } catch(e){} }, 1200);
+</script>
+</body>
+</html>
