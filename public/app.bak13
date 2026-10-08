@@ -1515,8 +1515,6 @@ async function buyPremium(){
 
 // ===== BACKGROUND MUSIC PLAYER (Melody) =====
 let musicCtx = null;
-let _customMusicEl = null;
-let _customMusicReady = false;
 let musicPlaying = false;
 let musicTimer = null;
 let musicNodes = [];
@@ -1597,39 +1595,6 @@ function playMelody() {
 }
 
 function startMusic() {
-  // Try custom music URL first
-  const musicUrl = siteData && siteData.musicUrl;
-  if (musicUrl) {
-    try {
-      if (!_customMusicEl) {
-        _customMusicEl = new Audio(musicUrl);
-        _customMusicEl.loop = true;
-        _customMusicEl.volume = 0.3;
-        _customMusicEl.addEventListener('loadeddata', () => { _customMusicReady = true; });
-        _customMusicEl.addEventListener('error', () => {
-          console.log('Music load err — fallback to melody');
-          _customMusicEl = null;
-          startMelody();
-        });
-      }
-      _customMusicEl.play().then(() => {
-        musicPlaying = true;
-        updateMusicBtn();
-        showToast('🎵 Music On', 'info');
-      }).catch(e => {
-        console.log('Play err:', e.message);
-        // Fallback to melody
-        startMelody();
-      });
-      return;
-    } catch(e) {
-      console.log('Custom music err:', e.message);
-    }
-  }
-  startMelody();
-}
-
-function startMelody() {
   try {
     if (!musicCtx) musicCtx = new (window.AudioContext || window.webkitAudioContext)();
     if (musicCtx.state === 'suspended') musicCtx.resume();
@@ -1642,9 +1607,6 @@ function startMelody() {
 
 function stopMusic() {
   musicPlaying = false;
-  if (_customMusicEl) {
-    try { _customMusicEl.pause(); _customMusicEl.currentTime = 0; } catch(e){}
-  }
   if (musicTimer) { clearTimeout(musicTimer); musicTimer = null; }
   musicNodes.forEach(n => { try { n.stop(); } catch(e){} });
   musicNodes = [];

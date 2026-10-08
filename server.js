@@ -185,6 +185,7 @@ app.get('/api/site', (req, res) => res.json({
   adsBanner: db.config.adsBanner || {enabled:false,text:''},
   logoUrl: db.config.logoUrl || 'https://i.imgur.com/iRwIfqs.png',
   customSound: db.config.customSound || '',
+  musicUrl: db.config.musicUrl || '',
   hero: db.config.hero || {title:'Safe Zone Topup', subtitle:'⚡ Instant Delivery', videoUrl:''},
   theme: db.config.theme || {primary:'#38bdf8', secondary:'#a855f7'},
   payments: db.config.payments || [
@@ -790,7 +791,7 @@ app.post('/api/admin/upload', adminAuth, (req, res) => {
   const mime = m[1];
   const b64 = m[2];
   const size = b64.length * 0.75;
-  if (size > 3 * 1024 * 1024) return res.status(400).json({error:'ပုံ 3MB အောက်သာ'});
+  if (size > 5 * 1024 * 1024) return res.status(400).json({error:'File 5MB အောက်သာ'});
   if (!db.uploads) db.uploads = {};
   const id = 'u' + Date.now() + Math.random().toString(36).substring(2, 6);
   db.uploads[id] = { mime, data: b64, size: Math.floor(size), at: Date.now() };
