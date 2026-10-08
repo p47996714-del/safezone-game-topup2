@@ -1115,19 +1115,21 @@ function openGameProducts(game){
 function openModal(id){
   selected = products.find(p=>p.id===id);
   closeModal('productModal');
-  if (selected.game === 'App Premium') {
-    // Skip order modal — go straight to confirm
-    buyPremium();
-    return;
-  }
   document.getElementById('mTitle').textContent = selected.name + ' - ' + selected.price.toLocaleString() + ' Ks';
-  document.getElementById('playerId').value = '';
-  document.getElementById('playerId').placeholder = 'Player ID / UID';
+  const pid = document.getElementById('playerId');
   const sf = document.getElementById('serverIdField');
-  const needsServer = ['Mobile Legends', 'Magic Chess'].includes(selected.game);
-  if (sf) sf.style.display = needsServer ? 'block' : 'none';
-  const si = document.getElementById('serverId');
-  if (si) si.value = '';
+  if (selected.game === 'App Premium') {
+    pid.value = '';
+    pid.placeholder = 'Email / Telegram / Phone';
+    if (sf) sf.style.display = 'none';
+  } else {
+    pid.value = '';
+    pid.placeholder = 'Player ID / UID';
+    const needsServer = ['Mobile Legends', 'Magic Chess'].includes(selected.game);
+    if (sf) sf.style.display = needsServer ? 'block' : 'none';
+    const si = document.getElementById('serverId');
+    if (si) si.value = '';
+  }
   document.getElementById('orderModal').classList.add('show');
 }
 function closeModal(id){ document.getElementById(id).classList.remove('show'); }
@@ -1136,23 +1138,49 @@ async function submitOrder(){
   const playerId = document.getElementById('playerId').value.trim();
   const sf = document.getElementById('serverIdField');
   const serverId = (sf && sf.style.display !== 'none') ? document.getElementById('serverId').value.trim() : '';
+  const isPremium = selected && selected.game === 'App Premium';
 
-  if (!playerId) return showToast('Player ID ဖြည့်ပါ', 'error');
-  if (sf && sf.style.display !== 'none' && !serverId) return showToast('Server ID ဖြည့်ပါ', 'error');
+  if (!playerId) return showToast(isPremium ? 'Email / Telegram ဖြည့်ပါ' : 'Player ID ဖြည့်ပါ', 'error');
+  if (!isPremium && sf && sf.style.display !== 'none' && !serverId) return showToast('Server ID ဖြည့်ပါ', 'error');
 
   if ((userData.balance || 0) < selected.price) {
-    return showToast('❌ Balance မလုံလောက်ပါ', 'error');
+    return showToast('❌ Balance မလုံလောက်ပါ (' + selected.price.toLocaleString() + ' Ks လိုတယ်)', 'error');
   }
 
-  if (!confirm('✅ Order တင်မလား?\n\n' + selected.game + ' - ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks\n🆔 ' + playerId + (serverId ? ' • S:' + serverId : '') + '\n\nBalance ဖြတ်မယ်')) return;
+  if (!confirm('✅ Order တင်မလား?\n\n' + selected.game + ' - ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks\n\nBalance ဖြတ်မယ်')) return;
 
-  const d = await api('/api/order', { method: 'POST', body: JSON.stringify({ productId: selected.id, playerId: playerId, serverId: serverId }) });
+  const body = { productId: selected.id, playerId: playerId };
+  if (!isPremium) body.serverId = serverId;
+
+  const d = await api('/api/order', { method: 'POST', body: JSON.stringify(body) });
   if (!d.success) { errorSound(); return showToast('❌ ' + d.error, 'error'); }
+
   successSound(); haptic(100); confetti();
   sendPush('Order တင်ပြီး', selected.game + ' - ' + selected.name);
   showToast('✅ Order တင်ပြီးပါပြီ', 'success');
   closeModal('orderModal');
   loadMe(); loadOrders();
+
+  if (isPremium) {
+    // Auto redirect to chat
+    setTimeout(function(){
+      const navBtns = document.querySelectorAll('.nav-item');
+      switchTab('chat', navBtns[3]);
+      setTimeout(function(){
+        const inp = document.getElementById('chatInput');
+        if (inp) {
+          inp.value = '📱 App Premium ဝယ်ပြီးပါပြီ\n\n' +
+            '🎁 ' + selected.name + '\n' +
+            '💵 ' + selected.price.toLocaleString() + ' Ks\n' +
+            '📧 ' + playerId + '\n' +
+            '🔖 Order: ' + d.orderId + '\n\n' +
+            'Admin ရေ — ဆောင်ရွက်ပေးပါ 🙏';
+          inp.focus();
+        }
+        showToast('📩 ➤ နှိပ်ပြီး Admin ဆီ ပို့ပါ', 'info');
+      }, 500);
+    }, 400);
+  }
 }
 async function reorder(orderId){
   if (!confirm('ဒီ order ကို ပြန်မှာမှာလား?')) return;
@@ -1325,42 +1353,6 @@ function confetti(){
 
 function openFaq(){ switchTab('faq', document.querySelector('.nav-item')); }
 function openStats(){ switchTab('analytics', document.querySelector('.nav-item')); }
-async function buyPremium(){
-  if (!selected) return;
-  if ((userData.balance || 0) < selected.price) {
-    errorSound();
-    return showToast('❌ Balance မလုံလောက်ပါ (' + selected.price.toLocaleString() + ' Ks လိုတယ်)', 'error');
-  }
-  if (!confirm('📱 App Premium ဝယ်မယ်\n\n' +
-    '🎁 ' + selected.name + '\n' +
-    '💵 ' + selected.price.toLocaleString() + ' Ks\n\n' +
-    'Balance ဖြတ်ပြီး Admin ဆီ ပို့မယ်\n\nOK နှိပ်ရင် အတည်ပြုမယ်')) return;
-
-  showToast('⏳ Order တင်နေတယ်...', 'info');
-
-  const d = await api('/api/order', { method: 'POST', body: JSON.stringify({ productId: selected.id, playerId: 'App Premium Buy' }) });
-  if (!d.success) { errorSound(); return showToast('❌ ' + d.error, 'error'); }
-
-  successSound(); haptic(100); confetti();
-  sendPush('Order တင်ပြီး', selected.game + ' - ' + selected.name);
-  showToast('✅ Balance ဖြတ်ပြီး — Admin ဆီ ပို့မယ်', 'success');
-  loadMe(); loadOrders();
-
-  // Auto go to chat
-  setTimeout(function(){
-    const navBtns = document.querySelectorAll('.nav-item');
-    switchTab('chat', navBtns[3]);
-    setTimeout(function(){
-      const inp = document.getElementById('chatInput');
-      if (inp) {
-        inp.value = '📱 App Premium ဝယ်ပြီးပါပြီ\n\n🎁 ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks\n🔖 Order: ' + d.orderId + '\n\nAdmin ရေ — ဆောင်ရွက်ပေးပါ 🙏';
-        inp.focus();
-      }
-      showToast('📩 ➤ နှိပ်ပြီး Admin ဆီ ပို့ပါ', 'info');
-    }, 500);
-  }, 500);
-}
-
 async function logout(){
   if (!confirm('Logout လုပ်မှာသေချာလား?')) return;
   await api('/api/logout', {method:'POST'});
