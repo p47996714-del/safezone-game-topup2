@@ -1,4 +1,4 @@
-const CACHE = 'safezone-v8';
+const CACHE = 'safezone-v10';
 const ASSETS = ['/', '/app.html', '/admin.html', '/offline.html', '/manifest.json', '/admin-manifest.json'];
 
 self.addEventListener('install', e => {

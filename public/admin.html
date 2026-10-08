@@ -1389,22 +1389,45 @@ window.addEventListener('appinstalled', function() {
   alert('✅ Admin App installed!');
 });
 async function installAdminPWA() {
-  // Already standalone?
   if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-    alert('\u2705 Admin Panel Install \u101C\u102F\u1015\u103A\u1015\u103C\u102E\u1038\u101E\u102B\u1038');
+    alert('✅ Admin Panel Install လုပ်ပြီးသား');
     return;
   }
-  // If native prompt available
   if (_adminDeferredPrompt) {
     _adminDeferredPrompt.prompt();
     _adminDeferredPrompt.userChoice.then(function(r) {
-      if (r.outcome === 'accepted') alert('\u2705 Install \u1015\u103C\u102E\u1038\u1015\u102B\u1015\u103C\u102E!');
+      if (r.outcome === 'accepted') alert('✅ Install ပြီးပါပြီ!');
       _adminDeferredPrompt = null;
     });
     return;
   }
-  // Show custom modal
-  showAdminInstallModal();
+  // Native prompt not ready — check SW status
+  if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+    // SW ready but prompt didn't fire — show manual guide
+    showManualInstallGuide();
+  } else {
+    // SW not ready — wait and retry
+    alert('⏳ Chrome က Install Prompt ပြင်ဆင်နေတယ်...\n\n1. ၁၀ စက္ကန့် စောင့်ပါ\n2. Install ပြန်နှိပ်\n\nဒါမှမဟုတ်:\n\nChrome ⋮ Menu → "Install app"');
+  }
+}
+function showManualInstallGuide() {
+  var old = document.getElementById('adminInstallModal');
+  if (old) old.remove();
+  var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+  var modal = document.createElement('div');
+  modal.id = 'adminInstallModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:flex-end;justify-content:center';
+  var steps = isIOS 
+    ? '<div style="margin-bottom:14px"><b style="color:#38bdf8">1.</b> Safari ဖွင့်ပါ</div><div style="margin-bottom:14px"><b style="color:#38bdf8">2.</b> Share (□↑) နှိပ်ပါ</div><div style="margin-bottom:14px"><b style="color:#38bdf8">3.</b> "Add to Home Screen" ရွေးပါ</div><div><b style="color:#38bdf8">4.</b> "Add" နှိပ်ပါ</div>'
+    : '<div style="margin-bottom:14px"><b style="color:#38bdf8">1.</b> Chrome ⋮ Menu ကို နှိပ်ပါ</div><div style="margin-bottom:14px"><b style="color:#38bdf8">2.</b> "Install app" ကို ရွေးပါ</div><div style="margin-bottom:14px"><b style="color:#38bdf8">3.</b> "Install" နှိပ်ပါ</div><div style="color:#22c55e;font-size:12px;margin-top:10px">✅ ဒါဆို Home Screen မှာ icon ပေါ်လာမယ်</div>';
+  modal.innerHTML = '<div style="background:#1e293b;padding:25px;border-radius:24px 24px 0 0;width:100%;max-width:500px">' +
+    '<div style="font-size:60px;text-align:center;margin-bottom:15px">📱</div>' +
+    '<div style="font-size:18px;font-weight:bold;color:#a855f7;text-align:center;margin-bottom:20px">' + (isIOS ? 'iPhone Install' : 'Android Install') + '</div>' +
+    '<div style="background:rgba(15,23,42,0.6);padding:16px;border-radius:14px">' + steps + '</div>' +
+    '<button onclick="document.getElementById('adminInstallModal').remove()" style="width:100%;padding:14px;background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;border:none;border-radius:14px;font-weight:bold;font-size:15px;cursor:pointer;margin-top:20px;font-family:inherit">✅ နားလည်ပါပြီ</button>' +
+    '</div>';
+  document.body.appendChild(modal);
+  modal.addEventListener('click', function(e) { if (e.target === modal) modal.remove(); });
 }
 function showAdminInstallModal() {
   var old = document.getElementById('adminInstallModal');
