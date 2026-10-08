@@ -1083,6 +1083,7 @@ async function loadSite(){
     dot.className = 'dot' + (i===0?' active':'');
     dotsBox.appendChild(dot);
   });
+  updateSpinVisibility();
   document.getElementById('payName').textContent = siteData.payName + ' — ' + siteData.payNumber;
   loadAdsBanner();
   const pays = (siteData.payments && siteData.payments.length) ? siteData.payments : [
@@ -1763,7 +1764,28 @@ async function shareOrder(orderId){
 
 var _spinPrize = 0;
 var _spinCanPlay = true;
+
+function renderSpinWheel() {
+  var cfg = (siteData && siteData.spinConfig) || {};
+  var prizes = (cfg.prizes && cfg.prizes.length) ? cfg.prizes : [
+    { value: 50 }, { value: 100 }, { value: 200 }, { value: 500 },
+    { value: 1000 }, { value: 2000 }, { value: 5000 }, { value: 0 }
+  ];
+  var n = prizes.length;
+  if (n < 2) n = 8;
+  var angle = 360 / n;
+  var colors = ['#ef4444','#f59e0b','#22c55e','#3b82f6','#a855f7','#ec4899','#38bdf8','#10b981','#f43f5e','#14b8a6'];
+  var grad = 'conic-gradient(';
+  for (var i = 0; i < n; i++) {
+    grad += colors[i % colors.length] + ' ' + (i * angle) + 'deg ' + ((i + 1) * angle) + 'deg,';
+  }
+  grad = grad.slice(0, -1) + ')';
+  var wheel = document.getElementById('spinWheel');
+  if (wheel) wheel.style.background = grad;
+}
+
 function openSpinWheel(){
+  renderSpinWheel();
   document.getElementById('spinResult').textContent = 'Spin နှိပ်ပြီး ကံစမ်းပါ';
   document.getElementById('spinWheel').style.transform = 'rotate(0deg)';
   document.getElementById('spinBtn').textContent = '🎰 Spin!';
@@ -1798,6 +1820,18 @@ async function doSpin(){
   }
   btn.textContent = 'Close';
   btn.onclick = function(){ closeModal('spinModal'); _spinCanPlay = true; };
+}
+
+
+function updateSpinVisibility() {
+  var cfg = (siteData && siteData.spinConfig) || {};
+  var cards = document.querySelectorAll('.quick-card');
+  for (var i = 0; i < cards.length; i++) {
+    if (cards[i].innerHTML.indexOf('🎰') > -1) {
+      cards[i].style.display = (cfg.enabled === false) ? 'none' : '';
+      break;
+    }
+  }
 }
 
 async function logout(){

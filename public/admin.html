@@ -381,7 +381,28 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     <div class="upload-progress-bar" id="uploadProgressBar"></div>
   </div>
   <div class="upload-grid" id="uploadGrid"></div>
-</div>
+
+<div class="section" id="spinConfigSection">
+  <h3>🎰 Lucky Spin Configuration</h3>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:12px">
+    <div>
+      <div style="font-weight:bold;font-size:14px">Spin Status</div>
+      <div id="spinStatus" style="font-size:12px;color:#94a3b8;margin-top:3px">Checking...</div>
+    </div>
+    <button id="spinToggleBtn" onclick="toggleSpin()" style="padding:10px 18px;background:#334155;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-family:inherit">...</button>
+  </div>
+  <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">Prizes (Value + Weight):</div>
+  <div id="spinPrizesList"></div>
+  <div class="row" style="margin-top:10px">
+    <input id="spinNewValue" type="number" placeholder="Value (Ks)" style="max-width:120px">
+    <input id="spinNewWeight" type="number" placeholder="Weight" value="10" style="max-width:120px">
+    <button onclick="addSpinPrize()">➕ Add</button>
+  </div>
+  <div class="row" style="margin-top:10px">
+    <button onclick="saveSpinConfig()">💾 Save Spin Config</button>
+  </div>
+  <p style="font-size:11px;color:#64748b;margin-top:8px">💡 Weight များလေ ရနိုင်ခြေ များလေ · Value 0 = "မရ"</p>
+</div></div>
 
 <div class="panel" id="settings">
     <div class="section" style="border:2px solid #ef4444">
@@ -1249,6 +1270,7 @@ const _origTab2 = tab;
 tab = function(name, btn){
   _origTab2(name, btn);
   if (name==='site') loadWebsiteConfig();
+  loadSpinConfig();
 };
 
 
@@ -1406,6 +1428,81 @@ tab = function(name, btn) {
     }, 300);
   }
 };
+
+
+// ===== LUCKY SPIN CONFIG =====
+var _spinConfig = null;
+async function loadSpinConfig() {
+  try {
+    var c = await api('/api/admin/config');
+    _spinConfig = c.spinConfig || { enabled: true, prizes: [] };
+    if (!_spinConfig.prizes || !_spinConfig.prizes.length) {
+      _spinConfig.prizes = [
+        { value: 50, weight: 30 }, { value: 100, weight: 25 },
+        { value: 200, weight: 20 }, { value: 500, weight: 12 },
+        { value: 1000, weight: 8 }, { value: 2000, weight: 3 },
+        { value: 5000, weight: 1 }, { value: 0, weight: 1 }
+      ];
+    }
+    renderSpinConfig();
+  } catch(e) { console.log('loadSpinConfig err', e.message); }
+}
+function renderSpinConfig() {
+  var st = document.getElementById('spinStatus');
+  var btn = document.getElementById('spinToggleBtn');
+  if (!st || !btn) return;
+  if (_spinConfig.enabled === false) {
+    st.innerHTML = '<span style="color:#ef4444;font-weight:bold">🔴 ပိတ်ထားသည်</span>';
+    btn.textContent = '🟢 ဖွင့်မည်'; btn.style.background = '#22c55e';
+  } else {
+    st.innerHTML = '<span style="color:#22c55e;font-weight:bold">🟢 ဖွင့်ထားသည်</span>';
+    btn.textContent = '🔴 ပိတ်မည်'; btn.style.background = '#ef4444';
+  }
+  var list = document.getElementById('spinPrizesList');
+  if (!list) return;
+  var total = _spinConfig.prizes.reduce(function(s, p) { return s + (Number(p.weight) || 0); }, 0);
+  list.innerHTML = _spinConfig.prizes.map(function(p, i) {
+    var pct = total > 0 ? ((Number(p.weight) / total) * 100).toFixed(1) : 0;
+    var color = Number(p.value) === 0 ? '#ef4444' : '#22c55e';
+    return '<div class="admin-item" style="padding:8px">' +
+      '<div style="display:flex;gap:8px;align-items:center;flex:1;flex-wrap:wrap">' +
+        '<input type="number" value="' + p.value + '" onchange="updSpinPrize(' + i + ',\'value\',this.value)" style="width:80px;padding:8px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:12px">' +
+        '<span style="color:#64748b">×</span>' +
+        '<input type="number" value="' + p.weight + '" onchange="updSpinPrize(' + i + ',\'weight\',this.value)" style="width:60px;padding:8px;border-radius:8px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:12px">' +
+        '<span style="color:' + color + ';font-size:11px;font-weight:bold">' + pct + '%</span>' +
+      '</div>' +
+      '<button class="btn red" style="margin:0;padding:6px 10px;font-size:11px" onclick="delSpinPrize(' + i + ')">✕</button>' +
+    '</div>';
+  }).join('');
+}
+function updSpinPrize(i, field, val) {
+  if (!_spinConfig.prizes[i]) return;
+  _spinConfig.prizes[i][field] = Number(val) || 0;
+  renderSpinConfig();
+}
+function addSpinPrize() {
+  var v = Number(document.getElementById('spinNewValue').value) || 0;
+  var w = Number(document.getElementById('spinNewWeight').value) || 1;
+  _spinConfig.prizes.push({ value: v, weight: w });
+  document.getElementById('spinNewValue').value = '';
+  document.getElementById('spinNewWeight').value = '10';
+  renderSpinConfig();
+}
+function delSpinPrize(i) { _spinConfig.prizes.splice(i, 1); renderSpinConfig(); }
+async function toggleSpin() {
+  _spinConfig.enabled = !_spinConfig.enabled;
+  var d = await api('/api/admin/config/section', { method: 'POST', body: JSON.stringify({ section: 'spinConfig', value: _spinConfig }) });
+  if (d.success) { renderSpinConfig(); alert(_spinConfig.enabled ? '🟢 Spin ဖွင့်ပြီး' : '🔴 Spin ပိတ်ပြီး'); }
+  else alert('❌ ' + (d.error || 'Failed'));
+}
+async function saveSpinConfig() {
+  if (!_spinConfig.prizes || _spinConfig.prizes.length < 2) return alert('အနည်းဆုံး ၂ ခု ထည့်ပါ');
+  var totalW = _spinConfig.prizes.reduce(function(s, p) { return s + (Number(p.weight) || 0); }, 0);
+  if (totalW <= 0) return alert('Weight စုစုပေါင်း 0 ဖြစ်နေတယ်');
+  var d = await api('/api/admin/config/section', { method: 'POST', body: JSON.stringify({ section: 'spinConfig', value: _spinConfig }) });
+  if (d.success) alert('✅ Spin config သိမ်းပြီး');
+  else alert('❌ ' + (d.error || 'Failed'));
+}
 
 if (ap) showPanel();
 setTimeout(function(){ try { loadBackupConfig(); } catch(e){} }, 1200);

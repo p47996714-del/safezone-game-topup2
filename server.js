@@ -113,6 +113,19 @@ function defaultDB() {
         { q: '🆔 Server ID ဆိုတာ ဘာလဲ?', a: 'MLBB/Magic Chess မှာ Player ID နဲ့အတူ Server ID လိုအပ်ပါတယ်။' },
         { q: '💬 Live Chat ဖွင့်ချိန်?', a: '၂၄ နာရီ ဖွင့်ပါတယ်။' }
       ],
+      spinConfig: {
+        enabled: true,
+        prizes: [
+          { value: 50, weight: 30 },
+          { value: 100, weight: 25 },
+          { value: 200, weight: 20 },
+          { value: 500, weight: 12 },
+          { value: 1000, weight: 8 },
+          { value: 2000, weight: 3 },
+          { value: 5000, weight: 1 },
+          { value: 0, weight: 1 }
+        ]
+      },
       coupons: { 'WELCOME100': { amount: 100, uses: 1000, usesLeft: 1000, expires: 0 } }
     },
     banners: [
@@ -255,6 +268,7 @@ app.get('/api/site', (req, res) => res.json({
   logoUrl: db.config.logoUrl || 'https://i.imgur.com/iRwIfqs.png',
   customSound: db.config.customSound || '',
   musicUrl: db.config.musicUrl || '',
+  spinConfig: db.config.spinConfig || { enabled: true, prizes: [] },
   hero: db.config.hero || {title:'Safe Zone Topup', subtitle:'⚡ Instant Delivery', videoUrl:''},
   theme: db.config.theme || {primary:'#38bdf8', secondary:'#a855f7'},
   payments: db.config.payments || [
@@ -507,16 +521,20 @@ app.get('/api/admin/subscriptions', adminAuth, (req, res) => {
 
 
 app.post('/api/spin', auth, (req, res) => {
+  const cfg = db.config.spinConfig || {};
+  if (cfg.enabled === false) return res.status(400).json({ error: 'Spin ပိတ်ထားပါတယ်' });
+  const prizes = (cfg.prizes && cfg.prizes.length) ? cfg.prizes : [
+    { value: 50, weight: 30 }, { value: 100, weight: 25 }, { value: 200, weight: 20 },
+    { value: 500, weight: 12 }, { value: 1000, weight: 8 }, { value: 2000, weight: 3 },
+    { value: 5000, weight: 1 }, { value: 0, weight: 1 }
+  ];
   const today = new Date().toDateString();
-  if (req.user.lastSpin === today) {
-    return res.status(400).json({ error: 'ဒီနေ့ Spin လုပ်ပြီးပါပြီ' });
-  }
-  const prizes = [50, 100, 200, 500, 1000, 2000, 5000, 0];
-  const weights = [30, 25, 20, 12, 8, 3, 1, 1];
-  let r = Math.random() * 100, sum = 0, reward = 0;
-  for (let i = 0; i < prizes.length; i++) {
-    sum += weights[i];
-    if (r < sum) { reward = prizes[i]; break; }
+  if (req.user.lastSpin === today) return res.status(400).json({ error: 'ဒီနေ့ Spin လုပ်ပြီးပါပြီ' });
+  const totalWeight = prizes.reduce((s, p) => s + (Number(p.weight) || 0), 0);
+  let r = Math.random() * totalWeight, sum = 0, reward = 0;
+  for (const p of prizes) {
+    sum += Number(p.weight) || 0;
+    if (r < sum) { reward = Number(p.value) || 0; break; }
   }
   req.user.balance = (req.user.balance || 0) + reward;
   req.user.lastSpin = today;
