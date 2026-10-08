@@ -352,7 +352,7 @@ let allUsers = [], allOrders = [], selectedOrders = new Set();
 
 async function api(url, opts={}) {
   const r = await fetch(url, {...opts, headers:{'Content-Type':'application/json','x-admin-user':au,'x-admin-pass':ap, ...(opts.headers||{})}});
-  if (r.status === 401) { alert('Username/Password မှား'); localStorage.removeItem('adminP'); location.reload(); }
+  if (r.status === 401) { localStorage.removeItem("adminP"); localStorage.removeItem("adminU"); if (!window._alerted) { window._alerted = true; alert("Wrong. Click OK then enter admin/2102002"); } }
   return r.json();
 }
 function login(){
