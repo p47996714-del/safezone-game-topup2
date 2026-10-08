@@ -907,6 +907,126 @@ function showIOSHint() {
   }, 5000);
 }
 
+
+// ===== iOS DETECTION & SUPPORT =====
+function getIOSVersion() {
+  const m = navigator.userAgent.match(/OS (d+)_(d+)/);
+  if (!m) return null;
+  return { major: parseInt(m[1]), minor: parseInt(m[2]) };
+}
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+function isIOSModern() {
+  const v = getIOSVersion();
+  if (!v) return false;
+  return v.major >= 17 || (v.major === 16 && v.minor >= 4);
+}
+function isStandalone() {
+  return ('standalone' in window.navigator) && window.navigator.standalone;
+}
+function isIOSSafari() {
+  return isIOS() && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|EdgiOS/.test(navigator.userAgent);
+}
+
+// ===== iOS INSTALL GUIDE MODAL =====
+function showIOSGuide() {
+  const modal = document.createElement('div');
+  modal.id = 'iosGuideModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.3s';
+  const iosV = getIOSVersion();
+  const vText = iosV ? ('iOS ' + iosV.major + '.' + iosV.minor) : 'Unknown';
+  modal.innerHTML = `
+    <div style="background:#1e293b;padding:25px;border-radius:24px 24px 0 0;width:100%;max-width:500px;animation:slideUp 0.4s;border-top:1px solid #334155">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:60px;margin-bottom:10px">📱</div>
+        <div style="font-size:20px;font-weight:bold;color:#38bdf8">iPhone Install လုပ်ပါ</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:5px">${vText}</div>
+      </div>
+
+      <div style="background:rgba(15,23,42,0.6);padding:15px;border-radius:14px;margin-bottom:12px">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">1</div>
+          <div style="flex:1">
+            <div style="font-weight:bold;font-size:14px;color:#fff">Safari ကနေ ဒီ site ကို ဖွင့်ပါ</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:3px">Chrome iOS မှာ install လို့မရ</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">2</div>
+          <div style="flex:1">
+            <div style="font-weight:bold;font-size:14px;color:#fff">Share ခလုတ် (□↑) နှိပ်ပါ</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:3px">Safari အောက်ခြေမှာ ရှိပါတယ်</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">3</div>
+          <div style="flex:1">
+            <div style="font-weight:bold;font-size:14px;color:#fff">"Add to Home Screen" ရွေးပါ</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:3px">Menu ကို အောက်ဆွဲပြီး ရှာပါ</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">4</div>
+          <div style="flex:1">
+            <div style="font-weight:bold;font-size:14px;color:#fff">Home Screen က icon နှိပ် → အသုံးပြု</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:3px">App လို ဖွင့်လာမယ်</div>
+          </div>
+        </div>
+      </div>
+
+      ${isIOSModern() ? 
+        '<div style="background:rgba(34,197,94,0.1);padding:12px;border-radius:12px;border:1px solid #22c55e;font-size:12px;color:#86efac;margin-bottom:12px">✅ သင့် iOS က Push Notification support ရှိပါတယ်</div>' :
+        '<div style="background:rgba(245,158,11,0.1);padding:12px;border-radius:12px;border:1px solid #f59e0b;font-size:12px;color:#fcd34d;margin-bottom:12px">⚠️ iOS 16.4+ လိုပါတယ် — Update လုပ်ပါ (သို့) Telegram သုံးပါ</div>'
+      }
+
+      <button onclick="document.getElementById('iosGuideModal').remove()" style="width:100%;padding:14px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:14px;font-weight:bold;font-size:15px;cursor:pointer;margin-bottom:8px">✅ နားလည်ပါပြီ</button>
+
+      <div style="background:rgba(59,130,246,0.1);padding:12px;border-radius:12px;border:1px solid #3b82f6;font-size:12px;color:#93c5fd;text-align:center">
+        💡 <b>Alternative:</b> Telegram Bot မှာ Account ချိတ်ထားရင်<br>Notification ကို Telegram မှာ ရမယ်
+      </div>
+    </div>
+  `;
+  document.body.appendChild(modal);
+}
+
+// ===== iOS HINT (Auto-show) =====
+function showIOSHint() {
+  if (!isIOS()) return;
+  if (isStandalone()) return; // Already installed
+  if (localStorage.getItem('iosHintDismissed') === 'yes') return;
+  setTimeout(function() {
+    const hint = document.createElement('div');
+    hint.id = 'iosHint';
+    hint.style.cssText = 'position:fixed;bottom:90px;left:15px;right:15px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:14px 16px;border-radius:16px;z-index:9998;box-shadow:0 12px 30px rgba(0,0,0,0.4);animation:slideUp 0.5s;';
+    hint.innerHTML = '<div style="display:flex;align-items:center;gap:12px">' +
+      '<div style="font-size:28px">📱</div>' +
+      '<div style="flex:1">' +
+      '<div style="font-weight:bold;font-size:13px;margin-bottom:2px">iPhone Install လုပ်ပါ</div>' +
+      '<div style="font-size:11px;opacity:0.95">Home Screen မှာ App လို</div>' +
+      '</div>' +
+      '<button onclick="showIOSGuide();this.parentElement.parentElement.remove();localStorage.setItem(\'iosHintDismissed\',\'yes\')" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:6px 12px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:bold">ကြည့်မယ်</button>' +
+      '<button onclick="this.parentElement.parentElement.remove();localStorage.setItem(\'iosHintDismissed\',\'yes\')" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px">✕</button>' +
+      '</div>';
+    document.body.appendChild(hint);
+  }, 5000);
+}
+
+// ===== iOS PUSH INIT (with version check) =====
+async function initIOSPush() {
+  if (!isIOS()) return;
+  if (!isStandalone()) {
+    console.log('iOS: PWA install လိုတယ် — hint ပြမယ်');
+    return;
+  }
+  if (!isIOSModern()) {
+    console.log('iOS: 16.4+ လိုတယ်');
+    return;
+  }
+  // Modern iOS + Installed PWA — proceed with normal push
+  await initPushNotifications();
+}
+
 async function api(url, opts={}) {
   const r = await fetch(url, {...opts, headers: {...H, ...(opts.headers||{})}});
   if (r.status === 401) { localStorage.clear(); location.href='/'; return {error:'unauth'}; }
@@ -1550,6 +1670,9 @@ setInterval(quickCheck, 3000);
   requestPushPermission();
   setTimeout(startTour, 2500);
   setTimeout(initPushNotifications, 2000);
+  setTimeout(initIOSPush, 2500);
+  if (isIOS() && !isStandalone()) { const b = document.getElementById("iosInstallBtn"); if (b) b.style.display = "block"; }
+  showIOSHint();
   showIOSHint();
   setInterval(loadMe, 5000);
   setInterval(async () => {
