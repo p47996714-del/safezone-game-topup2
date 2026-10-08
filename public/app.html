@@ -133,37 +133,37 @@ body.light .faq-item{background:#fff}
 .faq-item summary::after{content:'＋';color:#38bdf8;font-size:18px;font-weight:bold}
 .faq-item[open] summary::after{content:'−'}
 .faq-item p{padding:0 16px 16px;color:#cbd5e1;font-size:13px;line-height:1.6}
+/* ===== MAINTENANCE — NICE DESIGN ===== */
+.maint{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%,#1e293b 0%,#0b1120 70%);z-index:99999;display:none;align-items:center;justify-content:center;padding:30px;text-align:center;flex-direction:column;overflow:hidden}
+.maint.show{display:flex}
+.maint::before{content:'';position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(245,158,11,0.15),transparent 70%);border-radius:50%;top:-150px;left:-150px;animation:maintFloat 8s ease-in-out infinite}
+.maint::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(239,68,68,0.12),transparent 70%);border-radius:50%;bottom:-120px;right:-120px;animation:maintFloat 10s ease-in-out infinite reverse}
+@keyframes maintFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(30px) scale(1.1)}}
 
+.maint-icon-wrap{position:relative;width:140px;height:140px;margin-bottom:25px;display:flex;align-items:center;justify-content:center}
+.maint-icon-ring{position:absolute;inset:0;border-radius:50%;border:3px dashed #f59e0b;animation:maintSpin 12s linear infinite}
+.maint-icon-ring-2{position:absolute;inset:15px;border-radius:50%;border:2px dotted #38bdf8;animation:maintSpin 8s linear infinite reverse}
+@keyframes maintSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
+.maint-icon{font-size:60px;animation:maintPulse 2s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(245,158,11,0.6))}
+@keyframes maintPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 
+.maint-title{font-size:26px;font-weight:bold;background:linear-gradient(135deg,#f59e0b,#ef4444,#ec4899);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:maintGrad 3s ease infinite;margin-bottom:12px;letter-spacing:0.5px}
+@keyframes maintGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
 
+.maint-sub{font-size:14px;color:#94a3b8;margin-bottom:20px;letter-spacing:1px}
 
+.maint-msg{color:#cbd5e1;font-size:15px;line-height:1.7;max-width:420px;padding:18px 22px;background:rgba(30,41,59,0.6);backdrop-filter:blur(10px);border-radius:16px;border:1px solid rgba(245,158,11,0.3);margin-bottom:25px;position:relative;z-index:1}
 
-50%{transform:translateY(30px) scale(1.1)}}
+.maint-dots{display:flex;gap:8px;margin-bottom:25px}
+.maint-dot{width:10px;height:10px;border-radius:50%;background:#334155;animation:maintDot 1.5s ease-in-out infinite}
+.maint-dot:nth-child(2){animation-delay:0.2s}
+.maint-dot:nth-child(3){animation-delay:0.4s}
+@keyframes maintDot{0%,100%{background:#334155;transform:scale(1)}50%{background:#f59e0b;transform:scale(1.3)}}
 
-
-
-
-to{transform:rotate(360deg)}}
-
-50%{transform:scale(1.15)}}
-
-
-50%{background-position:100% 50%}}
-
-
-
-
-
-
-
-
-
-50%{background:#f59e0b;transform:scale(1.3)}}
-
-
-
-
-
+.maint-info{padding:12px 20px;background:rgba(15,23,42,0.7);border-radius:12px;font-size:12px;color:#94a3b8;border:1px solid #334155;display:flex;align-items:center;gap:8px;position:relative;z-index:1}
+.maint-info-icon{font-size:14px;animation:maintSpin 2s linear infinite}
+.maint-refresh{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;padding:12px 25px;border-radius:12px;font-weight:bold;font-size:14px;border:none;cursor:pointer;margin-top:15px;box-shadow:0 8px 20px rgba(245,158,11,0.3);transition:transform 0.2s;position:relative;z-index:1;font-family:inherit}
+.maint-refresh:active{transform:scale(0.95)}
 .splash{position:fixed;inset:0;background:radial-gradient(circle at 50% 50%,#1e293b,#0b1120);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s,visibility 0.6s}
 .splash.hide{opacity:0;visibility:hidden}
 .splash-logo{font-size:0;line-height:0;animation:splashIn 1s ease-out;position:relative}
@@ -301,32 +301,13 @@ button.main:active{transform:scale(0.97)}
 .order-search input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 14px; }
 
 
-.maint{position:fixed;inset:0;background:#0b1120;z-index:99999;display:none;align-items:center;justify-content:center;padding:30px;flex-direction:column;text-align:center}
-.maint.show{display:flex}
-.maint-icon{font-size:70px;margin-bottom:20px;animation:maintPulse 2.5s ease-in-out infinite}
-@keyframes maintPulse{0%,100%{transform:scale(1);opacity:1}50%{transform:scale(1.1);opacity:0.8}}
-.maint-title{font-size:22px;font-weight:bold;color:#f59e0b;margin-bottom:10px}
-.maint-msg{color:#94a3b8;font-size:14px;line-height:1.6;max-width:320px;margin-bottom:25px}
-.maint-dots{display:flex;gap:8px;margin-bottom:20px}
-.maint-dot{width:8px;height:8px;border-radius:50%;background:#334155;animation:maintDot 1.4s ease-in-out infinite}
-.maint-dot:nth-child(2){animation-delay:0.2s}
-.maint-dot:nth-child(3){animation-delay:0.4s}
-@keyframes maintDot{0%,100%{background:#334155;transform:scale(1)}50%{background:#f59e0b;transform:scale(1.3)}}
-.maint-info{font-size:12px;color:#475569}
+/* ICON PULSE ANIMATION */
+.maint-icon{animation:maintIconPulse 2s ease-in-out infinite !important}
+@keyframes maintIconPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 15px rgba(245,158,11,0.5))}50%{transform:scale(1.15);filter:drop-shadow(0 0 30px rgba(245,158,11,0.9))}}
 
 </style>
 </head>
 <body>
-<div class="maint" id="maintOverlay">
-  <div class="maint-icon">🔧</div>
-  <div class="maint-title">ပြုပြင်နေပါသည်</div>
-  <div class="maint-dots">
-    <div class="maint-dot"></div><div class="maint-dot"></div><div class="maint-dot"></div>
-  </div>
-  <div class="maint-msg" id="maintOverlayMsg">မကြာမီ ပြန်လည်ဖွင့်ပေးပါမည်</div>
-  <div class="maint-info">ကျေးဇူးပြု၍ စောင့်ဆိုင်းပေးပါ</div>
-</div>
-
 
 <div class="splash" id="splash">
   <div class="splash-logo"><img src="https://i.imgur.com/iRwIfqs.png" alt="logo"></div>
@@ -335,7 +316,720 @@ button.main:active{transform:scale(0.97)}
   <div class="splash-loader"><div class="splash-bar"></div></div>
 </div>
 
+<div class="maint" id="maintOverlay">
+  <div class="maint-icon-wrap">
+    <div class="maint-icon-ring"></div>
+    <div class="maint-icon-ring-2"></div>
+    <div class="maint-icon">🔧</div>
+  </div>
+  <div class="maint-title">Website ပြုပြင်နေပါသည်</div>
+  <div class="maint-sub">MAINTENANCE MODE</div>
+  <div class="maint-dots">
+    <div class="maint-dot"></div>
+    <div class="maint-dot"></div>
+    <div class="maint-dot"></div>
+  </div>
+  <div class="maint-msg" id="maintOverlayMsg">မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။</div>
+  <div class="maint-info">
+    <span class="maint-info-icon">⏳</span>
+    <span>Auto-refresh — ၃၀ စက္ကန့် တစ်ခါ</span>
+  </div>
+  <button class="maint-refresh" onclick="location.reload()">🔄 Refresh Now</button>
+</div>
 
+<div class="header">
+  <div class="user-info">
+    <div class="avatar" id="avatar">P</div>
+    <div><div class="user-name" id="uName">User</div><div class="user-phone" id="uPhone">09xxxxxxxxx</div></div>
+  </div>
+  <div class="header-actions">
+    <button class="bell-btn" onclick="openNotif()">🔔<span class="bell-badge" id="notifBadge" style="display:none">0</span></button>
+    <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
+    <button class="theme-btn" onclick="openSettings()" style="font-size:16px">⚙️</button>
+    <button class="logout-btn" onclick="logout()">Logout</button>
+  </div>
+</div>
+
+<div id="view-home">
+  <div class="balance-card">
+    <div class="balance-label">💰 လက်ကျန်ငွေ</div>
+    <div class="balance-amount" id="bal">0 <span>Ks</span></div>
+    <div class="points-row">
+      <div>⭐ <span id="pts">0</span> Points</div>
+      <div class="vip-badge vip-Bronze" id="vipBadge">Bronze</div>
+    </div>
+  </div>
+  <div class="video-hero">
+    <video autoplay muted loop playsinline>
+      <source src="https://cdn.pixabay.com/video/2023/10/20/185683-876929862_tiny.mp4" type="video/mp4">
+    </video>
+    <div class="overlay">
+      <h2>Safe Zone Topup</h2>
+      <p>⚡ Instant Delivery · 24/7 Service</p>
+    </div>
+  </div>
+
+  
+
+  <div class="section-title">🔥 Popular Games</div>
+  <div class="slider-wrap"><div class="slider-track" id="gameSlider"></div></div>
+
+  <div class="carousel" id="carousel"><div class="dots" id="dots"></div></div>
+  <div class="quick-grid">
+    <div class="quick-card" onclick="openFaq()"><div class="icon">❓</div><div class="label">FAQ</div><div class="value blue">Help</div></div>
+    <div class="quick-card" onclick="openStats()"><div class="icon">📊</div><div class="label">My Stats</div><div class="value purple">View</div></div>
+    <div class="quick-card" onclick="openCoupon()"><div class="icon">🎟️</div><div class="label">Coupon</div><div class="value red">Redeem</div></div>
+    <div class="quick-card" onclick="openLeaderboard()"><div class="icon">🏆</div><div class="label">Leaderboard</div><div class="value blue">Top 10</div></div>
+    <div class="quick-card" onclick="copyRef()"><div class="icon">🎯</div><div class="label">Referral</div><div class="value green">Copy</div></div>
+    <div class="quick-card" onclick="openSpinWheel()"><div class="icon">🎰</div><div class="label">Lucky Spin</div><div class="value red">Spin!</div></div>
+  </div>
+  <div class="search-bar"><input id="searchInput" placeholder="🔍 ဂိမ်း ရှာပါ..." oninput="filterGames()"></div>
+  <div class="category-tabs" id="categoryTabs">
+    <button class="active" onclick="setCategory('all',this)">🌐 အားလုံး</button>
+    <button onclick="setCategory('MOBA',this)">⚔️ MOBA</button>
+    <button onclick="setCategory('Battle Royale',this)">🔫 Battle Royale</button>
+    <button onclick="setCategory('Casual',this)">♟️ Casual</button>
+    <button onclick="setCategory('Premium',this)">⭐ Premium</button>
+  </div>
+  <div class="section-title">🎮 ဂိမ်းများ</div>
+  <div class="games-grid" id="gamesGrid"></div>
+</div>
+
+<div id="view-wallet" style="display:none;padding:15px">
+  <h2 style="color:#38bdf8;margin-bottom:15px;font-size:18px">💰 Wallet ဖြည့်ရန်</h2>
+  <div class="pay-owner">
+    <div>👤 <b id="payName">-</b></div>
+    <button class="copy-btn" onclick="copyNum()">📋 Copy</button>
+  </div>
+  <div id="paymentList"></div>
+  <div class="deposit-box">
+    <input id="dAmt" type="number" placeholder="ပမာဏ (Ks)">
+    <label class="deposit-label">📸 ငွေလွှဲ Receipt ပုံ (Optional)</label>
+    <input type="file" id="receiptInput" accept="image/*" class="deposit-file" onchange="previewReceipt(this)">
+    <div id="receiptPreview" class="receipt-preview">
+      <img id="receiptImg" alt="receipt">
+    </div>
+    <button onclick="deposit()" class="deposit-btn">Deposit တင်မယ်</button>
+  </div>
+  <h3 style="margin:20px 0 10px;font-size:14px;color:#38bdf8">📜 ဖြည့်မှု မှတ်တမ်း</h3>
+  <div id="depList"></div>
+</div>
+
+<div id="view-orders" style="display:none;padding:15px">
+  <h2 style="color:#38bdf8;margin-bottom:15px;font-size:18px">📦 မှာယူမှု မှတ်တမ်း</h2>
+  <div id="ordList"></div>
+</div>
+
+<div id="view-chat" style="display:none">
+  <div class="chat-wrap">
+    <div class="chat-head">
+      <div class="admin-av">👨‍💼</div>
+      <div><div class="admin-name">Admin Support</div><div class="admin-status">🟢 Online</div></div>
+    </div>
+    <div class="chat-messages" id="chatMessages"></div>
+    <div class="typing-ind" id="typingInd"><span>.</span><span>.</span><span>.</span> Admin ရေးနေသည်</div>
+    <div class="chat-input-row">
+      <input type="text" id="chatInput" placeholder="စာ ရေးပါ..." onkeypress="if(event.key==='Enter')sendChat()">
+      <button onclick="sendChat()">➤</button>
+    </div>
+  </div>
+</div>
+
+<div id="view-faq" style="display:none;padding:15px">
+  <h2 style="color:#38bdf8;margin-bottom:15px;font-size:18px">❓ FAQ</h2>
+  <div class="faq-list">
+    <details class="faq-item"><summary>💰 Deposit တင်ပြီး ဘယ်လောက်ကြာမလဲ?</summary><p>ပုံမှန် ၅-၁၅ မိနစ်အတွင်း approve လုပ်ပေးပါတယ်။</p></details>
+    <details class="faq-item"><summary>❌ Order Reject ဖြစ်ရင် ငွေပြန်ရလား?</summary><p>ရပါတယ်။ Balance ကို အလိုအလျောက် ပြန်အမ်းပါတယ်။</p></details>
+    <details class="faq-item"><summary>🆔 Server ID ဆိုတာ ဘာလဲ?</summary><p>MLBB/Magic Chess မှာ Player ID နဲ့အတူ Server ID (ဥပမာ 2001) လိုအပ်ပါတယ်။</p></details>
+    <details class="faq-item"><summary>⏱️ Order ဘယ်လောက်ကြာမလဲ?</summary><p>များသောအားဖြင့် ၁၀-၃၀ မိနစ်အတွင်း။</p></details>
+    <details class="faq-item"><summary>🎟️ Coupon ဘယ်လိုရမလဲ?</summary><p>Facebook/TikTok မှာ ဖြန့်ပေးတယ်။</p></details>
+    <details class="faq-item"><summary>📱 App Premium ဘယ်လိုဝယ်မလဲ?</summary><p>App Premium ကို Telegram Admin ဆီ တိုက်ရိုက် ဆက်သွယ်ဝယ်ယူပါ။</p></details>
+    <details class="faq-item"><summary>💵 ငွေဖြည့်နည်း?</summary><p>KBZ / Wave / UAB / AYA → 09763442881 (Mg Pyae Phyo Kyaw)။</p></details>
+  </div>
+</div>
+
+<div id="view-analytics" style="display:none;padding:15px">
+  <h2 style="color:#38bdf8;margin-bottom:15px;font-size:18px">📊 My Analytics</h2>
+  <div class="live-stats">
+    <div class="live-stat"><div class="num" id="aOrders">0</div><div class="lbl">Orders</div></div>
+    <div class="live-stat"><div class="num" id="aSpent">0</div><div class="lbl">Spent</div></div>
+    <div class="live-stat"><div class="num" id="aPoints">0</div><div class="lbl">Points</div></div>
+  </div>
+  <div style="background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155;margin-top:15px">
+    <h3 style="color:#38bdf8;font-size:15px;margin-bottom:10px">📅 Last 7 Days</h3>
+    <div class="chart-bars" id="userChartBars"></div>
+  </div>
+  <div style="background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155;margin-top:15px">
+    <h3 style="color:#38bdf8;font-size:15px;margin-bottom:10px">💎 Top Games</h3>
+    <div id="topGamesBox"></div>
+  </div>
+</div>
+
+<div id="view-profile" style="display:none;padding:15px">
+  <h2 style="color:#38bdf8;margin-bottom:15px;font-size:18px">👤 ပရိုဖိုင်</h2>
+  <div style="background:rgba(30,41,59,0.8);padding:24px;border-radius:18px;text-align:center;border:1px solid #334155">
+    <div style="width:80px;height:80px;background:linear-gradient(135deg,#38bdf8,#a855f7);border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:bold" id="pAvatar">P</div>
+    <div style="font-size:20px;font-weight:bold" id="pName">User</div>
+    <div style="font-size:13px;color:#94a3b8;margin-top:5px" id="pPhone">-</div>
+    <div class="vip-badge vip-Bronze" id="pVip" style="margin-top:10px;display:inline-block;padding:4px 12px">Bronze</div>
+    <div style="margin-top:20px;padding:15px;background:#0f172a;border-radius:14px">
+      <div style="font-size:12px;color:#94a3b8">လက်ကျန်ငွေ</div>
+      <div style="font-size:26px;font-weight:bold;color:#22c55e" id="pBal">0 Ks</div>
+    </div>
+    <div style="margin-top:12px;padding:12px;background:#0f172a;border-radius:14px;font-size:13px;text-align:left">
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#94a3b8">⭐ Points</span><b id="pPts">0</b></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#94a3b8">💎 Total Spent</span><b id="pSpent">0 Ks</b></div>
+      <div style="display:flex;justify-content:space-between"><span style="color:#94a3b8">🎁 Referral</span><b id="pRef" style="color:#38bdf8">-</b></div>
+    </div>
+    <button onclick="testPush()" style="width:100%;padding:12px;background:rgba(168,85,247,0.15);color:#a855f7;border:1px solid #a855f7;border-radius:12px;font-weight:bold;margin-top:12px;cursor:pointer">🔔 Test Notification</button>
+    <button onclick="openTerms()" style="width:100%;padding:12px;background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;border-radius:12px;font-weight:bold;margin-top:15px;cursor:pointer">📜 Terms & Privacy</button>
+    <div style="display:flex;justify-content:center;margin:12px 0 8px">
+      <button onclick="installPWA()" id="pwaBtn" style="padding:10px 22px;background:rgba(16,185,129,0.15);color:#10b981;border:1.5px solid #10b981;border-radius:22px;font-weight:bold;font-size:14px;cursor:pointer;display:inline-block">📱 Install App</button>
+    </div>
+    <button onclick="logout()" style="width:100%;padding:13px;background:rgba(127,29,29,0.9);color:#fff;border:none;border-radius:12px;font-weight:bold">Logout</button>
+  </div>
+</div>
+
+<div class="modal" id="orderModal"><div class="modal-box">
+  <h3 id="mTitle">Order</h3>
+  <input id="playerId" placeholder="Player ID">
+  <div id="serverIdField" style="display:none"><input id="serverId" placeholder="Server ID"></div>
+  <button onclick="submitOrder()">ဝယ်မယ်</button>
+  <button class="cancel" onclick="closeModal('orderModal')">Cancel</button>
+</div></div>
+
+<div class="modal" id="productModal"><div class="modal-box" id="productModalBox"></div></div>
+
+<div class="modal" id="leaderModal"><div class="modal-box">
+  <h3>🏆 Top Spenders</h3>
+  <div id="leaderBox"></div>
+  <button class="cancel" onclick="closeModal('leaderModal')">Close</button>
+</div></div>
+
+<div class="modal" id="couponModal"><div class="modal-box">
+  <h3>🎟️ Coupon Redeem</h3>
+  <input id="couponCode" placeholder="Coupon Code" style="text-transform:uppercase;text-align:center;font-size:18px;letter-spacing:2px">
+  <button onclick="redeemCoupon()">✅ Redeem</button>
+  <button class="cancel" onclick="closeModal('couponModal')">Close</button>
+</div></div>
+
+<div class="modal" id="achModal"><div class="modal-box">
+  <h3>🏅 Achievements</h3>
+  <div id="achBox"></div>
+  <button class="cancel" onclick="closeModal('achModal')">Close</button>
+</div></div>
+
+
+<div class="modal" id="settingsModal"><div class="modal-box">
+  <h3>⚙️ Settings</h3>
+  <div class="settings-toggle">
+    <div><b style="font-size:14px">🔊 Sound</b><div style="font-size:11px;color:#94a3b8">Sound Effect</div></div>
+    <div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div>
+  </div>
+  <div class="settings-toggle">
+    <div><b style="font-size:14px">📳 Haptic</b><div style="font-size:11px;color:#94a3b8">တုန်ခါမှု</div></div>
+    <div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div>
+  </div>
+  <div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px">
+    <b style="font-size:14px">🎨 Theme Color</b>
+    <div class="theme-color-row" id="themeColorRow"></div>
+  </div>
+  <button onclick="shareApp()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">📤 Share App</button>
+  <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
+</div></div>
+
+<div class="ads-banner" id="adsBanner" onclick="if(this.dataset.link)window.open(this.dataset.link,'_blank')"></div>
+<div class="modal" id="notifModal"><div class="modal-box">
+  <h3>🔔 Notifications</h3>
+  <div id="notifList"></div>
+  <button class="cancel" onclick="closeModal('notifModal')">Close</button>
+</div></div>
+
+<button class="music-btn" id="musicBtn" onclick="toggleMusicWithCustom()">🎵</button>
+
+
+<div class="modal" id="spinModal"><div class="modal-box">
+  <h3>🎰 Lucky Spin</h3>
+  <div class="spin-wheel" id="spinWheel"><div class="spin-center">🎁</div></div>
+  <div id="spinResult" style="text-align:center;padding:10px;font-size:14px;color:#94a3b8;margin-top:10px">Spin နှိပ်ပြီး ကံစမ်းပါ</div>
+  <button onclick="doSpin()" id="spinBtn" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🎰 Spin!</button>
+  <button class="cancel" onclick="closeModal('spinModal')">Close</button>
+</div></div>
+
+<div class="bottom-nav">
+  <button class="nav-item active" onclick="switchTab('home',this)"><span class="nav-icon">🏠</span>ပင်မ</button>
+  <button class="nav-item" onclick="switchTab('wallet',this)"><span class="nav-icon">💰</span>ငွေဖြည့်</button>
+  <button class="nav-item" onclick="switchTab('orders',this)"><span class="nav-icon">📦</span>မှာတမ်း</button>
+  <button class="nav-item" onclick="switchTab('chat',this)"><span class="nav-icon">💬</span>Chat</button>
+  <button class="nav-item" onclick="switchTab('profile',this)"><span class="nav-icon">👤</span>Profile</button>
+</div>
+
+<script>
+const token = localStorage.getItem('token');
+if (!token) location.href = '/';
+const H = {'Content-Type':'application/json','Authorization':token};
+let products = [], selected = null, siteData = null, selectedPay = 'KBZ Pay';
+let currentCategory = 'all', searchTerm = '', userData = {};
+let deferredPrompt = null, lastUnread = 0, chatPoll = null, lastChatId = null;
+
+setTimeout(() => {
+  const s = document.getElementById('splash');
+  if (s) { s.classList.add('hide'); setTimeout(() => s.remove(), 700); }
+}, 2200);
+
+const AudioCtx = window.AudioContext || window.webkitAudioContext;
+let audioCtx = null;
+let customAudio = new Audio();
+function playSound(type){
+  if (soundOn && siteData && siteData.customSound) { try { customAudio.src = siteData.customSound; customAudio.volume = 0.3; customAudio.play().catch(()=>{}); return; } catch(e){} }
+  try {
+    if (!audioCtx) audioCtx = new AudioCtx();
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain); gain.connect(audioCtx.destination);
+    if (type === 'success') { osc.frequency.setValueAtTime(800, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(1200, audioCtx.currentTime + 0.1); }
+    else if (type === 'error') { osc.frequency.setValueAtTime(400, audioCtx.currentTime); osc.frequency.exponentialRampToValueAtTime(200, audioCtx.currentTime + 0.2); }
+    else { osc.frequency.setValueAtTime(600, audioCtx.currentTime); }
+    gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+    osc.start(); osc.stop(audioCtx.currentTime + 0.2);
+  } catch(e){}
+}
+function haptic(ms){ if (navigator.vibrate) navigator.vibrate(ms || 30); }
+function showToast(text, type){
+  const t = document.getElementById('toast');
+  t.textContent = text;
+  t.className = 'toast show ' + (type || '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(() => {
+    t.classList.remove('show');
+    setTimeout(() => { t.textContent = ''; t.className = 'toast'; }, 400);
+  }, 2000);
+}
+if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light'); document.getElementById('themeBtn').textContent = '☀️'; }
+function toggleTheme(){
+  document.body.classList.toggle('light');
+  const isLight = document.body.classList.contains('light');
+  document.getElementById('themeBtn').textContent = isLight ? '☀️' : '🌙';
+  localStorage.setItem('theme', isLight ? 'light' : 'dark');
+  haptic(20);
+}
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
+async function installPWA(){
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') showToast('✅ App install ပြီးပါပြီ', 'success');
+    deferredPrompt = null;
+    return;
+  }
+  alert('📱 Install လုပ်နည်း:\n\n1. Chrome ⋮ menu နှိပ်\n2. "Add to Home screen" ရွေး\n3. "Add" နှိပ်\n\n✅ Home screen မှာ App လို ပေါ်မယ်');
+}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(()=>{});
+
+
+// Sound/Haptic toggles
+let soundOn = localStorage.getItem('soundOn') !== 'off';
+let hapticOn = localStorage.getItem('hapticOn') !== 'off';
+function updateToggles(){
+  const st = document.getElementById('soundToggle');
+  const ht = document.getElementById('hapticToggle');
+  if (st) st.classList.toggle('on', soundOn);
+  if (ht) ht.classList.toggle('on', hapticOn);
+}
+function toggleSound(){ soundOn = !soundOn; localStorage.setItem('soundOn', soundOn?'on':'off'); updateToggles(); playSound('click'); haptic(20); }
+function toggleHaptic(){ hapticOn = !hapticOn; localStorage.setItem('hapticOn', hapticOn?'on':'off'); updateToggles(); haptic(30); }
+
+// Override playSound & haptic
+const _origPlaySound = playSound;
+playSound = function(type){ if (!soundOn) return; _origPlaySound(type); };
+const _origHaptic = haptic;
+haptic = function(ms){ if (!hapticOn) return; _origHaptic(ms); };
+
+// Share
+function shareApp(){
+  const url = location.origin;
+  if (navigator.share) {
+    navigator.share({ title:'Safe Zone Game Topup', text:'\uD83C\uDFAE Safe Zone - Game Topup\n\uD83D\uDCB0 MLBB, PUBG, Magic Chess', url })
+      .catch(()=>{});
+  } else {
+    navigator.clipboard.writeText(url).then(()=>showToast('\u2705 Link \u1000\u1030\u1038\u1015\u103C\u102E\u1038\u1015\u102B\u1015\u103C\u102E', 'success'));
+  }
+}
+
+// Theme colors
+const THEME_COLORS = [
+  {name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},
+  {name:'Green', primary:'#10b981', secondary:'#3b82f6'},
+  {name:'Red', primary:'#ef4444', secondary:'#f59e0b'},
+  {name:'Pink', primary:'#ec4899', secondary:'#a855f7'},
+  {name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},
+  {name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}
+];
+function openSettings(){
+  document.getElementById('settingsModal').classList.add('show');
+  updateToggles();
+  const cur = localStorage.getItem('themeColor') || 'Blue';
+  document.getElementById('themeColorRow').innerHTML = THEME_COLORS.map(c =>
+    '<div class="theme-color-dot ' + (cur===c.name?'active':'') + '" style="background:linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')" onclick="setThemeColor(\'' + c.name + '\')" title="' + c.name + '"></div>'
+  ).join('');
+}
+function setThemeColor(name){
+  const c = THEME_COLORS.find(x => x.name === name);
+  if (!c) return;
+  document.documentElement.style.setProperty('--accent1', c.primary);
+  document.documentElement.style.setProperty('--accent2', c.secondary);
+  localStorage.setItem('themeColor', name);
+  document.querySelectorAll('button.main').forEach(b => b.style.background = 'linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')');
+  showToast('\u2705 ' + name + ' Theme', 'success');
+  haptic(30);
+}
+function applyTheme(){
+  const name = localStorage.getItem('themeColor') || 'Blue';
+  setThemeColor(name);
+}
+applyTheme();
+
+// Ads banner
+async function loadAdsBanner(){
+  if (!siteData || !siteData.adsBanner || !siteData.adsBanner.enabled || !siteData.adsBanner.text) return;
+  const b = document.getElementById('adsBanner');
+  b.textContent = '\uD83D\uDCE2 ' + siteData.adsBanner.text;
+  b.classList.add('show');
+}
+
+// Read receipt display
+function renderReadReceipt(m){
+  if (m.from !== 'user') return '';
+  return '<span class="read-receipt ' + (m.read ? 'read' : '') + '">' + (m.read ? '\u2713\u2713' : '\u2713') + '</span>';
+}
+
+// Typing indicator logic
+let lastMsgCount = 0;
+function checkTyping(list){
+  const ind = document.getElementById('typingInd');
+  if (!ind) return;
+  // Show if last message from user and admin hasn't replied within 3s
+  if (list.length && list[list.length-1].from === 'user' && Date.now() - list[list.length-1].createdAt < 3000) {
+    ind.classList.add('show');
+    setTimeout(() => ind.classList.remove('show'), 2500);
+  }
+}
+
+
+// ===== LIVE STATS (Feature 13) =====
+function animateNumber(el, target, dur) {
+  if (!el) return;
+  const start = parseInt(el.textContent) || 0;
+  const startTime = Date.now();
+  function tick() {
+    const p = Math.min((Date.now() - startTime) / (dur || 1200), 1);
+    const val = Math.floor(start + (target - start) * p);
+    el.textContent = val.toLocaleString();
+    if (p < 1) requestAnimationFrame(tick);
+  }
+  tick();
+}
+async function loadLiveStats() {
+  try {
+    const site = await (await fetch('/api/site')).json();
+    const t = site.trustBadge || { users: 0, orders: 0, completed: 0 };
+              } catch(e){}
+}
+
+// ===== GAME SLIDER (Feature 18) =====
+function loadGameSlider() {
+  const el = document.getElementById('gameSlider');
+  if (!el) return;
+  const imgs = siteData?.gameImages || {};
+  const games = [...new Set(products.map(p => p.game))];
+  const items = games.map(g => {
+    const img = imgs[g] || 'https://via.placeholder.com/300x180/334155/38bdf8?text=Game';
+    return '<div class="slider-card" onclick="openGameProducts(\'' + g.replace(/'/g, "\\'") + '\')">' +
+      '<img src="' + img + '" onerror="this.src=\'https://via.placeholder.com/300x180/334155/38bdf8?text=Game\'">' +
+      '<div class="title">' + g + '</div></div>';
+  }).join('');
+  el.innerHTML = items + items;
+}
+
+// ===== SMART RECOMMEND (Feature 22) =====
+function getRecommendedGames() {
+  const favs = JSON.parse(localStorage.getItem('favs') || '[]');
+  const orderGames = {};
+  (userData.orders || []).forEach(o => { orderGames[o.game] = (orderGames[o.game] || 0) + 1; });
+  const scores = {};
+  products.forEach(p => {
+    let s = 0;
+    if (favs.includes(p.game)) s += 5;
+    if (orderGames[p.game]) s += orderGames[p.game] * 3;
+    scores[p.game] = Math.max(scores[p.game] || 0, s);
+  });
+  return Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
+}
+function markRecommended() {
+  const recs = getRecommendedGames();
+  document.querySelectorAll('#gamesGrid .game-card').forEach(card => {
+    const title = card.querySelector('.game-title')?.textContent || '';
+    if (recs.includes(title) && !card.querySelector('.recommend-badge')) {
+      const badge = document.createElement('div');
+      badge.className = 'recommend-badge';
+      badge.textContent = '⭐ For You';
+      card.appendChild(badge);
+    }
+  });
+}
+
+// ===== BACKGROUND MUSIC (Feature 10) =====
+
+
+// ===== PUSH NOTIFICATION (Feature 9) =====
+async function requestPushPermission() {
+  if (!('Notification' in window)) return;
+  if (Notification.permission === 'default') {
+    try { await Notification.requestPermission(); } catch(e){}
+  }
+}
+async function sendPush(title, body) {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  try {
+    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
+      const reg = await navigator.serviceWorker.ready;
+      reg.showNotification(title, { body: body, icon: 'https://i.imgur.com/iRwIfqs.png', badge: 'https://i.imgur.com/iRwIfqs.png', vibrate: [200,100,200] });
+    } else {
+      new Notification(title, { body: body, icon: 'https://i.imgur.com/iRwIfqs.png' });
+    }
+  } catch(e){}
+}
+
+// ===== ANALYTICS (Feature 20) =====
+function loadAnalytics() {
+  const orders = userData.orders || [];
+  const stats = {
+    total: orders.length,
+    spent: orders.filter(o => o.status === 'completed').reduce((s, o) => s + o.price, 0),
+    points: userData.points || 0
+  };
+  animateNumber(document.getElementById('aOrders'), stats.total);
+  const spentEl = document.getElementById('aSpent');
+  if (spentEl) spentEl.textContent = (stats.spent / 1000).toFixed(1) + 'k';
+  animateNumber(document.getElementById('aPoints'), stats.points);
+  // 7-day chart
+  const days = [];
+  for (let i = 6; i >= 0; i--) {
+    const d = new Date(); d.setDate(d.getDate() - i);
+    const ds = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
+    const de = ds + 86400000;
+    const cnt = orders.filter(o => o.createdAt >= ds && o.createdAt < de).length;
+    days.push({ label: d.toLocaleDateString('en', { weekday: 'short' }), value: cnt });
+  }
+  const max = Math.max(...days.map(x => x.value), 1);
+  document.getElementById('userChartBars').innerHTML = days.map(x => {
+    const hgt = Math.max(3, (x.value / max) * 100);
+    return '<div class="chart-bar-wrap"><div class="chart-bar-val">' + (x.value || '') + '</div><div class="chart-bar" style="height:' + hgt + '%"></div><div class="chart-bar-lbl">' + x.label + '</div></div>';
+  }).join('');
+  // Top games
+  const gm = {};
+  orders.forEach(o => { gm[o.game] = (gm[o.game] || 0) + 1; });
+  const top = Object.entries(gm).sort((a, b) => b[1] - a[1]).slice(0, 5);
+  const tb = document.getElementById('topGamesBox');
+  if (tb) {
+    tb.innerHTML = top.length ? top.map(([g, c]) => '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #334155;font-size:13px"><span>' + g + '</span><b style="color:#38bdf8">' + c + ' orders</b></div>').join('') : '<div style="color:#64748b;font-size:12px">Order မရှိသေးပါ</div>';
+  }
+}
+
+// ===== AUTO CHAT BOT (Feature 24) =====
+const AUTO_REPLIES = {
+  'hi': 'မင်္ဂလာပါ! 👋 Safe Zone မှ ကြိုဆိုပါတယ်',
+  'hello': 'မင်္ဂလာပါ! 👋 ဘာကူညီပေးရမလဲ?',
+  'မင်္ဂလာပါ': 'မင်္ဂလာပါ! 👋 ဘာကူညီပေးရမလဲ?',
+  'deposit': 'Deposit ဖြည့်ရန် Wallet tab မှာ ဖြည့်ပါ။ 5-15 မိနစ်အတွင်း approve ဖြစ်မယ် ⏱',
+  'order': 'Order တင်ရန် Home → ဂိမ်းရွေး → Player ID ထည့် → Order တင်ပါ 🎮',
+  'balance': 'Balance ကြည့်ရန် Home မှာ ကြည့်နိုင်ပါတယ် 💰',
+  'refund': 'Order Reject ဖြစ်ရင် Balance ကို auto ပြန်အမ်းပါတယ် ✅',
+  'app premium': 'App Premium ဝယ်ရန် Admin ဆီ Telegram မှာ ဆက်သွယ်ပါ 📱',
+};
+function autoReply(text) {
+  const lc = text.toLowerCase().trim();
+  for (const k in AUTO_REPLIES) {
+    if (lc.includes(k)) return AUTO_REPLIES[k];
+  }
+  return null;
+}
+
+// ===== ORDER SUCCESS SOUND (Feature 2) =====
+function successSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    [523, 659, 784, 1047].forEach((f, i) => {
+      const o = ctx.createOscillator();
+      const g = ctx.createGain();
+      o.connect(g); g.connect(ctx.destination);
+      o.frequency.value = f;
+      o.type = 'sine';
+      g.gain.setValueAtTime(0, ctx.currentTime + i * 0.1);
+      g.gain.linearRampToValueAtTime(0.15, ctx.currentTime + i * 0.1 + 0.02);
+      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.3);
+      o.start(ctx.currentTime + i * 0.1);
+      o.stop(ctx.currentTime + i * 0.1 + 0.3);
+    });
+  } catch(e){}
+}
+function errorSound() {
+  try {
+    const ctx = new (window.AudioContext || window.webkitAudioContext)();
+    const o = ctx.createOscillator(); const g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    o.frequency.setValueAtTime(300, ctx.currentTime);
+    o.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.2);
+    g.gain.setValueAtTime(0.15, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
+    o.start(); o.stop(ctx.currentTime + 0.3);
+  } catch(e){}
+}
+
+// ===== SKELETON LOADING (Feature 1) =====
+function showSkeletons() {
+  const grid = document.getElementById('gamesGrid');
+  if (!grid) return;
+  grid.innerHTML = Array(4).fill('<div class="skeleton skel-card"></div>').join('');
+}
+
+
+
+async function initPushNotifications() {
+  if (!('serviceWorker' in navigator) || !('PushManager' in window)) { console.log('Push not supported'); return; }
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    let perm = Notification.permission;
+    if (perm === 'default') perm = await Notification.requestPermission();
+    if (perm !== 'granted') { console.log('Push denied'); return; }
+    const vapidRes = await fetch('/api/push/vapid');
+    const vapidData = await vapidRes.json();
+    if (!vapidData.publicKey) { console.log('No VAPID'); return; }
+    let sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: urlB64ToUint8(vapidData.publicKey)
+      });
+    }
+    const r = await api('/api/push/subscribe', { method:'POST', body: JSON.stringify({ subscription: sub.toJSON() }) });
+    console.log('Push subscribed:', r && r.success ? 'OK' : 'FAIL');
+  } catch(e) { console.log('Push err:', e.message); }
+}
+function urlB64ToUint8(base64String) {
+  const padding = '='.repeat((4 - base64String.length % 4) % 4);
+  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
+  const rawData = window.atob(base64);
+  const outputArray = new Uint8Array(rawData.length);
+  for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
+  return outputArray;
+}
+async function testPush() {
+  const r = await api('/api/push/test', { method:'POST' });
+  if (r && r.success) showToast('🔔 Test push — ' + r.sent + ' device', 'success');
+  else showToast('❌ Push failed', 'error');
+}
+
+
+// ===== iOS PWA HINT =====
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+function isInStandaloneMode() {
+  return ('standalone' in window.navigator) && window.navigator.standalone;
+}
+function isSafari() {
+  return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
+}
+function showIOSHint() {
+  if (!isIOS()) return;
+  if (isInStandaloneMode()) return; // Already installed
+  if (!isSafari()) return; // Chrome iOS - can't install
+  // Show hint after 5s
+  setTimeout(function() {
+    const hint = document.createElement('div');
+    hint.id = 'iosHint';
+    hint.style.cssText = 'position:fixed;bottom:90px;left:15px;right:15px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:16px;border-radius:16px;z-index:9999;box-shadow:0 12px 30px rgba(0,0,0,0.4);animation:slideUp 0.5s;';
+    hint.innerHTML = '<div style="display:flex;align-items:center;gap:12px">' +
+      '<div style="font-size:32px">📱</div>' +
+      '<div style="flex:1">' +
+      '<div style="font-weight:bold;font-size:14px;margin-bottom:3px">App အဖြစ် Install လုပ်ပါ</div>' +
+      '<div style="font-size:12px;opacity:0.95">Share (□↑) → "Add to Home Screen"</div>' +
+      '</div>' +
+      '<button onclick="this.parentElement.parentElement.remove()" style="background:rgba(255,255,255,0.2);border:none;color:#fff;width:28px;height:28px;border-radius:50%;cursor:pointer;font-size:16px">✕</button>' +
+      '</div>';
+    document.body.appendChild(hint);
+  }, 5000);
+}
+
+
+// ===== iOS DETECTION & SUPPORT =====
+function getIOSVersion() {
+  const m = navigator.userAgent.match(/OS (d+)_(d+)/);
+  if (!m) return null;
+  return { major: parseInt(m[1]), minor: parseInt(m[2]) };
+}
+function isIOS() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+}
+function isIOSModern() {
+  const v = getIOSVersion();
+  if (!v) return false;
+  return v.major >= 17 || (v.major === 16 && v.minor >= 4);
+}
+function isStandalone() {
+  return ('standalone' in window.navigator) && window.navigator.standalone;
+}
+function isIOSSafari() {
+  return isIOS() && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|EdgiOS/.test(navigator.userAgent);
+}
+
+// ===== iOS INSTALL GUIDE MODAL =====
+function showIOSGuide() {
+  const modal = document.createElement('div');
+  modal.id = 'iosGuideModal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.3s';
+  const iosV = getIOSVersion();
+  const vText = iosV ? ('iOS ' + iosV.major + '.' + iosV.minor) : 'Unknown';
+  modal.innerHTML = `
+    <div style="background:#1e293b;padding:25px;border-radius:24px 24px 0 0;width:100%;max-width:500px;animation:slideUp 0.4s;border-top:1px solid #334155">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-size:60px;margin-bottom:10px">📱</div>
+        <div style="font-size:20px;font-weight:bold;color:#38bdf8">iPhone Install လုပ်ပါ</div>
+        <div style="font-size:12px;color:#94a3b8;margin-top:5px">${vText}</div>
+      </div>
+
+      <div style="background:rgba(15,23,42,0.6);padding:15px;border-radius:14px;margin-bottom:12px">
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">1</div>
+          <div style="flex:1">
+            <div style="font-weight:bold;font-size:14px;color:#fff">Safari ကနေ ဒီ site ကို ဖွင့်ပါ</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:3px">Chrome iOS မှာ install လို့မရ</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">2</div>
+          <div style="flex:1">
+            <div style="font-weight:bold;font-size:14px;color:#fff">Share ခလုတ် (□↑) နှိပ်ပါ</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:3px">Safari အောက်ခြေမှာ ရှိပါတယ်</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px">
+          <div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">3</div>
+          <div style="flex:1">
+            <div style="font-weight:bold;font-size:14px;color:#fff">"Add to Home Screen" ရွေးပါ</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:3px">Menu ကို အောက်ဆွဲပြီး ရှာပါ</div>
+          </div>
+        </div>
+        <div style="display:flex;align-items:flex-start;gap:12px">
+          <div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">4</div>
+          <div style="flex:1">
+            <div style="font-weight:bold;font-size:14px;color:#fff">Home Screen က icon နှိပ် → အသုံးပြု</div>
+            <div style="font-size:12px;color:#94a3b8;margin-top:3px">App လို ဖွင့်လာမယ်</div>
+          </div>
+        </div>
+      </div>
 
       ${isIOSModern() ? 
         '<div style="background:rgba(34,197,94,0.1);padding:12px;border-radius:12px;border:1px solid #22c55e;font-size:12px;color:#86efac;margin-bottom:12px">✅ သင့် iOS က Push Notification support ရှိပါတယ်</div>' :
