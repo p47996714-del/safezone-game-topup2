@@ -290,7 +290,16 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
       <input id="ws_themePrimary" placeholder="Primary color (#38bdf8)">
       <input id="ws_themeSecondary" placeholder="Secondary color (#a855f7)">
     </div>
-    <div class="row"><button onclick="saveSiteInfo()">💾 Save Site Info</button></div>
+    
+    <div class="upload-row">
+      <input id="ws_musicUrl" type="text" placeholder="🎵 Music URL (mp3)">
+      <button class="upload-btn" onclick="pickFile('music')">🎵 Upload</button>
+      <button class="upload-btn red" onclick="clearField('ws_musicUrl')">✕</button>
+    </div>
+    <div class="upload-preview" id="musicPreview">
+      <audio id="musicPreviewPlayer" controls style="width:100%;margin-top:8px"></audio>
+    </div>
+<div class="row"><button onclick="saveSiteInfo()">💾 Save Site Info</button></div>
   </div>
 
   <!-- LABELS -->
@@ -1005,12 +1014,9 @@ async function loadWebsiteConfig() {
     document.getElementById('ws_heroTitle').value = c.hero?.title || '';
     document.getElementById('ws_heroSubtitle').value = c.hero?.subtitle || '';
     document.getElementById('ws_videoUrl').value = c.hero?.videoUrl || '';
-    document.getElementById('ws_musicUrl').value = c.musicUrl || '';
-    if (c.musicUrl) {
-      const pv = document.getElementById('musicPreview');
-      const pl = document.getElementById('musicPreviewPlayer');
-      if (pv && pl) { pv.classList.add('show'); pl.src = c.musicUrl; }
-    }
+    var _mi = document.getElementById('ws_musicUrl');
+    if (_mi) _mi.value = c.musicUrl || '';
+    if (c.musicUrl) { var _pl = document.getElementById('musicPreviewPlayer'); var _pv = document.getElementById('musicPreview'); if (_pl) _pl.src = c.musicUrl; if (_pv) _pv.classList.add('show'); }
     document.getElementById('ws_themePrimary').value = c.theme?.primary || '';
     document.getElementById('ws_themeSecondary').value = c.theme?.secondary || '';
     // Labels
@@ -1160,8 +1166,8 @@ async function saveSiteInfo() {
   let ok = 0;
   if (name) { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'siteName', value:name})}); if (r.success) ok++; }
   if (logo) { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'logoUrl', value:logo})}); if (r.success) ok++; }
-  const music = document.getElementById('ws_musicUrl').value.trim();
-  { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'musicUrl', value:music})}); if (r.success) ok++; }
+  var _miS = document.getElementById('ws_musicUrl');
+  if (_miS) { var _mv = _miS.value.trim(); var _mr = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'musicUrl', value:_mv})}); if (_mr.success) ok++; }
   { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'hero', value:hero})}); if (r.success) ok++; }
   { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'theme', value:theme})}); if (r.success) ok++; }
   alert('✅ Site info သိမ်းပြီး (' + ok + '/4)');
@@ -1240,8 +1246,7 @@ function pickGameImg() {
 async function onFileSelected(e) {
   const file = e.target.files[0];
   if (!file) return;
-  const maxSize = (_uploadContext === 'music' || _uploadContext === 'video') ? 5 * 1024 * 1024 : 3 * 1024 * 1024;
-  if (file.size > maxSize) { alert('❌ File အလွန်ကြီး (' + Math.round(maxSize/1024/1024) + 'MB အောက်သာ)'); return; }
+  if (file.size > 3 * 1024 * 1024) { alert('❌ ပုံ 3MB အောက်သာ'); return; }
   const reader = new FileReader();
   const prog = document.getElementById('uploadProgress');
   const bar = document.getElementById('uploadProgressBar');
@@ -1277,11 +1282,12 @@ async function handleUploadSuccess(url, context) {
     if (inp) inp.value = url;
     alert('✅ Video တင်ပြီး — Site Info Save နှိပ်ပါ');
   } else if (context === 'music') {
-    const inp = document.getElementById('ws_musicUrl');
-    if (inp) inp.value = url;
-    const pv = document.getElementById('musicPreview');
-    const pl = document.getElementById('musicPreviewPlayer');
-    if (pv && pl) { pv.classList.add('show'); pl.src = url; }
+    var _mh = document.getElementById('ws_musicUrl');
+    if (_mh) _mh.value = url;
+    var _ph = document.getElementById('musicPreviewPlayer');
+    var _pvh = document.getElementById('musicPreview');
+    if (_ph) _ph.src = url;
+    if (_pvh) _pvh.classList.add('show');
     alert('✅ Music တင်ပြီး — Site Info Save နှိပ်ပါ');
   } else if (context === 'gameImg') {
     const inp = document.getElementById('giUrl');
