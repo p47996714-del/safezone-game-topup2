@@ -150,6 +150,74 @@ function logActivity(admin, action, detail) {
 }
 let db = loadDB();
 
+// SAFE DEFAULTS — auto-fill empty config fields
+(function applyDefaults() {
+  var DEFAULTS = {
+    siteName: 'Safe Zone Game Topup',
+    payNumber: '09763442881',
+    payName: 'Mg Pyae Phyo Kyaw',
+    whatsapp: '09763442881',
+    viber: '09763442881',
+    tiktok: 'https://tiktok.com/@safezone',
+    facebook: 'https://facebook.com/safezone',
+    logoUrl: 'https://i.imgur.com/iRwIfqs.png',
+    terms: 'Safe Zone Game Topup ကို အသုံးပြုခြင်းဖြင့် စည်းကမ်းချက်များကို လက်ခံပါသည်။',
+    privacy: 'Safe Zone သည် သင့် Data များကို လုံခြုံစွာ ထိန်းသိမ်းပါသည်။',
+    hero: { title: 'Safe Zone Topup', subtitle: '⚡ Instant Delivery · 24/7 Service', videoUrl: 'https://cdn.pixabay.com/video/2023/10/20/185683-876929862_tiny.mp4' },
+    theme: { primary: '#38bdf8', secondary: '#a855f7' },
+    payments: [
+      { name: 'KBZ Pay', short: 'KBZ', cls: 'kbz' },
+      { name: 'Wave Money', short: 'Wave', cls: 'wave' },
+      { name: 'UAB Pay', short: 'UAB', cls: 'uab' },
+      { name: 'AYA Pay', short: 'AYA', cls: 'aya' }
+    ],
+    social: { facebook: 'https://facebook.com/safezone', tiktok: 'https://tiktok.com/@safezone', whatsapp: '09763442881', viber: '09763442881', telegram: '' },
+    trustBadges: [
+      { icon: '✅', text: 'Verified Shop' },
+      { icon: '⚡', text: 'Fast Delivery' },
+      { icon: '🛡️', text: 'Safe Payment' }
+    ],
+    labels: {
+      balance: '💰 လက်ကျန်ငွေ',
+      gamesTitle: '🎮 ဂိမ်းများ',
+      searchPlaceholder: '🔍 ဂိမ်း ရှာပါ...',
+      popularTitle: '🔥 Popular Games',
+      quickActions: '⚡ Quick Actions',
+      paymentTitle: '💰 Wallet ဖြည့်ရန်'
+    },
+    faq: [
+      { q: '💰 Deposit တင်ပြီး ဘယ်လောက်ကြာမလဲ?', a: 'ပုံမှန် ၅-၁၅ မိနစ်အတွင်း approve လုပ်ပေးပါတယ်။' },
+      { q: '❌ Order Reject ဖြစ်ရင် ငွေပြန်ရလား?', a: 'ရပါတယ်။ Balance ကို အလိုအလျောက် ပြန်အမ်းပါတယ်။' },
+      { q: '🆔 Server ID ဆိုတာ ဘာလဲ?', a: 'MLBB/Magic Chess မှာ Server ID လိုအပ်ပါတယ်။' },
+      { q: '💬 Live Chat ဖွင့်ချိန်?', a: '၂၄ နာရီ ဖွင့်ပါတယ်။' }
+    ]
+  };
+  if (!db.config) db.config = {};
+  var changed = false;
+  for (var k in DEFAULTS) {
+    var cur = db.config[k];
+    var def = DEFAULTS[k];
+    if (cur === undefined || cur === null || cur === '') {
+      db.config[k] = def;
+      changed = true;
+    } else if (Array.isArray(def) && (!Array.isArray(cur) || cur.length === 0)) {
+      db.config[k] = def;
+      changed = true;
+    } else if (typeof def === 'object' && !Array.isArray(def) && typeof cur === 'object' && !Array.isArray(cur)) {
+      for (var kk in def) {
+        if (cur[kk] === undefined || cur[kk] === '' || (Array.isArray(def[kk]) && (!Array.isArray(cur[kk]) || cur[kk].length === 0))) {
+          cur[kk] = def[kk];
+          changed = true;
+        }
+      }
+    }
+  }
+  if (changed) {
+    try { fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2)); } catch(e){}
+    console.log('✅ Config defaults applied');
+  }
+})();
+
 if (!db.config.githubBackup) {
   db.config.githubBackup = { enabled: false, token: '', owner: '', repo: '', branch: 'main', path: 'db.json', intervalMin: 5, lastBackup: 0 };
   fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
