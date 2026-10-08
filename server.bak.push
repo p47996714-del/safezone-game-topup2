@@ -1,5 +1,4 @@
 const express = require('express');
-const webpush = require('web-push');
 const fs = require('fs');
 const crypto = require('crypto');
 const startBot = require('./bot');
@@ -33,11 +32,10 @@ app.use('/api', (req, res, next) => {
 app.use(express.static('public'));
 
 const DB_FILE = 'db.json';
-webpush.setVapidDetails('mailto:safezone@example.com', 'BHgYbat8Lapx6QOcpjI9O9MO5b5PEtKQ85XROqdt-YPY7g0n6-nLUqNDirlppGMmSfOOcde_ycD6DZV4J9YkG9Q', 'gLa6zljKqbBBir9XmK8_YNnqA0A_DaiA7w8lnJc6vh8');
 
 function defaultDB() {
   return {
-    users: [], orders: [], deposits: [], sessions: {}, chats: [], notifications: [], activityLog: [], uploads: {}, subscriptions: [],
+    users: [], orders: [], deposits: [], sessions: {}, chats: [], notifications: [], activityLog: [], uploads: {},
     otps: {}, banned: [], broadcasts: [], coupons: {}, cashbacks: {},
     boxesOpened: {}, missions: {}, reviews: [],
     products: [
@@ -405,36 +403,6 @@ app.post('/api/chat', auth, (req, res) => {
 
 // ===== LEADERBOARD =====
 
-app.get('/api/push/vapid', (req, res) => res.json({ publicKey: 'BHgYbat8Lapx6QOcpjI9O9MO5b5PEtKQ85XROqdt-YPY7g0n6-nLUqNDirlppGMmSfOOcde_ycD6DZV4J9YkG9Q' }));
-
-app.post('/api/push/subscribe', auth, (req, res) => {
-  const { subscription } = req.body;
-  if (!subscription || !subscription.endpoint) return res.status(400).json({error:'မှား'});
-  if (!db.subscriptions) db.subscriptions = [];
-  const ex = db.subscriptions.find(x => x.endpoint === subscription.endpoint);
-  if (ex) { ex.subscription = subscription; ex.userId = req.user.id; ex.username = req.user.username; ex.at = Date.now(); }
-  else db.subscriptions.push({ id:'S'+Date.now(), userId: req.user.id, username: req.user.username, endpoint: subscription.endpoint, subscription, at: Date.now() });
-  saveDB();
-  res.json({ success: true, total: db.subscriptions.filter(x => x.userId === req.user.id).length });
-});
-
-app.post('/api/push/test', auth, async (req, res) => {
-  const sent = await sendPushToUser(req.user.id, '🔔 Test Notification', 'Push system အလုပ်လုပ်နေပါပြီ!');
-  res.json({ success: true, sent });
-});
-
-app.post('/api/push/unsubscribe', auth, (req, res) => {
-  db.subscriptions = (db.subscriptions||[]).filter(x => x.userId !== req.user.id);
-  saveDB();
-  res.json({ success: true });
-});
-
-app.get('/api/admin/subscriptions', adminAuth, (req, res) => {
-  const byUser = {};
-  (db.subscriptions||[]).forEach(x => { byUser[x.username] = (byUser[x.username] || 0) + 1; });
-  res.json({ total: (db.subscriptions||[]).length, users: byUser });
-});
-
 app.get('/api/notifications', auth, (req, res) => {
   const list = (db.notifications || []).filter(n => n.userId === req.user.id)
     .sort((a,b) => b.createdAt - a.createdAt).slice(0, 50);
@@ -514,20 +482,19 @@ app.get('/api/admin/export/:type', adminAuth, (req, res) => {
   res.send(csv);
 });
 
-app.post('/api/admin/approve-deposit', adminAuth, async (req, res) => {
+app.post('/api/admin/approve-deposit', adminAuth, (req, res) => {
   const dep = db.deposits.find(d => d.id === req.body.depositId);
   if (!dep || dep.status !== 'pending') return res.status(400).json({error:'Deposit မတွေ့'});
   const user = db.users.find(u => u.id === dep.userId);
   if (!user) return res.status(404).json({error:'User မတွေ့'});
   user.balance += dep.amount;
-  dep.status = 'approved'; dep.approvedAt = Date.now();
-  try { await sendPushToUser(user.id, '💰 Balance ဝင်ပြီ', '+' + dep.amount.toLocaleString() + ' Ks ဖြည့်ပြီးပါပြီ'); } catch(e){} dep.approvedBy = req.admin.username;
+  dep.status = 'approved'; dep.approvedAt = Date.now(); dep.approvedBy = req.admin.username;
   db.chats.push({ id:'C'+Date.now(), userId: user.id, username: user.username, from:'admin',
     text:`✅ ငွေ ${dep.amount.toLocaleString()} Ks ဖြည့်မှု အတည်ပြုပြီးပါပြီ။ လက်ကျန်: ${user.balance.toLocaleString()} Ks`,
     createdAt: Date.now(), read:false });
   saveDB(); res.json({success:true});
 });
-app.post('/api/admin/reject-deposit', adminAuth, async (req, res) => {
+app.post('/api/admin/reject-deposit', adminAuth, (req, res) => {
   const dep = db.deposits.find(d => d.id === req.body.depositId);
   if (!dep) return res.status(404).json({error:'Deposit မတွေ့'});
   dep.status = 'rejected'; dep.rejectedBy = req.admin.username;
@@ -535,7 +502,7 @@ app.post('/api/admin/reject-deposit', adminAuth, async (req, res) => {
     text:`❌ ငွေ ${dep.amount.toLocaleString()} Ks ဖြည့်မှု ပယ်ဖျက်ခဲ့ပါတယ်။`, createdAt: Date.now(), read:false });
   saveDB(); res.json({success:true});
 });
-app.post('/api/admin/update-order-status', adminAuth, async (req, res) => {
+app.post('/api/admin/update-order-status', adminAuth, (req, res) => {
   const { orderId, status } = req.body;
   const o = db.orders.find(x => x.id === orderId);
   if (!o) return res.status(404).json({error:'Order မတွေ့'});
@@ -545,8 +512,6 @@ app.post('/api/admin/update-order-status', adminAuth, async (req, res) => {
     if (u) u.balance += o.price;
   }
   o.status = status; o.updatedAt = Date.now();
-  const _pm = { processing:['⚙️ Order Processing','ပြင်ဆင်နေပါပြီ'], completed:['✅ Order Complete','ပြီးစီးပါပြီ!'], rejected:['❌ Order Reject','ပယ်ဖျက်ခဲ့ပါပြီ'] }[status];
-  if (_pm) { try { await sendPushToUser(o.userId, _pm[0], _pm[1]); } catch(e){} }
   const msgs = {
     processing: `⚙️ Order ${o.id} (${o.product}) ပြင်ဆင်နေပါပြီ`,
     completed: `✅ Order ${o.id} (${o.product}) ပြီးစီးပါပြီ! ကျေးဇူးတင်ပါတယ်`,
@@ -651,7 +616,7 @@ app.get('/api/admin/chat/:userId', adminAuth, (req, res) => {
   saveDB();
   res.json(msgs);
 });
-app.post('/api/admin/chat', adminAuth, async (req, res) => {
+app.post('/api/admin/chat', adminAuth, (req, res) => {
   const { userId, text, image, audio } = req.body;
   if (!userId || (!text && !image && !audio)) return res.status(400).json({error:'ဖြည့်ပါ'});
   const user = db.users.find(u => u.id === userId);
@@ -938,33 +903,6 @@ function startBackupLoop() {
     }
   }, 60000);
   console.log('Backup loop started');
-}
-
-
-async function sendPushToUser(userId, title, body, data) {
-  if (!db.subscriptions) return 0;
-  const subs = db.subscriptions.filter(x => x.userId === userId);
-  let sent = 0;
-  for (const sub of subs) {
-    try {
-      await webpush.sendNotification(sub.subscription, JSON.stringify({
-        title: title, body: body, data: data || {}, url: '/app.html'
-      }));
-      sent++;
-    } catch(e) {
-      if (e.statusCode === 404 || e.statusCode === 410) {
-        db.subscriptions = db.subscriptions.filter(x => x.endpoint !== sub.endpoint);
-      }
-    }
-  }
-  if (sent) saveDB();
-  return sent;
-}
-async function sendPushToAll(title, body, data) {
-  const uids = [...new Set((db.subscriptions||[]).map(x => x.userId))];
-  let t = 0;
-  for (const uid of uids) t += await sendPushToUser(uid, title, body, data);
-  return t;
 }
 
 const PORT = process.env.PORT || 3000;

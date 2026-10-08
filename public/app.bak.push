@@ -434,7 +434,6 @@ button.main:active{transform:scale(0.97)}
       <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#94a3b8">💎 Total Spent</span><b id="pSpent">0 Ks</b></div>
       <div style="display:flex;justify-content:space-between"><span style="color:#94a3b8">🎁 Referral</span><b id="pRef" style="color:#38bdf8">-</b></div>
     </div>
-    <button onclick="testPush()" style="width:100%;padding:12px;background:rgba(168,85,247,0.15);color:#a855f7;border:1px solid #a855f7;border-radius:12px;font-weight:bold;margin-top:12px;cursor:pointer">🔔 Test Notification</button>
     <button onclick="openTerms()" style="width:100%;padding:12px;background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;border-radius:12px;font-weight:bold;margin-top:15px;cursor:pointer">📜 Terms & Privacy</button>
     <div style="display:flex;justify-content:center;margin:12px 0 8px">
       <button onclick="installPWA()" id="pwaBtn" style="padding:10px 22px;background:rgba(16,185,129,0.15);color:#10b981;border:1.5px solid #10b981;border-radius:22px;font-weight:bold;font-size:14px;cursor:pointer;display:inline-block">📱 Install App</button>
@@ -879,42 +878,6 @@ function showSkeletons() {
   grid.innerHTML = Array(4).fill('<div class="skeleton skel-card"></div>').join('');
 }
 
-
-
-async function initPushNotifications() {
-  if (!('serviceWorker' in navigator) || !('PushManager' in window)) { console.log('Push not supported'); return; }
-  try {
-    const reg = await navigator.serviceWorker.ready;
-    let perm = Notification.permission;
-    if (perm === 'default') perm = await Notification.requestPermission();
-    if (perm !== 'granted') { console.log('Push denied'); return; }
-    const vapidRes = await fetch('/api/push/vapid');
-    const vapidData = await vapidRes.json();
-    if (!vapidData.publicKey) { console.log('No VAPID'); return; }
-    let sub = await reg.pushManager.getSubscription();
-    if (!sub) {
-      sub = await reg.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: urlB64ToUint8(vapidData.publicKey)
-      });
-    }
-    const r = await api('/api/push/subscribe', { method:'POST', body: JSON.stringify({ subscription: sub.toJSON() }) });
-    console.log('Push subscribed:', r && r.success ? 'OK' : 'FAIL');
-  } catch(e) { console.log('Push err:', e.message); }
-}
-function urlB64ToUint8(base64String) {
-  const padding = '='.repeat((4 - base64String.length % 4) % 4);
-  const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/');
-  const rawData = window.atob(base64);
-  const outputArray = new Uint8Array(rawData.length);
-  for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i);
-  return outputArray;
-}
-async function testPush() {
-  const r = await api('/api/push/test', { method:'POST' });
-  if (r && r.success) showToast('🔔 Test push — ' + r.sent + ' device', 'success');
-  else showToast('❌ Push failed', 'error');
-}
 
 async function api(url, opts={}) {
   const r = await fetch(url, {...opts, headers: {...H, ...(opts.headers||{})}});
@@ -1443,7 +1406,6 @@ setInterval(quickCheck, 3000);
   await loadProducts();
   requestPushPermission();
   setTimeout(startTour, 2500);
-  setTimeout(initPushNotifications, 2000);
   setInterval(loadMe, 5000);
   setInterval(async () => {
     try {
