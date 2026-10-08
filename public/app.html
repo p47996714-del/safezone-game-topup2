@@ -724,48 +724,7 @@ function markRecommended() {
 }
 
 // ===== BACKGROUND MUSIC (Feature 10) =====
-let musicCtx = null;
-let musicPlaying = false;
-function startMusic() {
-  try {
-    if (musicCtx) { musicCtx.resume(); musicPlaying = true; updateMusicBtn(); return; }
-    musicCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // Simple ambient chord progression
-    const notes = [262, 330, 392, 523, 392, 330];
-    let i = 0;
-    const osc = musicCtx.createOscillator();
-    const gain = musicCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = notes[0];
-    osc.connect(gain);
-    gain.connect(musicCtx.destination);
-    gain.gain.value = 0.03;
-    osc.start();
-    const iv = setInterval(() => {
-      if (!musicPlaying) return;
-      i = (i + 1) % notes.length;
-      try { osc.frequency.setValueAtTime(notes[i], musicCtx.currentTime); } catch(e){}
-    }, 700);
-    musicCtx._interval = iv;
-    musicPlaying = true;
-    updateMusicBtn();
-  } catch(e){ console.log('music err', e.message); }
-}
-function stopMusic() {
-  if (musicCtx) { try { musicCtx.suspend(); } catch(e){} }
-  musicPlaying = false;
-  updateMusicBtn();
-}
-function toggleMusic() {
-  if (musicPlaying) stopMusic(); else startMusic();
-  haptic(30);
-}
-function updateMusicBtn() {
-  const b = document.getElementById('musicBtn');
-  if (!b) return;
-  b.textContent = musicPlaying ? '🎵' : '🔇';
-  b.classList.toggle('playing', musicPlaying);
-}
+
 
 // ===== PUSH NOTIFICATION (Feature 9) =====
 async function requestPushPermission() {
@@ -1431,6 +1390,121 @@ async function buyPremium(){
       showToast('📩 ➤ နှိပ်ပြီး Admin ဆီ ပို့ပါ', 'info');
     }, 500);
   }, 500);
+}
+
+
+// ===== BACKGROUND MUSIC PLAYER (Melody) =====
+let musicCtx = null;
+let musicPlaying = false;
+let musicTimer = null;
+let musicNodes = [];
+
+const MUSIC_MELODY = [
+  // Lo-fi chill melody (frequencies in Hz)
+  // Pattern: [freq, duration_ms]
+  [523.25, 500],  // C5
+  [587.33, 500],  // D5
+  [659.25, 500],  // E5
+  [783.99, 500],  // G5
+  [659.25, 500],  // E5
+  [587.33, 500],  // D5
+  [523.25, 1000], // C5 (long)
+  [0, 500],       // Rest
+  
+  [587.33, 500],  // D5
+  [659.25, 500],  // E5
+  [698.46, 500],  // F5
+  [880.00, 500],  // A5
+  [698.46, 500],  // F5
+  [659.25, 500],  // E5
+  [587.33, 1000], // D5
+  [0, 500],       // Rest
+  
+  [523.25, 500],  // C5
+  [587.33, 500],  // D5
+  [659.25, 500],  // E5
+  [523.25, 500],  // C5
+  [440.00, 500],  // A4
+  [493.88, 500],  // B4
+  [523.25, 1500], // C5 (long)
+  [0, 1000],      // Rest
+];
+
+function playNote(freq, duration) {
+  if (!musicCtx) return;
+  try {
+    const osc = musicCtx.createOscillator();
+    const gain = musicCtx.createGain();
+    osc.type = 'sine';
+    osc.frequency.value = freq;
+    osc.connect(gain);
+    gain.connect(musicCtx.destination);
+    const now = musicCtx.currentTime;
+    const attack = 0.05;
+    const release = 0.3;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.08, now + attack);
+    gain.gain.setValueAtTime(0.08, now + (duration/1000) - release);
+    gain.gain.exponentialRampToValueAtTime(0.001, now + (duration/1000));
+    osc.start(now);
+    osc.stop(now + (duration/1000) + 0.1);
+    musicNodes.push(osc);
+    // Cleanup
+    setTimeout(() => {
+      try { osc.disconnect(); } catch(e){}
+      const i = musicNodes.indexOf(osc);
+      if (i >= 0) musicNodes.splice(i, 1);
+    }, duration + 200);
+  } catch(e){}
+}
+
+function playMelody() {
+  if (!musicPlaying || !musicCtx) return;
+  let totalDelay = 0;
+  MUSIC_MELODY.forEach(([freq, dur]) => {
+    setTimeout(() => {
+      if (!musicPlaying) return;
+      if (freq > 0) playNote(freq, dur);
+    }, totalDelay);
+    totalDelay += dur;
+  });
+  // Loop again after full melody
+  musicTimer = setTimeout(() => {
+    if (musicPlaying) playMelody();
+  }, totalDelay + 500);
+}
+
+function startMusic() {
+  try {
+    if (!musicCtx) musicCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if (musicCtx.state === 'suspended') musicCtx.resume();
+    musicPlaying = true;
+    playMelody();
+    updateMusicBtn();
+    showToast('🎵 Music On', 'info');
+  } catch(e){ console.log('music err', e.message); }
+}
+
+function stopMusic() {
+  musicPlaying = false;
+  if (musicTimer) { clearTimeout(musicTimer); musicTimer = null; }
+  musicNodes.forEach(n => { try { n.stop(); } catch(e){} });
+  musicNodes = [];
+  if (musicCtx) { try { musicCtx.suspend(); } catch(e){} }
+  updateMusicBtn();
+  showToast('🔇 Music Off', 'info');
+}
+
+function toggleMusic() {
+  if (musicPlaying) stopMusic(); else startMusic();
+  haptic(30);
+}
+
+function updateMusicBtn() {
+  const b = document.getElementById('musicBtn');
+  if (!b) return;
+  b.textContent = musicPlaying ? '🎵' : '🔇';
+  b.classList.toggle('playing', musicPlaying);
 }
 
 async function logout(){
