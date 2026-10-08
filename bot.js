@@ -319,6 +319,23 @@ async function handleMessage(msg) {
       if (cmd === '/version') return send(cid, '🤖 Version: <code>' + BOT_VER + '</code>', MENU.admin);
       if (cmd === '/start' || cmd === '/menu') return showAdmin(cid);
       if (cmd === '/faq') return send(cid, FAQ, MENU.back_a);
+
+    if (cmd === '/leaderboard' || cmd === '/top') {
+      const totals = {};
+      db.deposits.filter(d => d.status === 'approved').forEach(d => {
+        totals[d.userId] = (totals[d.userId] || 0) + d.amount;
+      });
+      const list = db.users.map(u => ({ username: u.username, total: totals[u.id] || 0 }))
+        .filter(u => u.total > 0).sort((a, b) => b.total - a.total).slice(0, 10);
+      const medals = ['🥇','🥈','🥉'];
+      let t = '<b>🏆 Top Spenders</b>\n━━━━━━━━━━━━━\n\n';
+      if (!list.length) t += 'ဒေတာ မရှိပါ';
+      list.forEach((u, i) => {
+        t += (medals[i] || (i+1) + '.') + ' <b>' + u.username + '</b>\n💰 ' + u.total.toLocaleString() + ' Ks\n\n';
+      });
+      return send(chatId, t, MENU.back_a);
+    }
+
       return showAdmin(cid);
     }
 
@@ -375,6 +392,23 @@ async function handleMessage(msg) {
     if (cmd === '/start' || cmd === '/menu') return showUser(cid, user);
     if (cmd === '/balance') return send(cid, '💰 <b>' + user.balance.toLocaleString() + ' Ks</b>', MENU.user);
     if (cmd === '/faq') return send(cid, FAQ, MENU.back_u);
+
+    if (cmd === '/leaderboard' || cmd === '/top') {
+      const totals = {};
+      db.deposits.filter(d => d.status === 'approved').forEach(d => {
+        totals[d.userId] = (totals[d.userId] || 0) + d.amount;
+      });
+      const list = db.users.map(u => ({ username: u.username, total: totals[u.id] || 0 }))
+        .filter(u => u.total > 0).sort((a, b) => b.total - a.total).slice(0, 10);
+      const medals = ['🥇','🥈','🥉'];
+      let t = '<b>🏆 Top Spenders</b>\n━━━━━━━━━━━━━\n\n';
+      if (!list.length) t += 'ဒေတာ မရှိပါ';
+      list.forEach((u, i) => {
+        t += (medals[i] || (i+1) + '.') + ' <b>' + u.username + '</b>\n💰 ' + u.total.toLocaleString() + ' Ks\n\n';
+      });
+      return send(cid, t, MENU.back_u);
+    }
+
     if (cmd === '/buy') {
       const games = [...new Set(db.products.map(p => p.game))];
       if (!games.length) return send(cid, '❌ ဂိမ်း မရှိပါ', MENU.user);

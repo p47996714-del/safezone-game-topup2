@@ -505,6 +505,25 @@ app.get('/api/admin/subscriptions', adminAuth, (req, res) => {
   res.json({ total: (db.subscriptions||[]).length, users: byUser });
 });
 
+
+app.post('/api/spin', auth, (req, res) => {
+  const today = new Date().toDateString();
+  if (req.user.lastSpin === today) {
+    return res.status(400).json({ error: 'ဒီနေ့ Spin လုပ်ပြီးပါပြီ' });
+  }
+  const prizes = [50, 100, 200, 500, 1000, 2000, 5000, 0];
+  const weights = [30, 25, 20, 12, 8, 3, 1, 1];
+  let r = Math.random() * 100, sum = 0, reward = 0;
+  for (let i = 0; i < prizes.length; i++) {
+    sum += weights[i];
+    if (r < sum) { reward = prizes[i]; break; }
+  }
+  req.user.balance = (req.user.balance || 0) + reward;
+  req.user.lastSpin = today;
+  saveDB();
+  res.json({ success: true, reward: reward, balance: req.user.balance });
+});
+
 app.get('/api/notifications', auth, (req, res) => {
   const list = (db.notifications || []).filter(n => n.userId === req.user.id)
     .sort((a,b) => b.createdAt - a.createdAt).slice(0, 50);
