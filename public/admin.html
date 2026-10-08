@@ -3,14 +3,9 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Safe Zone Admin</title>
+<title>Admin - Safe Zone</title>
 <link rel="manifest" href="/admin-manifest.json">
 <meta name="theme-color" content="#a855f7">
-<meta name="mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="apple-mobile-web-app-title" content="SZ Admin">
-<link rel="apple-touch-icon" href="https://i.imgur.com/iRwIfqs.png">
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif}
 body{background:radial-gradient(circle at 20% 20%,#1e3a8a33,transparent),#0b1120;color:#fff;min-height:100vh;padding:15px}
@@ -165,7 +160,7 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
       <button onclick="exportData('users')" class="btn blue" style="margin-top:0">📥 Users</button>
       <button onclick="exportData('orders')" class="btn blue" style="margin-top:0">📥 Orders</button>
       <button onclick="exportData('deposits')" class="btn blue" style="margin-top:0">📥 Deps</button>
-      <button onclick="installAdminPWA()" id="adminInstallBtn" style="padding:8px 14px;background:linear-gradient(135deg,#22c55e,#059669);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:bold;font-family:inherit;font-size:12px;margin-right:6px">📱 Install</button>
+      <button id="adminInstallBtn" onclick="window.installAdminPWA && window.installAdminPWA()" style="padding:8px 14px;background:#22c55e;color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:bold;font-family:inherit;font-size:12px;margin-right:6px">📱 Install</button>
       <button onclick="logout()" style="padding:8px 14px;background:rgba(127,29,29,0.9);color:#fff;border:none;border-radius:10px;cursor:pointer;font-weight:bold;font-family:inherit">Logout</button>
     </div>
   </div>
@@ -298,16 +293,7 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
       <input id="ws_themePrimary" placeholder="Primary color (#38bdf8)">
       <input id="ws_themeSecondary" placeholder="Secondary color (#a855f7)">
     </div>
-    
-    <div class="upload-row">
-      <input id="ws_musicUrl" type="text" placeholder="🎵 Music URL (mp3)">
-      <button class="upload-btn" onclick="pickFile('music')">🎵 Upload</button>
-      <button class="upload-btn red" onclick="clearField('ws_musicUrl')">✕</button>
-    </div>
-    <div class="upload-preview" id="musicPreview">
-      <audio id="musicPreviewPlayer" controls style="width:100%;margin-top:8px"></audio>
-    </div>
-<div class="row"><button onclick="saveSiteInfo()">💾 Save Site Info</button></div>
+    <div class="row"><button onclick="saveSiteInfo()">💾 Save Site Info</button></div>
   </div>
 
   <!-- LABELS -->
@@ -1022,9 +1008,12 @@ async function loadWebsiteConfig() {
     document.getElementById('ws_heroTitle').value = c.hero?.title || '';
     document.getElementById('ws_heroSubtitle').value = c.hero?.subtitle || '';
     document.getElementById('ws_videoUrl').value = c.hero?.videoUrl || '';
-    var _mi = document.getElementById('ws_musicUrl');
-    if (_mi) _mi.value = c.musicUrl || '';
-    if (c.musicUrl) { var _pl = document.getElementById('musicPreviewPlayer'); var _pv = document.getElementById('musicPreview'); if (_pl) _pl.src = c.musicUrl; if (_pv) _pv.classList.add('show'); }
+    document.getElementById('ws_musicUrl').value = c.musicUrl || '';
+    if (c.musicUrl) {
+      const pv = document.getElementById('musicPreview');
+      const pl = document.getElementById('musicPreviewPlayer');
+      if (pv && pl) { pv.classList.add('show'); pl.src = c.musicUrl; }
+    }
     document.getElementById('ws_themePrimary').value = c.theme?.primary || '';
     document.getElementById('ws_themeSecondary').value = c.theme?.secondary || '';
     // Labels
@@ -1174,8 +1163,8 @@ async function saveSiteInfo() {
   let ok = 0;
   if (name) { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'siteName', value:name})}); if (r.success) ok++; }
   if (logo) { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'logoUrl', value:logo})}); if (r.success) ok++; }
-  var _miS = document.getElementById('ws_musicUrl');
-  if (_miS) { var _mv = _miS.value.trim(); var _mr = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'musicUrl', value:_mv})}); if (_mr.success) ok++; }
+  const music = document.getElementById('ws_musicUrl').value.trim();
+  { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'musicUrl', value:music})}); if (r.success) ok++; }
   { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'hero', value:hero})}); if (r.success) ok++; }
   { const r = await api('/api/admin/config/section',{method:'POST',body:JSON.stringify({section:'theme', value:theme})}); if (r.success) ok++; }
   alert('✅ Site info သိမ်းပြီး (' + ok + '/4)');
@@ -1254,7 +1243,8 @@ function pickGameImg() {
 async function onFileSelected(e) {
   const file = e.target.files[0];
   if (!file) return;
-  if (file.size > 3 * 1024 * 1024) { alert('❌ ပုံ 3MB အောက်သာ'); return; }
+  const maxSize = (_uploadContext === 'music' || _uploadContext === 'video') ? 5 * 1024 * 1024 : 3 * 1024 * 1024;
+  if (file.size > maxSize) { alert('❌ File အလွန်ကြီး (' + Math.round(maxSize/1024/1024) + 'MB အောက်သာ)'); return; }
   const reader = new FileReader();
   const prog = document.getElementById('uploadProgress');
   const bar = document.getElementById('uploadProgressBar');
@@ -1290,12 +1280,11 @@ async function handleUploadSuccess(url, context) {
     if (inp) inp.value = url;
     alert('✅ Video တင်ပြီး — Site Info Save နှိပ်ပါ');
   } else if (context === 'music') {
-    var _mh = document.getElementById('ws_musicUrl');
-    if (_mh) _mh.value = url;
-    var _ph = document.getElementById('musicPreviewPlayer');
-    var _pvh = document.getElementById('musicPreview');
-    if (_ph) _ph.src = url;
-    if (_pvh) _pvh.classList.add('show');
+    const inp = document.getElementById('ws_musicUrl');
+    if (inp) inp.value = url;
+    const pv = document.getElementById('musicPreview');
+    const pl = document.getElementById('musicPreviewPlayer');
+    if (pv && pl) { pv.classList.add('show'); pl.src = url; }
     alert('✅ Music တင်ပြီး — Site Info Save နှိပ်ပါ');
   } else if (context === 'gameImg') {
     const inp = document.getElementById('giUrl');
@@ -1373,57 +1362,20 @@ tab = function(name, btn) {
   }
 };
 
-
-// ===== ADMIN PWA INSTALL =====
-let _adminDeferredPrompt = null;
-window.addEventListener('beforeinstallprompt', function(e) {
-  e.preventDefault();
-  _adminDeferredPrompt = e;
-  var btn = document.getElementById('adminInstallBtn');
-  if (btn) btn.style.display = 'inline-block';
-});
-window.addEventListener('appinstalled', function() {
-  _adminDeferredPrompt = null;
-  var btn = document.getElementById('adminInstallBtn');
-  if (btn) btn.style.display = 'none';
-  alert('✅ Admin App installed!');
-});
-async function installAdminPWA() {
-  // Already installed?
-  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
-    alert('✅ ဒီ Admin Panel က Install လုပ်ပြီးသား');
-    return;
-  }
-  // If Android/Chrome prompt available
-  if (_adminDeferredPrompt) {
-    _adminDeferredPrompt.prompt();
-    var result = await _adminDeferredPrompt.userChoice;
-    if (result.outcome === 'accepted') alert('✅ Admin App install ပြီး!');
-    _adminDeferredPrompt = null;
-    return;
-  }
-  // Manual instructions
-  var ua = navigator.userAgent;
-  var isIOS = /iPad|iPhone|iPod/.test(ua) && !window.MSStream;
-  if (isIOS) {
-    alert('📱 iPhone Install:\n\n1. Safari ဖွင့်ပါ\n2. Share (□↑) နှိပ်\n3. "Add to Home Screen" ရွေး\n4. "Add" နှိပ်');
-  } else {
-    alert('📱 Android Install:\n\n1. Chrome ⋮ menu နှိပ်\n2. "Install app" (သို့) "Add to Home screen" ရွေး\n3. "Install" နှိပ်');
-  }
-}
-// Show install button if not installed
-setTimeout(function() {
-  if (!window.matchMedia('(display-mode: standalone)').matches && !window.navigator.standalone) {
-    var btn = document.getElementById('adminInstallBtn');
-    if (btn && !_adminDeferredPrompt) {
-      // Show but with manual instructions
-      btn.style.display = 'inline-block';
-    }
-  }
-}, 2000);
-
 if (ap) showPanel();
 setTimeout(function(){ try { loadBackupConfig(); } catch(e){} }, 1200);
+</script>
+<script>
+window._adminPrompt = null;
+window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); window._adminPrompt = e; });
+window.installAdminPWA = function(){
+  if(window._adminPrompt){
+    window._adminPrompt.prompt();
+    window._adminPrompt.userChoice.then(function(r){ if(r.outcome==="accepted") alert("Install OK!"); window._adminPrompt=null; });
+    return;
+  }
+  alert("Install လုပ်ရန်:\n\n1. Chrome Menu (⋮) ကို နှိပ်\n2. \"Install app\" ကို ရွေး\n3. \"Install\" နှိပ်");
+};
 </script>
 </body>
 </html>
