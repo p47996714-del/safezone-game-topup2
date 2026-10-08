@@ -322,7 +322,11 @@ button.main:active{transform:scale(0.97)}
     </div>
   </div>
 
-  
+  <div class="live-stats" id="liveStats">
+    <div class="live-stat"><div class="num" id="statUsers">0</div><div class="lbl">Users</div></div>
+    <div class="live-stat"><div class="num" id="statOrders">0</div><div class="lbl">Orders</div></div>
+    <div class="live-stat"><div class="num" id="statDone">0</div><div class="lbl">Completed</div></div>
+  </div>
 
   <div class="section-title">🔥 Popular Games</div>
   <div class="slider-wrap"><div class="slider-track" id="gameSlider"></div></div>
@@ -677,7 +681,10 @@ async function loadLiveStats() {
   try {
     const site = await (await fetch('/api/site')).json();
     const t = site.trustBadge || { users: 0, orders: 0, completed: 0 };
-              } catch(e){}
+    animateNumber(document.getElementById('statUsers'), t.users || 0);
+    animateNumber(document.getElementById('statOrders'), t.orders || 0);
+    animateNumber(document.getElementById('statDone'), t.completed || 0);
+  } catch(e){}
 }
 
 // ===== GAME SLIDER (Feature 18) =====
@@ -1116,16 +1123,13 @@ function openModal(id){
   selected = products.find(p=>p.id===id);
   closeModal('productModal');
   if (selected.game === 'App Premium') {
-    if (confirm('📱 App Premium ဝယ်ရန် Admin ဆီ Chat ပို့မလား?\n\nOK နှိပ်ရင် Chat tab ကို ရောက်မယ်')) {
-      gotoChat();
-      setTimeout(function(){
-        const inp = document.getElementById('chatInput');
-        if (inp) {
-          inp.value = '📱 App Premium ဝယ်ချင်ပါတယ်: ' + selected.name + ' (' + selected.price.toLocaleString() + ' Ks)';
-          inp.focus();
-        }
-        showToast('📱 စာ ရေးပြီး ➤ နှိပ်ပါ', 'info');
-      }, 500);
+    const bu = siteData && siteData.botUsername;
+    if (bu) {
+      if (confirm('📱 App Premium ဝယ်ရန် Admin ဆီ Telegram မှာ ဆက်သွယ်ပါ။\n\nTelegram ဖွင့်မလား?')) {
+        window.open('https://t.me/' + bu, '_blank');
+      }
+    } else {
+      alert('📱 App Premium ဝယ်ရန် Admin ဆီ Telegram မှာ ဆက်သွယ်ပါ');
     }
     return;
   }
