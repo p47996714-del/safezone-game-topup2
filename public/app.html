@@ -4,15 +4,12 @@
 <script>
 var soundOn = true;
 var hapticOn = true;
-
-// Error Catcher 1: Syntax/Runtime Errors
 window.onerror = function(msg, url, line, col, error) {
-  alert("⚠️ JS Error: " + msg + "\nLine: " + line + "\nCol: " + col);
+  console.log("JS Error: " + msg + " at " + line + ":" + col);
   return false;
 };
-// Error Catcher 2: Async/Promise Errors
 window.addEventListener('unhandledrejection', function(event) {
-  alert("⚠️ App Error: " + (event.reason ? event.reason.message : "Unknown API Error"));
+  console.log("App Error: " + (event.reason ? event.reason.message : "Unknown API Error"));
 });
 </script>
 <meta charset="UTF-8">
@@ -20,7 +17,6 @@ window.addEventListener('unhandledrejection', function(event) {
 <meta name="theme-color" content="#0b1120">
 <link rel="manifest" href="/manifest.json">
 <link rel="preconnect" href="https://i.imgur.com">
-<link rel="preconnect" href="https://api.qrserver.com">
 <title>Safe Zone Game Topup</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
@@ -149,13 +145,6 @@ body.light .faq-item{background:#fff}
 .faq-item p{padding:0 16px 16px;color:#cbd5e1;font-size:13px;line-height:1.6}
 .maint{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%,#1e293b 0%,#0b1120 70%);z-index:99999;display:none;align-items:center;justify-content:center;padding:30px;text-align:center;flex-direction:column;overflow:hidden}
 .maint.show{display:flex}
-.maint::before{content:'';position:absolute;width:500px;height:500px;background:radial-gradient(circle,rgba(245,158,11,0.15),transparent 70%);border-radius:50%;top:-150px;left:-150px;animation:maintFloat 8s ease-in-out infinite}
-.maint::after{content:'';position:absolute;width:400px;height:400px;background:radial-gradient(circle,rgba(239,68,68,0.12),transparent 70%);border-radius:50%;bottom:-120px;right:-120px;animation:maintFloat 10s ease-in-out infinite reverse}
-@keyframes maintFloat{0%,100%{transform:translateY(0) scale(1)}50%{transform:translateY(30px) scale(1.1)}}
-.maint-icon-wrap{position:relative;width:140px;height:140px;margin-bottom:25px;display:flex;align-items:center;justify-content:center}
-.maint-icon-ring{position:absolute;inset:0;border-radius:50%;border:3px dashed #f59e0b;animation:maintSpin 12s linear infinite}
-.maint-icon-ring-2{position:absolute;inset:15px;border-radius:50%;border:2px dotted #38bdf8;animation:maintSpin 8s linear infinite reverse}
-@keyframes maintSpin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 .maint-icon{font-size:60px;animation:maintPulse 2s ease-in-out infinite;filter:drop-shadow(0 0 20px rgba(245,158,11,0.6))}
 @keyframes maintPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
 .maint-title{font-size:26px;font-weight:bold;background:linear-gradient(135deg,#f59e0b,#ef4444,#ec4899);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:maintGrad 3s ease infinite;margin-bottom:12px;letter-spacing:0.5px}
@@ -184,120 +173,32 @@ body.light .faq-item{background:#fff}
 .splash-loader{margin-top:40px;width:180px;height:4px;background:#1e293b;border-radius:4px;overflow:hidden}
 .splash-bar{height:100%;background:linear-gradient(90deg,#38bdf8,#a855f7,#ec4899);border-radius:4px;animation:loadBar 2s ease-in-out forwards}
 @keyframes loadBar{0%{width:0}100%{width:100%}}
-.tour{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:5000;display:none;align-items:center;justify-content:center;padding:20px}
-.tour.show{display:flex}
-.tour-box{background:#1e293b;padding:28px;border-radius:20px;max-width:360px;text-align:center;border:1px solid #38bdf8}
-.tour-icon{font-size:60px;margin-bottom:15px}
-.tour-title{font-size:18px;font-weight:bold;color:#38bdf8;margin-bottom:10px}
-.tour-text{color:#cbd5e1;font-size:14px;line-height:1.6;margin-bottom:20px}
-.tour-buttons{display:flex;gap:10px}
-.tour-buttons button{flex:1;padding:12px;border:none;border-radius:12px;font-weight:bold;cursor:pointer;font-size:14px}
-.tour-skip{background:#334155;color:#fff}
-.tour-next{background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff}
 .toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:14px 24px;border-radius:14px;font-weight:bold;font-size:14px;z-index:10000;transition:all 0.4s;box-shadow:0 8px 25px rgba(16,185,129,0.4);max-width:90vw;text-align:center;opacity:0}
 .toast.show{transform:translateX(-50%) translateY(0);opacity:1}
 .toast.error{background:linear-gradient(135deg,#ef4444,#dc2626)}
 .toast.info{background:linear-gradient(135deg,#38bdf8,#3b82f6)}
 .confetti{position:fixed;width:10px;height:10px;z-index:10001;pointer-events:none;animation:confetti 3s linear forwards}
 @keyframes confetti{to{transform:translateY(100vh) rotate(720deg);opacity:0}}
-.progress-bar-wrap{margin-top:8px;height:6px;background:#0f172a;border-radius:3px;overflow:hidden}
-.progress-bar{height:100%;background:linear-gradient(90deg,#eab308,#3b82f6,#22c55e);border-radius:3px;transition:width 0.5s;width:0}
-.progress-bar[data-stage="pending"]{width:33%}
-.progress-bar[data-stage="processing"]{width:66%}
-.progress-bar[data-stage="completed"]{width:100%}
-.progress-bar[data-stage="rejected"]{width:100%;background:linear-gradient(90deg,#ef4444,#dc2626)}
 .typing-ind{display:none;padding:8px 14px;background:#1e293b;border-radius:14px;align-self:flex-start;font-size:12px;color:#94a3b8;font-style:italic}
 .typing-ind.show{display:block}
 .typing-ind span{animation:blink 1.4s infinite}
 .typing-ind span:nth-child(2){animation-delay:0.2s}
 .typing-ind span:nth-child(3){animation-delay:0.4s}
 @keyframes blink{0%,60%,100%{opacity:0.3}30%{opacity:1}}
-.read-receipt{font-size:9px;color:#94a3b8;margin-left:4px}
-.read-receipt.read{color:#38bdf8}
-.ads-banner{margin:10px 15px;padding:12px 15px;background:linear-gradient(135deg,#f59e0b,#ef4444);border-radius:12px;font-size:13px;font-weight:bold;text-align:center;display:none}
-.ads-banner.show{display:block}
-.theme-color-row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
-.theme-color-dot{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:0.2s}
-.theme-color-dot.active{border-color:#fff;transform:scale(1.1)}
 .settings-toggle{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px}
 .toggle-switch{position:relative;width:46px;height:26px;background:#334155;border-radius:13px;cursor:pointer;transition:0.3s}
 .toggle-switch.on{background:#22c55e}
 .toggle-switch::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:3px;left:3px;transition:0.3s}
 .toggle-switch.on::after{left:23px}
-.skeleton{background:linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);background-size:200% 100%;animation:skelShimmer 1.5s infinite;border-radius:12px}
-@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.skel-card{height:120px;border-radius:16px;margin-bottom:12px}
-.skel-line{height:14px;border-radius:7px;margin:6px 0}
-.skel-line.short{width:60%}
-.balance-card{background:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899,#3b82f6);background-size:300% 300%;animation:gradientShift 8s ease infinite}
-@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.carousel{box-shadow:0 12px 40px rgba(56,189,248,0.25)}
-.game-card{transition:transform 0.25s cubic-bezier(0.4,0,0.2,1),box-shadow 0.25s,border-color 0.25s}
-.game-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 12px 30px rgba(56,189,248,0.25);border-color:#38bdf8}
-.quick-card{transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s}
-.quick-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(56,189,248,0.2)}
-button.main{transition:transform 0.15s,box-shadow 0.15s}
-button.main:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(56,189,248,0.4)}
-button.main:active{transform:scale(0.97)}
-@media (hover: hover) and (pointer: fine) {
-  body{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%2338bdf8' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%2338bdf8'/%3E%3C/svg%3E") 12 12,auto}
-  button,a,input,select{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%2338bdf8' opacity='0.3'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%2338bdf8'/%3E%3C/svg%3E") 12 12,pointer}
-}
-.slider-wrap{margin:0 15px 15px;overflow:hidden;border-radius:20px;position:relative}
-.slider-track{display:flex;gap:12px;animation:slideScroll 25s linear infinite;padding:5px 0}
-.slider-track:hover{animation-play-state:paused}
-@keyframes slideScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.slider-card{min-width:150px;background:rgba(30,41,59,0.8);border-radius:16px;overflow:hidden;border:1px solid #334155;cursor:pointer;flex-shrink:0}
-.slider-card img{width:100%;height:90px;object-fit:cover}
-.slider-card .title{padding:8px;font-size:11px;text-align:center;font-weight:600}
-.video-hero{margin:15px;position:relative;height:180px;border-radius:22px;overflow:hidden;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;align-items:center;justify-content:center}
-.video-hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.35}
-.video-hero .overlay{position:relative;z-index:1;text-align:center;padding:20px}
-.video-hero h2{font-size:22px;font-weight:bold;background:linear-gradient(135deg,#38bdf8,#a855f7,#ec4899);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradientShift 3s ease infinite}
-.video-hero p{font-size:13px;color:#cbd5e1;margin-top:8px}
-.live-stats{margin:0 15px 15px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.live-stat{background:rgba(30,41,59,0.8);padding:14px 8px;border-radius:14px;text-align:center;border:1px solid #334155}
-.live-stat .num{font-size:20px;font-weight:bold;color:#38bdf8;font-variant-numeric:tabular-nums}
-.live-stat .lbl{font-size:10px;color:#94a3b8;margin-top:3px}
-.music-btn{position:fixed;bottom:90px;right:15px;width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#a855f7);border:none;color:#fff;font-size:20px;cursor:pointer;z-index:99;box-shadow:0 8px 20px rgba(56,189,248,0.4);display:flex;align-items:center;justify-content:center;transition:transform 0.2s}
-.music-btn:active{transform:scale(0.9)}
-.music-btn.playing{animation:pulseBtn 1.5s ease-in-out infinite}
-@keyframes pulseBtn{0%,100%{box-shadow:0 8px 20px rgba(56,189,248,0.4)}50%{box-shadow:0 8px 30px rgba(168,85,247,0.7)}}
-.chart-bars{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:15px;padding:0 5px}
-.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
-.chart-bar{width:100%;background:linear-gradient(180deg,#38bdf8,#a855f7);border-radius:5px 5px 0 0;min-height:3px;transition:height 0.6s}
-.chart-bar-lbl{font-size:9px;color:#94a3b8}
-.chart-bar-val{font-size:9px;color:#38bdf8;font-weight:bold}
-.recommend-badge{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:bold;padding:3px 8px;border-radius:10px;z-index:2}
-@media (hover: hover) and (pointer: fine) {
-  body, button, a, input, select { cursor: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='10' fill='none' stroke='%2338bdf8' stroke-width='2'/><circle cx='14' cy='14' r='3' fill='%23a855f7'/></svg>") 14 14, auto; }
-}
-.timer-badge { display: inline-block; font-size: 10px; color: #94a3b8; background: rgba(56,189,248,0.1); padding: 2px 8px; border-radius: 10px; margin-left: 5px; }
 .spin-wheel { width: 240px; height: 240px; border-radius: 50%; margin: 20px auto; position: relative; background: conic-gradient(#ef4444 0deg 45deg, #f59e0b 45deg 90deg, #22c55e 90deg 135deg, #3b82f6 135deg 180deg, #a855f7 180deg 225deg, #ec4899 225deg 270deg, #38bdf8 270deg 315deg, #10b981 315deg 360deg); box-shadow: 0 0 30px rgba(56,189,248,0.4); transition: transform 4s cubic-bezier(0.17,0.67,0.12,0.99); border: 4px solid #1e293b; }
 .spin-wheel::after { content: ''; position: absolute; top: -10px; left: 50%; transform: translateX(-50%); width: 0; height: 0; border-left: 15px solid transparent; border-right: 15px solid transparent; border-top: 25px solid #38bdf8; }
 .spin-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 70px; height: 70px; background: #0f172a; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 30px; z-index: 2; border: 3px solid #38bdf8; }
-.order-search { margin-bottom: 12px; }
-.order-search input { width: 100%; padding: 12px; border-radius: 12px; border: 1px solid #334155; background: #0f172a; color: #fff; font-size: 14px; }
-.maint-icon{animation:maintIconPulse 2s ease-in-out infinite !important}
-@keyframes maintIconPulse{0%,100%{transform:scale(1);filter:drop-shadow(0 0 15px rgba(245,158,11,0.5))}50%{transform:scale(1.15);filter:drop-shadow(0 0 30px rgba(245,158,11,0.9))}}
-/* Force hide splash after 3 seconds even if JS fails */
 .splash { animation: forceHideSplash 0.5s ease 3s forwards !important; }
 @keyframes forceHideSplash { to { opacity: 0; visibility: hidden; pointer-events: none; z-index: -9999; } }
 </style>
-
-<script>
-window.addEventListener('error', function(e) {
-  console.log('Global Error Caught:', e.message);
-  var splash = document.getElementById('splash');
-  if (splash) {
-    splash.classList.add('hide');
-    setTimeout(function(){ if (splash.parentNode) splash.parentNode.removeChild(splash); }, 700);
-  }
-});
-</script>
-
 </head>
 <body>
+<div id="toast" class="toast"></div>
 <div class="splash" id="splash">
   <div class="splash-logo"><img src="https://i.imgur.com/iRwIfqs.png" alt="logo"></div>
   <div class="splash-title">SAFE ZONE</div>
@@ -305,8 +206,9 @@ window.addEventListener('error', function(e) {
   <div class="splash-loader"><div class="splash-bar"></div></div>
 </div>
 <div class="maint" id="maintOverlay">
-  <div class="maint-icon-wrap"><div class="maint-icon-ring"></div><div class="maint-icon-ring-2"></div><div class="maint-icon">🚧</div></div>
-  <div class="maint-title">ခဏပိတ်ထားပါသည်</div><div class="maint-sub">TEMPORARILY CLOSED</div>
+  <div class="maint-icon">🚧</div>
+  <div class="maint-title">ခဏပိတ်ထားပါသည်</div>
+  <div class="maint-sub">TEMPORARILY CLOSED</div>
   <div class="maint-dots"><div class="maint-dot"></div><div class="maint-dot"></div><div class="maint-dot"></div></div>
   <div class="maint-msg" id="maintOverlayMsg">မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။ ကျေးဇူးပြု၍ စောင့်ဆိုင်းပေးပါ။</div>
   <div class="maint-info"><span class="maint-info-icon">⏳</span><span>Auto-refresh — ၃၀ စက္ကန့် တစ်ခါ</span></div>
@@ -416,11 +318,8 @@ window.addEventListener('error', function(e) {
   <h3>⚙️ Settings</h3>
   <div class="settings-toggle"><div><b style="font-size:14px">🔊 Sound</b><div style="font-size:11px;color:#94a3b8">Sound Effect</div></div><div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div></div>
   <div class="settings-toggle"><div><b style="font-size:14px">📳 Haptic</b><div style="font-size:11px;color:#94a3b8">တုန်ခါမှု</div></div><div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div></div>
-  <div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px"><b style="font-size:14px">🎨 Theme Color</b><div class="theme-color-row" id="themeColorRow"></div></div>
-  <button onclick="shareApp()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">📤 Share App</button>
   <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
 </div></div>
-<div class="ads-banner" id="adsBanner" onclick="if(this.dataset.link)window.open(this.dataset.link,'_blank')"></div>
 <div class="modal" id="notifModal"><div class="modal-box"><h3>🔔 Notifications</h3><div id="notifList"></div><button class="cancel" onclick="closeModal('notifModal')">Close</button></div></div>
 <button class="music-btn" id="musicBtn" onclick="toggleMusicWithCustom()">🎵</button>
 <div class="modal" id="spinModal"><div class="modal-box"><h3>🎰 Lucky Spin</h3><div class="spin-wheel" id="spinWheel"><div class="spin-center">🎁</div></div><div id="spinResult" style="text-align:center;padding:10px;font-size:14px;color:#94a3b8;margin-top:10px">Spin နှိပ်ပြီး ကံစမ်းပါ</div><button onclick="doSpin()" id="spinBtn" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🎰 Spin!</button><button class="cancel" onclick="closeModal('spinModal')">Close</button></div></div>
@@ -461,6 +360,7 @@ function playSound(type){
 function haptic(ms){ if (navigator.vibrate) navigator.vibrate(ms || 30); }
 function showToast(text, type){
   const t = document.getElementById('toast');
+  if (!t) return;
   t.textContent = text; t.className = 'toast show ' + (type || '');
   clearTimeout(t._timer);
   t._timer = setTimeout(() => { t.classList.remove('show'); setTimeout(() => { t.textContent = ''; t.className = 'toast'; }, 400); }, 2000);
@@ -476,21 +376,13 @@ function toggleHaptic(){ hapticOn = !hapticOn; localStorage.setItem('hapticOn', 
 const _origPlaySound = playSound; playSound = function(type){ if (!soundOn) return; _origPlaySound(type); };
 const _origHaptic = haptic; haptic = function(ms){ if (!hapticOn) return; _origHaptic(ms); };
 function shareApp(){ const url = location.origin; if (navigator.share) { navigator.share({ title:'Safe Zone Game Topup', text:'\uD83C\uDFAE Safe Zone - Game Topup\n\uD83D\uDCB0 MLBB, PUBG, Magic Chess', url }).catch(()=>{}); } else { navigator.clipboard.writeText(url).then(()=>showToast('\u2705 Link \u1000\u1030\u1038\u1015\u103C\u102E\u1038\u1015\u102B\u1015\u103C\u102E', 'success')); } }
-const THEME_COLORS = [{name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},{name:'Green', primary:'#10b981', secondary:'#3b82f6'},{name:'Red', primary:'#ef4444', secondary:'#f59e0b'},{name:'Pink', primary:'#ec4899', secondary:'#a855f7'},{name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},{name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}];
-function openSettings(){ document.getElementById('settingsModal').classList.add('show'); updateToggles(); const cur = localStorage.getItem('themeColor') || 'Blue'; document.getElementById('themeColorRow').innerHTML = THEME_COLORS.map(c => '<div class="theme-color-dot ' + (cur===c.name?'active':'') + '" style="background:linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')" onclick="setThemeColor(\'' + c.name + '\')" title="' + c.name + '"></div>').join(''); }
-function setThemeColor(name){ const c = THEME_COLORS.find(x => x.name === name); if (!c) return; document.documentElement.style.setProperty('--accent1', c.primary); document.documentElement.style.setProperty('--accent2', c.secondary); localStorage.setItem('themeColor', name); document.querySelectorAll('button.main').forEach(b => b.style.background = 'linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')'); showToast('\u2705 ' + name + ' Theme', 'success'); haptic(30); }
-function applyTheme(){ const name = localStorage.getItem('themeColor') || 'Blue'; setThemeColor(name); } applyTheme();
-async function loadAdsBanner(){ if (!siteData || !siteData.adsBanner || !siteData.adsBanner.enabled || !siteData.adsBanner.text) return; const b = document.getElementById('adsBanner'); b.textContent = '\uD83D\uDCE2 ' + siteData.adsBanner.text; b.classList.add('show'); }
+function openSettings(){ document.getElementById('settingsModal').classList.add('show'); updateToggles(); }
+async function loadAdsBanner(){ if (!siteData || !siteData.adsBanner || !siteData.adsBanner.enabled || !siteData.adsBanner.text) return; const b = document.getElementById('adsBanner'); if(b){ b.textContent = '\uD83D\uDCE2 ' + siteData.adsBanner.text; b.classList.add('show'); } }
 function renderReadReceipt(m){ if (m.from !== 'user') return ''; return '<span class="read-receipt ' + (m.read ? 'read' : '') + '">' + (m.read ? '\u2713\u2713' : '\u2713') + '</span>'; }
 let lastMsgCount = 0;
 function checkTyping(list){ const ind = document.getElementById('typingInd'); if (!ind) return; if (list.length && list[list.length-1].from === 'user' && Date.now() - list[list.length-1].createdAt < 3000) { ind.classList.add('show'); setTimeout(() => ind.classList.remove('show'), 2500); } }
 function animateNumber(el, target, dur) { if (!el) return; const start = parseInt(el.textContent) || 0; const startTime = Date.now(); function tick() { const p = Math.min((Date.now() - startTime) / (dur || 1200), 1); const val = Math.floor(start + (target - start) * p); el.textContent = val.toLocaleString(); if (p < 1) requestAnimationFrame(tick); } tick(); }
-async function loadLiveStats() { try { const site = await api('/api/site'); if (site.error) return; const t = site.trustBadge || { users: 0, orders: 0, completed: 0 }; } catch(e){} }
 function loadGameSlider() { const el = document.getElementById('gameSlider'); if (!el) return; const imgs = siteData?.gameImages || {}; const games = [...new Set(products.map(p => p.game))]; const items = games.map(g => { const img = imgs[g] || 'https://via.placeholder.com/300x180/334155/38bdf8?text=Game'; return '<div class="slider-card" onclick="openGameProducts(\'' + g.replace(/'/g, "\\'") + '\')"><img src="' + img + '" onerror="this.src=\'https://via.placeholder.com/300x180/334155/38bdf8?text=Game\'"><div class="title">' + g + '</div></div>'; }).join(''); el.innerHTML = items + items; }
-function getRecommendedGames() { const favs = JSON.parse(localStorage.getItem('favs') || '[]'); const orderGames = {}; (userData.orders || []).forEach(o => { orderGames[o.game] = (orderGames[o.game] || 0) + 1; }); const scores = {}; products.forEach(p => { let s = 0; if (favs.includes(p.game)) s += 5; if (orderGames[p.game]) s += orderGames[p.game] * 3; scores[p.game] = Math.max(scores[p.game] || 0, s); }); return Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]); }
-function markRecommended() { const recs = getRecommendedGames(); document.querySelectorAll('#gamesGrid .game-card').forEach(card => { const title = card.querySelector('.game-title')?.textContent || ''; if (recs.includes(title) && !card.querySelector('.recommend-badge')) { const badge = document.createElement('div'); badge.className = 'recommend-badge'; badge.textContent = '⭐ For You'; card.appendChild(badge); } }); }
-async function requestPushPermission() { if (!('Notification' in window)) return; if (Notification.permission === 'default') { try { await Notification.requestPermission(); } catch(e){} } }
-async function sendPush(title, body) { if (!('Notification' in window) || Notification.permission !== 'granted') return; try { if (navigator.serviceWorker && navigator.serviceWorker.controller) { const reg = await navigator.serviceWorker.ready; reg.showNotification(title, { body: body, icon: 'https://i.imgur.com/iRwIfqs.png', badge: 'https://i.imgur.com/iRwIfqs.png', vibrate: [200,100,200] }); } else { new Notification(title, { body: body, icon: 'https://i.imgur.com/iRwIfqs.png' }); } } catch(e){} }
 function loadAnalytics() {
   const orders = userData.orders || [];
   const stats = { total: orders.length, spent: orders.filter(o => o.status === 'completed').reduce((s, o) => s + o.price, 0), points: userData.points || 0 };
@@ -499,39 +391,12 @@ function loadAnalytics() {
   animateNumber(document.getElementById('aPoints'), stats.points);
   const days = []; for (let i = 6; i >= 0; i--) { const d = new Date(); d.setDate(d.getDate() - i); const ds = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime(); const de = ds + 86400000; const cnt = orders.filter(o => o.createdAt >= ds && o.createdAt < de).length; days.push({ label: d.toLocaleDateString('en', { weekday: 'short' }), value: cnt }); }
   const max = Math.max(...days.map(x => x.value), 1);
-  document.getElementById('userChartBars').innerHTML = days.map(x => { const hgt = Math.max(3, (x.value / max) * 100); return '<div class="chart-bar-wrap"><div class="chart-bar-val">' + (x.value || '') + '</div><div class="chart-bar" style="height:' + hgt + '%"></div><div class="chart-bar-lbl">' + x.label + '</div></div>'; }).join('');
+  const chart = document.getElementById('userChartBars'); if (chart) chart.innerHTML = days.map(x => { const hgt = Math.max(3, (x.value / max) * 100); return '<div class="chart-bar-wrap"><div class="chart-bar-val">' + (x.value || '') + '</div><div class="chart-bar" style="height:' + hgt + '%"></div><div class="chart-bar-lbl">' + x.label + '</div></div>'; }).join('');
   const gm = {}; orders.forEach(o => { gm[o.game] = (gm[o.game] || 0) + 1; });
   const top = Object.entries(gm).sort((a, b) => b[1] - a[1]).slice(0, 5);
   const tb = document.getElementById('topGamesBox'); if (tb) { tb.innerHTML = top.length ? top.map(([g, c]) => '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #334155;font-size:13px"><span>' + g + '</span><b style="color:#38bdf8">' + c + ' orders</b></div>').join('') : '<div style="color:#64748b;font-size:12px">Order မရှိသေးပါ</div>'; }
 }
-const AUTO_REPLIES = { 'hi': 'မင်္ဂလာပါ! 👋 Safe Zone မှ ကြိုဆိုပါတယ်', 'hello': 'မင်္ဂလာပါ! 👋 ဘာကူညီပေးရမလဲ?', 'မင်္ဂလာပါ': 'မင်္ဂလာပါ! 👋 ဘာကူညီပေးရမလဲ?', 'deposit': 'Deposit ဖြည့်ရန် Wallet tab မှာ ဖြည့်ပါ။ 5-15 မိနစ်အတွင်း approve ဖြစ်မယ် ⏱', 'order': 'Order တင်ရန် Home → ဂိမ်းရွေး → Player ID ထည့် → Order တင်ပါ 🎮', 'balance': 'Balance ကြည့်ရန် Home မှာ ကြည့်နိုင်ပါတယ် 💰', 'refund': 'Order Reject ဖြစ်ရင် Balance ကို auto ပြန်အမ်းပါတယ် ✅', 'app premium': 'App Premium ဝယ်ရန် Admin ဆီ Telegram မှာ ဆက်သွယ်ပါ 📱' };
-function autoReply(text) { const lc = text.toLowerCase().trim(); for (const k in AUTO_REPLIES) { if (lc.includes(k)) return AUTO_REPLIES[k]; } return null; }
-function successSound() { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); [523, 659, 784, 1047].forEach((f, i) => { const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.value = f; o.type = 'sine'; g.gain.setValueAtTime(0, ctx.currentTime + i * 0.1); g.gain.linearRampToValueAtTime(0.15, ctx.currentTime + i * 0.1 + 0.02); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.3); o.start(ctx.currentTime + i * 0.1); o.stop(ctx.currentTime + i * 0.1 + 0.3); }); } catch(e){} }
-function errorSound() { try { const ctx = new (window.AudioContext || window.webkitAudioContext)(); const o = ctx.createOscillator(); const g = ctx.createGain(); o.connect(g); g.connect(ctx.destination); o.frequency.setValueAtTime(300, ctx.currentTime); o.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.2); g.gain.setValueAtTime(0.15, ctx.currentTime); g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25); o.start(); o.stop(ctx.currentTime + 0.3); } catch(e){} }
 function showSkeletons() { const grid = document.getElementById('gamesGrid'); if (!grid) return; grid.innerHTML = Array(4).fill('<div class="skeleton skel-card"></div>').join(''); }
-async function initPushNotifications() { if (!('serviceWorker' in navigator) || !('PushManager' in window)) { console.log('Push not supported'); return; } try { const reg = await navigator.serviceWorker.ready; let perm = Notification.permission; if (perm === 'default') perm = await Notification.requestPermission(); if (perm !== 'granted') { console.log('Push denied'); return; } const vapidRes = await fetch('/api/push/vapid'); const vapidData = await vapidRes.json(); if (!vapidData.publicKey) { console.log('No VAPID'); return; } let sub = await reg.pushManager.getSubscription(); if (!sub) { sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: urlB64ToUint8(vapidData.publicKey) }); } const r = await api('/api/push/subscribe', { method:'POST', body: JSON.stringify({ subscription: sub.toJSON() }) }); console.log('Push subscribed:', r && r.success ? 'OK' : 'FAIL'); } catch(e) { console.log('Push err:', e.message); } }
-function urlB64ToUint8(base64String) { const padding = '='.repeat((4 - base64String.length % 4) % 4); const base64 = (base64String + padding).replace(/-/g, '+').replace(/_/g, '/'); const rawData = window.atob(base64); const outputArray = new Uint8Array(rawData.length); for (let i = 0; i < rawData.length; ++i) outputArray[i] = rawData.charCodeAt(i); return outputArray; }
-async function testPush() { const r = await api('/api/push/test', { method:'POST' }); if (r && r.success) showToast('🔔 Test push — ' + r.sent + ' device', 'success'); else showToast('❌ Push failed', 'error'); }
-function isIOS() { return /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream; }
-function isInStandaloneMode() { return ('standalone' in window.navigator) && window.navigator.standalone; }
-function getIOSVersion() { const m = navigator.userAgent.match(/OS (\d+)_(\d+)/); if (!m) return null; return { major: parseInt(m[1]), minor: parseInt(m[2]) }; }
-function isIOSModern() { const v = getIOSVersion(); if (!v) return false; return v.major >= 17 || (v.major === 16 && v.minor >= 4); }
-function isIOSSafari() { return isIOS() && /Safari/.test(navigator.userAgent) && !/CriOS|FxiOS|EdgiOS/.test(navigator.userAgent); }
-function showIOSGuide() {
-  const modal = document.createElement('div'); modal.id = 'iosGuideModal'; modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:flex;align-items:flex-end;justify-content:center;animation:fadeIn 0.3s';
-  const iosV = getIOSVersion(); const vText = iosV ? ('iOS ' + iosV.major + '.' + iosV.minor) : 'Unknown';
-  modal.innerHTML = '<div style="background:#1e293b;padding:25px;border-radius:24px 24px 0 0;width:100%;max-width:500px;animation:slideUp 0.4s;border-top:1px solid #334155"><div style="text-align:center;margin-bottom:20px"><div style="font-size:60px;margin-bottom:10px">📱</div><div style="font-size:20px;font-weight:bold;color:#38bdf8">iPhone Install လုပ်ပါ</div><div style="font-size:12px;color:#94a3b8;margin-top:5px">' + vText + '</div></div><div style="background:rgba(15,23,42,0.6);padding:15px;border-radius:14px;margin-bottom:12px"><div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px"><div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">1</div><div style="flex:1"><div style="font-weight:bold;font-size:14px;color:#fff">Safari ကနေ ဒီ site ကို ဖွင့်ပါ</div><div style="font-size:12px;color:#94a3b8;margin-top:3px">Chrome iOS မှာ install လို့မရ</div></div></div><div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px"><div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">2</div><div style="flex:1"><div style="font-weight:bold;font-size:14px;color:#fff">Share ခလုတ် (□↑) နှိပ်ပါ</div><div style="font-size:12px;color:#94a3b8;margin-top:3px">Safari အောက်ခြေမှာ ရှိပါတယ်</div></div></div><div style="display:flex;align-items:flex-start;gap:12px;margin-bottom:12px"><div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">3</div><div style="flex:1"><div style="font-weight:bold;font-size:14px;color:#fff">"Add to Home Screen" ရွေးပါ</div><div style="font-size:12px;color:#94a3b8;margin-top:3px">Menu ကို အောက်ဆွဲပြီး ရှာပါ</div></div></div><div style="display:flex;align-items:flex-start;gap:12px"><div style="background:#3b82f6;color:#fff;width:28px;height:28px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:bold;flex-shrink:0">4</div><div style="flex:1"><div style="font-weight:bold;font-size:14px;color:#fff">Home Screen က icon နှိပ် → အသုံးပြု</div><div style="font-size:12px;color:#94a3b8;margin-top:3px">App လို ဖွင့်လာမယ်</div></div></div></div>' + (isIOSModern() ? '<div style="background:rgba(34,197,94,0.1);padding:12px;border-radius:12px;border:1px solid #22c55e;font-size:12px;color:#86efac;margin-bottom:12px">✅ သင့် iOS က Push Notification support ရှိပါတယ်</div>' : '<div style="background:rgba(245,158,11,0.1);padding:12px;border-radius:12px;border:1px solid #f59e0b;font-size:12px;color:#fcd34d;margin-bottom:12px">⚠️ iOS 16.4+ လိုပါတယ် — Update လုပ်ပါ (သို့) Telegram သုံးပါ</div>') + '<button onclick="document.getElementById(\'iosGuideModal\').remove()" style="width:100%;padding:14px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:14px;font-weight:bold;font-size:15px;cursor:pointer;margin-bottom:8px">✅ နားလည်ပါပြီ</button><div style="background:rgba(59,130,246,0.1);padding:12px;border-radius:12px;border:1px solid #3b82f6;font-size:12px;color:#93c5fd;text-align:center">💡 <b>Alternative:</b> Telegram Bot မှာ Account ချိတ်ထားရင်<br>Notification ကို Telegram မှာ ရမယ်</div></div>';
-  document.body.appendChild(modal);
-}
-function showIOSHint() {
-  if (!isIOS()) return; if (isInStandaloneMode()) return; if (localStorage.getItem('iosHintDismissed') === 'yes') return;
-  setTimeout(function() {
-    const hint = document.createElement('div'); hint.id = 'iosHint'; hint.style.cssText = 'position:fixed;bottom:90px;left:15px;right:15px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);padding:14px 16px;border-radius:16px;z-index:9998;box-shadow:0 12px 30px rgba(0,0,0,0.4);animation:slideUp 0.5s;';
-    hint.innerHTML = '<div style="display:flex;align-items:center;gap:12px"><div style="font-size:28px">📱</div><div style="flex:1"><div style="font-weight:bold;font-size:13px;margin-bottom:2px">iPhone Install လုပ်ပါ</div><div style="font-size:11px;opacity:0.95">Home Screen မှာ App လို</div></div><button onclick="showIOSGuide();this.parentElement.parentElement.remove();localStorage.setItem(\'iosHintDismissed\',\'yes\')" style="background:rgba(255,255,255,0.2);border:none;color:#fff;padding:6px 12px;border-radius:12px;cursor:pointer;font-size:12px;font-weight:bold">ကြည့်မယ်</button><button onclick="this.parentElement.parentElement.remove();localStorage.setItem(\'iosHintDismissed\',\'yes\')" style="background:none;border:none;color:#fff;font-size:18px;cursor:pointer;padding:0 4px">✕</button></div>';
-    document.body.appendChild(hint);
-  }, 5000);
-}
-async function initIOSPush() { if (!isIOS()) return; if (!isInStandaloneMode()) { console.log('iOS: PWA install လိုတယ် — hint ပြမယ်'); return; } if (!isIOSModern()) { console.log('iOS: 16.4+ လိုတယ်'); return; } await initPushNotifications(); }
 async function api(url, opts={}) {
   try {
     const r = await fetch(url, {...opts, headers: {...H, ...(opts.headers||{})}});
@@ -541,19 +406,19 @@ async function api(url, opts={}) {
     return r.json();
   } catch (e) { return {error: 'Network error'}; }
 }
-async function checkMaint(){ try { const d = await api('/api/maintenance'); const ov = document.getElementById('maintOverlay'); if (d.error) return; if (d.enabled) { document.getElementById('maintOverlayMsg').textContent = d.message || 'မကြာမီ'; ov.classList.add('show'); } else ov.classList.remove('show'); } catch(e){} }
+async function checkMaint(){ try { const d = await api('/api/maintenance'); const ov = document.getElementById('maintOverlay'); if (d.error) return; if (d.enabled) { const msg = document.getElementById('maintOverlayMsg'); if(msg) msg.textContent = d.message || 'မကြာမီ'; if(ov) ov.classList.add('show'); } else { if(ov) ov.classList.remove('show'); } } catch(e){} }
 setInterval(checkMaint, 15000);
 async function loadSite(){
   siteData = await api('/api/site'); if (siteData.error) { console.error(siteData.error); return; }
   document.title = siteData.siteName;
   const car = document.getElementById('carousel'); const dotsBox = document.getElementById('dots');
-  (siteData.banners || []).forEach((b,i) => { const div = document.createElement('div'); div.className = 'slide' + (i===0?' active':''); div.style.background = b.bg; div.innerHTML = '<h3>' + b.title + '</h3><p>' + b.subtitle + '</p>'; car.insertBefore(div, dotsBox); const dot = document.createElement('div'); dot.className = 'dot' + (i===0?' active':''); dotsBox.appendChild(dot); });
+  if(car && dotsBox) { (siteData.banners || []).forEach((b,i) => { const div = document.createElement('div'); div.className = 'slide' + (i===0?' active':''); div.style.background = b.bg; div.innerHTML = '<h3>' + b.title + '</h3><p>' + b.subtitle + '</p>'; car.insertBefore(div, dotsBox); const dot = document.createElement('div'); dot.className = 'dot' + (i===0?' active':''); dotsBox.appendChild(dot); }); }
   updateSpinVisibility();
-  document.getElementById('payName').textContent = siteData.payName + ' — ' + siteData.payNumber;
+  const payNameEl = document.getElementById('payName'); if(payNameEl) payNameEl.textContent = siteData.payName + ' — ' + siteData.payNumber;
   loadAdsBanner();
   const pays = (siteData.payments && siteData.payments.length) ? siteData.payments : [{name:'KBZ Pay', cls:'kbz', label:'KBZ'},{name:'Wave Money', cls:'wave', label:'Wave'},{name:'UAB Pay', cls:'uab', label:'UAB'},{name:'AYA Pay', cls:'aya', label:'AYA'}];
   if (pays.length && !pays.find(p => p.name === selectedPay)) selectedPay = pays[0].name;
-  document.getElementById('paymentList').innerHTML = pays.map(p=>{ const logoHtml = p.image ? '<div class="pay-logo" style="background:#fff;padding:4px;overflow:hidden"><img src="' + p.image + '" style="width:100%;height:100%;object-fit:contain;border-radius:6px"></div>' : '<div class="pay-logo ' + (p.cls || 'kbz') + '">' + (p.short || p.label || p.name.substring(0, 4)) + '</div>'; return '<div class="payment-method ' + (p.name===selectedPay?'selected':'') + '" onclick="selectPay(\'' + p.name + '\',this)">' + logoHtml + '<div class="pay-info"><div class="pay-name">' + p.name + '</div><div class="pay-num">' + siteData.payNumber + ' · ' + siteData.payName + '</div></div></div>'; }).join('');
+  const payList = document.getElementById('paymentList'); if(payList) payList.innerHTML = pays.map(p=>{ const logoHtml = p.image ? '<div class="pay-logo" style="background:#fff;padding:4px;overflow:hidden"><img src="' + p.image + '" style="width:100%;height:100%;object-fit:contain;border-radius:6px"></div>' : '<div class="pay-logo ' + (p.cls || 'kbz') + '">' + (p.short || p.label || p.name.substring(0, 4)) + '</div>'; return '<div class="payment-method ' + (p.name===selectedPay?'selected':'') + '" onclick="selectPay(\'' + p.name + '\',this)">' + logoHtml + '<div class="pay-info"><div class="pay-name">' + p.name + '</div><div class="pay-num">' + siteData.payNumber + ' · ' + siteData.payName + '</div></div></div>'; }).join('');
 }
 function selectPay(name, el){ selectedPay = name; document.querySelectorAll('.payment-method').forEach(x=>x.classList.remove('selected')); el.classList.add('selected'); haptic(15); }
 function copyNum(){ navigator.clipboard.writeText(siteData.payNumber).then(()=>showToast('✅ နံပါတ် ကူးပြီးပါပြီ', 'success')); }
@@ -561,178 +426,139 @@ let slideIdx = 0;
 setInterval(() => { const slides = document.querySelectorAll('.slide'); const dots = document.querySelectorAll('.dot'); if (!slides.length) return; slides[slideIdx].classList.remove('active'); dots[slideIdx].classList.remove('active'); slideIdx = (slideIdx + 1) % slides.length; slides[slideIdx].classList.add('active'); dots[slideIdx].classList.add('active'); }, 3500);
 async function loadMe(){
   const d = await api('/api/me'); if (d.error) return; userData = d;
-  document.getElementById('bal').innerHTML = d.balance.toLocaleString() + ' <span>Ks</span>';
-  document.getElementById('pBal').textContent = d.balance.toLocaleString() + ' Ks';
-  document.getElementById('pts').textContent = d.points || 0; document.getElementById('pPts').textContent = d.points || 0;
-  document.getElementById('pSpent').textContent = (d.totalSpent||0).toLocaleString() + ' Ks'; document.getElementById('pRef').textContent = d.referralCode;
-  document.getElementById('uName').textContent = d.username; document.getElementById('uPhone').textContent = d.phone || '09xxxxxxxxx';
-  document.getElementById('pName').textContent = d.username; document.getElementById('pPhone').textContent = d.phone || '-';
-  document.getElementById('avatar').textContent = d.username.charAt(0).toUpperCase(); document.getElementById('pAvatar').textContent = d.username.charAt(0).toUpperCase();
+  const setT = (id, val) => { const el = document.getElementById(id); if(el) el.textContent = val; };
+  const setH = (id, val) => { const el = document.getElementById(id); if(el) el.innerHTML = val; };
+  setH('bal', d.balance.toLocaleString() + ' <span>Ks</span>');
+  setT('pBal', d.balance.toLocaleString() + ' Ks');
+  setT('pts', d.points || 0); setT('pPts', d.points || 0);
+  setT('pSpent', (d.totalSpent||0).toLocaleString() + ' Ks'); setT('pRef', d.referralCode);
+  setT('uName', d.username); setT('uPhone', d.phone || '09xxxxxxxxx');
+  setT('pName', d.username); setT('pPhone', d.phone || '-');
+  setT('avatar', d.username.charAt(0).toUpperCase()); setT('pAvatar', d.username.charAt(0).toUpperCase());
   const vip = d.vip || 'Bronze';
-  document.getElementById('vipBadge').textContent = vip; document.getElementById('vipBadge').className = 'vip-badge vip-' + vip;
-  document.getElementById('pVip').textContent = vip; document.getElementById('pVip').className = 'vip-badge vip-' + vip;
-  const achCountEl = document.getElementById('achCount'); if (achCountEl) achCountEl.textContent = (d.achievements||[]).length;
-  if (d.unread > 0) { const b = document.getElementById('notifBadge'); b.textContent = d.unread; b.style.display = 'inline-block'; } else { document.getElementById('notifBadge').style.display = 'none'; }
+  const vb = document.getElementById('vipBadge'); if(vb) { vb.textContent = vip; vb.className = 'vip-badge vip-' + vip; }
+  const pv = document.getElementById('pVip'); if(pv) { pv.textContent = vip; pv.className = 'vip-badge vip-' + vip; }
+  if (d.unread > 0) { const b = document.getElementById('notifBadge'); if(b){ b.textContent = d.unread; b.style.display = 'inline-block'; } } else { const b = document.getElementById('notifBadge'); if(b) b.style.display = 'none'; }
 }
-async function loadProducts(){ showSkeletons(); products = await api('/api/products'); if (products.error) { console.error(products.error); return; } renderGames(); loadGameSlider(); setTimeout(markRecommended, 300); }
+async function loadProducts(){ showSkeletons(); products = await api('/api/products'); if (products.error) { console.error(products.error); return; } renderGames(); loadGameSlider(); }
 function renderGames(){
   const games = [...new Set(products.map(p => p.game))]; const imgs = siteData?.gameImages || {}; const favs = JSON.parse(localStorage.getItem('favs') || '[]');
   let filtered = games.filter(g => { if (searchTerm && !g.toLowerCase().includes(searchTerm.toLowerCase())) return false; if (currentCategory !== 'all') { const p = products.find(x => x.game === g); if (!p || p.category !== currentCategory) return false; } return true; });
-  document.getElementById('gamesGrid').innerHTML = filtered.map(g => { const img = imgs[g] || 'https://via.placeholder.com/200x120/334155/38bdf8?text=Game'; const isFav = favs.includes(g); return '<div class="game-card" onclick="openGameProducts(\'' + g.replace(/'/g,"\\'") + '\')"><button class="fav-btn" onclick="event.stopPropagation();toggleFav(\'' + g.replace(/'/g,"\\'") + '\',this)">' + (isFav?'❤️':'🤍') + '</button><img class="game-img" src="' + img + '" alt="' + g + '" onerror="this.src=\'https://via.placeholder.com/200x120/334155/38bdf8?text=Game\'"><div class="game-title">' + g + '</div></div>'; }).join('') || '<div class="empty" style="grid-column:1/-1">ဂိမ်း မတွေ့ပါ</div>';
+  const grid = document.getElementById('gamesGrid'); if(!grid) return;
+  grid.innerHTML = filtered.map(g => { const img = imgs[g] || 'https://via.placeholder.com/200x120/334155/38bdf8?text=Game'; const isFav = favs.includes(g); return '<div class="game-card" onclick="openGameProducts(\'' + g.replace(/'/g,"\\'") + '\')"><button class="fav-btn" onclick="event.stopPropagation();toggleFav(\'' + g.replace(/'/g,"\\'") + '\',this)">' + (isFav?'❤️':'🤍') + '</button><img class="game-img" src="' + img + '" alt="' + g + '" onerror="this.src=\'https://via.placeholder.com/200x120/334155/38bdf8?text=Game\'"><div class="game-title">' + g + '</div></div>'; }).join('') || '<div class="empty" style="grid-column:1/-1">ဂိမ်း မတွေ့ပါ</div>';
 }
-function filterGames(){ searchTerm = document.getElementById('searchInput').value; renderGames(); }
+function filterGames(){ const el = document.getElementById('searchInput'); searchTerm = el ? el.value : ''; renderGames(); }
 function setCategory(cat, el){ currentCategory = cat; document.querySelectorAll('.category-tabs button').forEach(b => b.classList.remove('active')); el.classList.add('active'); haptic(15); renderGames(); }
 function toggleFav(game, el){ const favs = JSON.parse(localStorage.getItem('favs') || '[]'); const idx = favs.indexOf(game); if (idx >= 0) { favs.splice(idx,1); el.textContent='🤍'; } else { favs.push(game); el.textContent='❤️'; showToast('⭐ Favorite', 'info'); } localStorage.setItem('favs', JSON.stringify(favs)); haptic(20); }
-async function loadDeposits(){ const d = await api('/api/deposits'); if (d.error) return; document.getElementById('depList').innerHTML = d.length ? d.map(x=>'<div class="deposit-list-item"><div class="deposit-list-head"><b class="deposit-list-amount">' + x.amount.toLocaleString() + ' Ks</b><span class="status-badge status-' + x.status + '">' + x.status + '</span></div><div class="deposit-list-meta">' + x.method + '</div>' + (x.receipt ? '<div class="receipt-thumb"><img src="' + x.receipt + '" onclick="window.open(this.src)"></div>' : '') + '</div>').join('') : '<div class="empty">မှတ်တမ်း မရှိပါ</div>'; }
-let orderSearchTerm = '';
-function filterOrders(){ var el = document.getElementById('orderSearch'); orderSearchTerm = el ? el.value.toLowerCase() : ''; loadOrders(); }
+async function loadDeposits(){ const d = await api('/api/deposits'); if (d.error) return; const el = document.getElementById('depList'); if(!el) return; el.innerHTML = d.length ? d.map(x=>'<div class="deposit-list-item"><div class="deposit-list-head"><b class="deposit-list-amount">' + x.amount.toLocaleString() + ' Ks</b><span class="status-badge status-' + x.status + '">' + x.status + '</span></div><div class="deposit-list-meta">' + x.method + '</div>' + (x.receipt ? '<div class="receipt-thumb"><img src="' + x.receipt + '" onclick="window.open(this.src)"></div>' : '') + '</div>').join('') : '<div class="empty">မှတ်တမ်း မရှိပါ</div>'; }
 async function loadOrders(){
-  const d = await api('/api/orders'); if (d.error) return;
-  const filtered = orderSearchTerm ? d.filter(x => { const s = (x.product + ' ' + x.game + ' ' + x.playerId + ' ' + x.id).toLowerCase(); return s.includes(orderSearchTerm); }) : d;
-  const html = filtered.length ? filtered.map(function(x){
+  const d = await api('/api/orders'); if (d.error) return; const el = document.getElementById('ordList'); if(!el) return;
+  el.innerHTML = d.length ? d.map(function(x){
     var mins = Math.floor((Date.now() - x.createdAt) / 60000); var timeStr = mins < 1 ? 'အခုလေးတင်' : (mins < 60 ? mins + ' မိနစ်က' : Math.floor(mins/60) + ' နာရီက');
-    return '<div style="background:rgba(30,41,59,0.8);padding:14px;border-radius:14px;margin-bottom:10px;font-size:13px;border:1px solid #334155"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="color:#38bdf8">' + x.game + '</b><span class="status-badge status-' + x.status + '">' + x.status + '</span></div><div>' + x.product + '</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">ID: ' + x.playerId + (x.serverId ? ' · S:' + x.serverId : '') + ' · ' + x.price.toLocaleString() + ' Ks</div><div style="margin-top:6px"><span class="timer-badge">⏱ ' + timeStr + '</span></div><div style="display:flex;gap:6px;margin-top:8px;flex-wrap:wrap"><button onclick="reorder(\'' + x.id + '\')" style="padding:8px 14px;background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;border-radius:10px;font-size:12px;font-weight:bold;cursor:pointer">🔄 Reorder</button><button onclick="shareOrder(\'' + x.id + '\')" style="padding:8px 14px;background:rgba(168,85,247,0.15);color:#a855f7;border:1px solid #a855f7;border-radius:10px;font-size:12px;font-weight:bold;cursor:pointer">📤 Share</button></div></div>';
+    return '<div style="background:rgba(30,41,59,0.8);padding:14px;border-radius:14px;margin-bottom:10px;font-size:13px;border:1px solid #334155"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="color:#38bdf8">' + x.game + '</b><span class="status-badge status-' + x.status + '">' + x.status + '</span></div><div>' + x.product + '</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">ID: ' + x.playerId + (x.serverId ? ' · S:' + x.serverId : '') + ' · ' + x.price.toLocaleString() + ' Ks</div><div style="margin-top:6px"><span class="timer-badge">⏱ ' + timeStr + '</span></div></div>';
   }).join('') : '<div class="empty">မှတ်တမ်း မရှိပါ</div>';
-  document.getElementById('ordList').innerHTML = '<div class="order-search"><input id="orderSearch" placeholder="🔍 Order ရှာပါ..." oninput="filterOrders()" value="' + orderSearchTerm + '"></div>' + html;
 }
 async function loadChat(){
-  const list = await api('/api/chat'); if (list.error) return;
-  const box = document.getElementById('chatMessages');
-  box.innerHTML = list.length ? list.map(m=>{ let html = '<div class="chat-bubble ' + m.from + '">'; if (m.image) html += '<img src="' + m.image + '" style="max-width:100%;border-radius:8px">'; html += (m.text ? escapeHtml(m.text) : ''); html += '<div class="time">' + new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + (m.from === 'user' ? renderReadReceipt(m) : '') + '</div></div>'; return html; }).join('') : '<div class="empty">Admin \u1006\u102E \u1005\u102C \u101B\u1031\u1038\u101C\u102D\u102F\u1037\u101B\u1015\u102B\u1015\u103C\u102E \uD83D\uDC4B</div>';
+  const list = await api('/api/chat'); if (list.error) return; const box = document.getElementById('chatMessages'); if(!box) return;
+  box.innerHTML = list.length ? list.map(m=>{ let html = '<div class="chat-bubble ' + m.from + '">'; if (m.image) html += '<img src="' + m.image + '" style="max-width:100%;border-radius:8px">'; html += (m.text ? escapeHtml(m.text) : ''); html += '<div class="time">' + new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '</div></div>'; return html; }).join('') : '<div class="empty">Admin ဆီ စာ ရေးလို့ရပါပြီ 👋</div>';
   const last = list[list.length-1]; if (last && last.id !== lastChatId) { lastChatId = last.id; box.scrollTop = box.scrollHeight; } checkTyping(list);
 }
 function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-async function sendChat(){ const inp = document.getElementById('chatInput'); const text = inp.value.trim(); if (!text) return; inp.value = ''; const r = await api('/api/chat', {method:'POST', body: JSON.stringify({text})}); if (r.success) { loadChat(); haptic(20); } }
+async function sendChat(){ const inp = document.getElementById('chatInput'); if(!inp) return; const text = inp.value.trim(); if (!text) return; inp.value = ''; const r = await api('/api/chat', {method:'POST', body: JSON.stringify({text})}); if (r.success) { loadChat(); haptic(20); } }
 function switchTab(name, btn){
   document.querySelectorAll('[id^="view-"]').forEach(v=>v.style.display='none');
   document.querySelectorAll('.nav-item').forEach(b=>b.classList.remove('active'));
-  document.getElementById('view-'+name).style.display='block'; if (btn) btn.classList.add('active'); haptic(15);
-  if (name==='wallet') { loadDeposits(); setInterval(loadDeposits, 5000); }
+  const target = document.getElementById('view-'+name); if(target) target.style.display='block';
+  if (btn) btn.classList.add('active'); haptic(15);
+  if (name==='wallet') { loadDeposits(); }
   if (name==='orders') loadOrders(); if (name==='analytics') loadAnalytics();
   if (name==='chat') { loadChat(); lastChatId = null; if (chatPoll) clearInterval(chatPoll); chatPoll = setInterval(loadChat, 1500); }
   else { if (chatPoll) { clearInterval(chatPoll); chatPoll = null; } }
 }
-function gotoChat(){ switchTab('chat', document.querySelectorAll('.nav-item')[3]); }
 function openGameProducts(game){
   const gProducts = products.filter(p=>p.game===game); const userVip = userData.vip || 'Bronze'; const vipDisc = {Bronze:0, Silver:2, Gold:5, Diamond:8}[userVip] || 0;
   const list = gProducts.map(p=>{ const final = Math.round(p.price * (1 - vipDisc/100)); const disc = vipDisc > 0 ? '<div style="font-size:11px;color:#22c55e;margin-top:2px">-' + vipDisc + '% → ' + final.toLocaleString() + ' Ks</div>' : ''; const imgHtml = p.imgUrl ? '<img src="' + p.imgUrl + '" style="width:50px;height:50px;object-fit:cover;border-radius:10px;border:1px solid #334155">' : '<div style="font-size:26px">' + p.image + '</div>'; return '<div class="game-card" onclick="openModal(' + p.id + ')" style="cursor:pointer"><div style="padding:15px;text-align:center">' + imgHtml + '<div style="font-weight:bold;margin-top:5px;font-size:13px">' + p.name + '</div><div style="color:#22c55e;margin-top:5px;font-weight:bold">' + p.price.toLocaleString() + ' Ks</div>' + disc + '</div></div>'; }).join('');
-  document.getElementById('productModalBox').innerHTML = '<h3>' + game + ' - ရွေးပါ</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + list + '</div><button class="cancel" style="margin-top:15px" onclick="closeModal(\'productModal\')">Close</button>';
-  document.getElementById('productModal').classList.add('show');
+  const box = document.getElementById('productModalBox'); if(box) box.innerHTML = '<h3>' + game + ' - ရွေးပါ</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + list + '</div><button class="cancel" style="margin-top:15px" onclick="closeModal(\'productModal\')">Close</button>';
+  const modal = document.getElementById('productModal'); if(modal) modal.classList.add('show');
 }
 function openModal(id){
   selected = products.find(p=>p.id===id); if (!selected) return; closeModal('productModal');
   if (selected.game === 'App Premium') { buyPremium(); return; }
-  document.getElementById('mTitle').textContent = selected.name + ' - ' + selected.price.toLocaleString() + ' Ks';
-  document.getElementById('playerId').value = ''; document.getElementById('playerId').placeholder = 'Player ID';
+  const title = document.getElementById('mTitle'); if(title) title.textContent = selected.name + ' - ' + selected.price.toLocaleString() + ' Ks';
+  const pid = document.getElementById('playerId'); if(pid) { pid.value = ''; pid.placeholder = 'Player ID'; }
   const sf = document.getElementById('serverIdField'); const needsServer = ['Mobile Legends', 'Magic Chess'].includes(selected.game);
   if (sf) sf.style.display = needsServer ? 'block' : 'none'; const si = document.getElementById('serverId'); if (si) si.value = '';
-  document.getElementById('orderModal').classList.add('show');
+  const modal = document.getElementById('orderModal'); if(modal) modal.classList.add('show');
 }
-function closeModal(id){ document.getElementById(id).classList.remove('show'); }
+function closeModal(id){ const el = document.getElementById(id); if(el) el.classList.remove('show'); }
 async function submitOrder(){
-  const playerId = document.getElementById('playerId').value.trim(); const sf = document.getElementById('serverIdField');
-  const serverId = (sf && sf.style.display !== 'none') ? document.getElementById('serverId').value.trim() : '';
-  if (!playerId) return showToast('Player ID ဖြည့်ပါ', 'error');
-  if (sf && sf.style.display !== 'none' && !serverId) return showToast('Server ID ဖြည့်ပါ', 'error');
+  const pidEl = document.getElementById('playerId'); const pid = pidEl ? pidEl.value.trim() : ''; const sf = document.getElementById('serverIdField');
+  const sidEl = document.getElementById('serverId'); const sid = (sf && sf.style.display !== 'none' && sidEl) ? sidEl.value.trim() : '';
+  if (!pid) return showToast('Player ID ဖြည့်ပါ', 'error');
+  if (sf && sf.style.display !== 'none' && !sid) return showToast('Server ID ဖြည့်ပါ', 'error');
   if ((userData.balance || 0) < selected.price) { return showToast('❌ Balance မလုံလောက်ပါ', 'error'); }
-  if (!confirm('✅ Order တင်မလား?\n\n' + selected.game + ' - ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks\n🆔 ' + playerId + (serverId ? ' • S:' + serverId : '') + '\n\nBalance ဖြတ်မယ်')) return;
-  const d = await api('/api/order', { method: 'POST', body: JSON.stringify({ productId: selected.id, playerId: playerId, serverId: serverId }) });
-  if (!d.success) { errorSound(); return showToast('❌ ' + d.error, 'error'); }
-  successSound(); haptic(100); confetti(); sendPush('Order တင်ပြီး', selected.game + ' - ' + selected.name);
-  showToast('✅ Order တင်ပြီးပါပြီ', 'success'); closeModal('orderModal'); loadMe(); loadOrders();
+  if (!confirm('✅ Order တင်မလား?\n\n' + selected.game + ' - ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks\n🆔 ' + pid + (sid ? ' • S:' + sid : '') + '\n\nBalance ဖြတ်မယ်')) return;
+  const d = await api('/api/order', { method: 'POST', body: JSON.stringify({ productId: selected.id, playerId: pid, serverId: sid }) });
+  if (!d.success) { playSound('error'); return showToast('❌ ' + d.error, 'error'); }
+  playSound('success'); haptic(100); confetti(); showToast('✅ Order တင်ပြီးပါပြီ', 'success'); closeModal('orderModal'); loadMe(); loadOrders();
 }
-async function reorder(orderId){ if (!confirm('ဒီ order ကို ပြန်မှာမှာလား?')) return; const d = await api('/api/reorder', {method:'POST', body: JSON.stringify({orderId})}); if (d.success) { showToast('✅ Reorder ပြီးပါပြီ', 'success'); loadMe(); loadOrders(); } else showToast('❌ ' + d.error, 'error'); }
-function previewReceipt(input){ const file = input.files[0]; if (!file) return; if (file.size > 2 * 1024 * 1024) { showToast('ပုံ 2MB အောက်သာ', 'error'); input.value = ''; return; } const reader = new FileReader(); reader.onload = e => { document.getElementById('receiptImg').src = e.target.result; document.getElementById('receiptPreview').style.display = 'block'; }; reader.readAsDataURL(file); }
+function previewReceipt(input){ const file = input.files[0]; if (!file) return; if (file.size > 2 * 1024 * 1024) { showToast('ပုံ 2MB အောက်သာ', 'error'); input.value = ''; return; } const reader = new FileReader(); reader.onload = e => { const img = document.getElementById('receiptImg'); if(img) img.src = e.target.result; const prev = document.getElementById('receiptPreview'); if(prev) prev.style.display = 'block'; }; reader.readAsDataURL(file); }
 async function deposit(){
-  const amount = document.getElementById('dAmt').value; if (!amount || amount < 1000) return showToast('အနည်းဆုံး 1000 Ks', 'error');
+  const amtEl = document.getElementById('dAmt'); const amount = amtEl ? amtEl.value : ''; if (!amount || amount < 1000) return showToast('အနည်းဆုံး 1000 Ks', 'error');
   let receipt = null; const preview = document.getElementById('receiptPreview'); const img = document.getElementById('receiptImg'); if (preview && preview.style.display !== 'none' && img && img.src) receipt = img.src;
   const d = await api('/api/deposit', {method:'POST', body: JSON.stringify({amount, method:selectedPay, receipt})});
-  if (d.success){ playSound('success'); haptic(60); showToast('✅ ' + d.message, 'success'); document.getElementById('dAmt').value=''; document.getElementById('receiptInput').value=''; preview.style.display='none'; loadDeposits(); } else { playSound('error'); showToast('❌ ' + d.error, 'error'); }
+  if (d.success){ playSound('success'); haptic(60); showToast('✅ ' + d.message, 'success'); if(amtEl) amtEl.value=''; const ri = document.getElementById('receiptInput'); if(ri) ri.value=''; if(preview) preview.style.display='none'; loadDeposits(); } else { playSound('error'); showToast('❌ ' + d.error, 'error'); }
 }
-function openCoupon(){ document.getElementById('couponCode').value = ''; document.getElementById('couponModal').classList.add('show'); setTimeout(() => document.getElementById('couponCode').focus(), 300); }
-async function redeemCoupon(){ const code = document.getElementById('couponCode').value.trim(); if (!code) return showToast('Code ရိုက်ပါ', 'error'); const d = await api('/api/redeem-coupon', {method:'POST', body: JSON.stringify({code})}); if (d.success) { playSound('success'); haptic(60); confetti(); showToast('✅ +' + d.reward.toLocaleString() + ' Ks!', 'success'); closeModal('couponModal'); loadMe(); } else { playSound('error'); showToast('❌ ' + d.error, 'error'); } }
-async function openLeaderboard(){ const list = await api('/api/leaderboard'); if (list.error) return; const medals = ['🥇','🥈','🥉']; document.getElementById('leaderBox').innerHTML = list.length ? list.map((u,i)=>'<div style="display:flex;justify-content:space-between;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px;border:1px solid #334155"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px;width:28px">' + (medals[i]||('#'+(i+1))) + '</span><div><b style="color:#38bdf8">' + u.username + '</b><div style="font-size:10px"><span class="vip-badge vip-' + u.vip + '">' + u.vip + '</span></div></div></div><b style="color:#22c55e">' + u.total.toLocaleString() + ' Ks</b></div>').join('') : '<div class="empty">ဒေတာ မရှိပါ</div>'; document.getElementById('leaderModal').classList.add('show'); }
-const ACH_DEFS = { first_order: {icon:'🎯', name:'First Order', desc:'ပထမဆုံး ဝယ်ပြီးပါပြီ'}, ten_orders: {icon:'🔟', name:'10 Orders', desc:'၁၀ ခါ ဝယ်ပြီးပါပြီ'}, big_spender: {icon:'💎', name:'Big Spender', desc:'100,000 Ks ဝယ်ပြီးပါပြီ'} };
-function openAchievements(){ const achs = userData.achievements || []; document.getElementById('achBox').innerHTML = Object.keys(ACH_DEFS).map(k => { const has = achs.includes(k); const d = ACH_DEFS[k]; return '<div style="display:flex;gap:12px;padding:14px;background:' + (has?'rgba(34,197,94,0.1)':'rgba(15,23,42,0.6)') + ';border-radius:12px;margin-bottom:10px;border:1px solid ' + (has?'#22c55e':'#334155') + ';opacity:' + (has?1:0.5) + '"><div style="font-size:32px">' + d.icon + '</div><div><div style="font-weight:bold;font-size:14px">' + d.name + '</div><div style="font-size:12px;color:#94a3b8;margin-top:3px">' + d.desc + '</div></div></div>'; }).join(''); document.getElementById('achModal').classList.add('show'); }
+function openCoupon(){ const c = document.getElementById('couponCode'); if(c) c.value = ''; const m = document.getElementById('couponModal'); if(m) m.classList.add('show'); setTimeout(() => { if(c) c.focus(); }, 300); }
+async function redeemCoupon(){ const el = document.getElementById('couponCode'); if(!el) return; const code = el.value.trim(); if (!code) return showToast('Code ရိုက်ပါ', 'error'); const d = await api('/api/redeem-coupon', {method:'POST', body: JSON.stringify({code})}); if (d.success) { playSound('success'); haptic(60); confetti(); showToast('✅ +' + d.reward.toLocaleString() + ' Ks!', 'success'); closeModal('couponModal'); loadMe(); } else { playSound('error'); showToast('❌ ' + d.error, 'error'); } }
+async function openLeaderboard(){ const list = await api('/api/leaderboard'); if (list.error) return; const medals = ['🥇','🥈','🥉']; const box = document.getElementById('leaderBox'); if(box) box.innerHTML = list.length ? list.map((u,i)=>'<div style="display:flex;justify-content:space-between;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px;border:1px solid #334155"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px;width:28px">' + (medals[i]||('#'+(i+1))) + '</span><div><b style="color:#38bdf8">' + u.username + '</b><div style="font-size:10px"><span class="vip-badge vip-' + u.vip + '">' + u.vip + '</span></div></div></div><b style="color:#22c55e">' + u.total.toLocaleString() + ' Ks</b></div>').join('') : '<div class="empty">ဒေတာ မရှိပါ</div>'; const m = document.getElementById('leaderModal'); if(m) m.classList.add('show'); }
 async function openNotif(){
-  playSound('click'); haptic(20); document.getElementById('notifModal').classList.add('show'); document.getElementById('notifList').innerHTML = '<div class="empty">Loading...</div>';
+  playSound('click'); haptic(20); const m = document.getElementById('notifModal'); if(m) m.classList.add('show'); const listEl = document.getElementById('notifList'); if(listEl) listEl.innerHTML = '<div class="empty">Loading...</div>';
   try {
     let list = []; try { const r = await api('/api/notifications'); if (Array.isArray(r)) list = r; } catch(e){}
-    if (!list.length) { try { const chat = await api('/api/chat'); if (Array.isArray(chat)) { list = chat.slice(-30).reverse().map(m => ({ message: (m.from === 'admin' ? '\u{1F468}\u200D\u{1F4BC} Admin: ' : '\u{1F464} You: ') + (m.text || '[\u{1F4F7} Image]'), createdAt: m.createdAt, read: m.from === 'user' })); } } catch(e){} }
-    document.getElementById('notifList').innerHTML = list.length ? list.map(n=>'<div style="padding:14px;background:' + (n.read ? 'rgba(15,23,42,0.4)' : 'rgba(56,189,248,0.08)') + ';border-radius:12px;margin-bottom:8px;border:1px solid ' + (n.read ? '#334155' : '#38bdf8') + '"><div style="font-size:13px">' + escapeHtml(n.message) + '</div><div style="font-size:11px;color:#64748b;margin-top:5px">' + new Date(n.createdAt).toLocaleString() + '</div></div>').join('') : '<div class="empty">Notification \u1019\u101B\u103E\u102B\u1015\u102B</div>';
+    if (!list.length) { try { const chat = await api('/api/chat'); if (Array.isArray(chat)) { list = chat.slice(-30).reverse().map(m => ({ message: (m.from === 'admin' ? 'Admin: ' : 'You: ') + (m.text || '[Image]'), createdAt: m.createdAt, read: m.from === 'user' })); } } catch(e){} }
+    if(listEl) listEl.innerHTML = list.length ? list.map(n=>'<div style="padding:14px;background:' + (n.read ? 'rgba(15,23,42,0.4)' : 'rgba(56,189,248,0.08)') + ';border-radius:12px;margin-bottom:8px;border:1px solid ' + (n.read ? '#334155' : '#38bdf8') + '"><div style="font-size:13px">' + escapeHtml(n.message) + '</div><div style="font-size:11px;color:#64748b;margin-top:5px">' + new Date(n.createdAt).toLocaleString() + '</div></div>').join('') : '<div class="empty">Notification မရှိပါ</div>';
     if (list.length && list.some(x => !x.read)) { try { await api('/api/notifications/read', {method:'POST'}); } catch(e){} } loadMe();
-  } catch(e) { document.getElementById('notifList').innerHTML = '<div class="empty">\u1019\u101B\u103E\u102B\u1015\u102B</div>'; }
+  } catch(e) { if(listEl) listEl.innerHTML = '<div class="empty">မရှိပါ</div>'; }
 }
 function copyRef(){ const code = userData.referralCode || ''; navigator.clipboard.writeText(code).then(()=>showToast('✅ ' + code, 'success')).catch(()=>showToast('Code: ' + code, 'info')); }
 function openTerms(){ window.open('/terms.html', '_blank'); }
-const TOUR_STEPS = [{ icon:'👋', title:'Safe Zone မှ ကြိုဆိုပါတယ်!', text:'Game Topup လုပ်နည်း လမ်းညွှန်ပြပါမယ်။' },{ icon:'💰', title:'Step 1: Wallet ဖြည့်', text:'ငွေဖြည့် tab မှာ ဖြည့်ပါ။' },{ icon:'🎮', title:'Step 2: ဂိမ်း ရွေး', text:'ဂိမ်း ရွေးပြီး Order တင်ပါ။' },{ icon:'⚡', title:'Step 3: ချက်ချင်း ရ', text:'Admin approve ပြီးရင် ရပါပြီ!' }];
-let tourIdx = 0;
-function startTour(){ if (localStorage.getItem('tourSeen')) return; tourIdx = 0; updateTour(); document.getElementById('tour').classList.add('show'); }
-function updateTour(){ const s = TOUR_STEPS[tourIdx]; document.getElementById('tourIcon').textContent = s.icon; document.getElementById('tourTitle').textContent = s.title; document.getElementById('tourText').textContent = s.text; document.querySelector('.tour-next').textContent = tourIdx === TOUR_STEPS.length-1 ? 'ပြီးပါပြီ' : 'Next'; }
-function nextTour(){ tourIdx++; if (tourIdx >= TOUR_STEPS.length) return endTour(); updateTour(); haptic(15); }
-function endTour(){ document.getElementById('tour').classList.remove('show'); localStorage.setItem('tourSeen', '1'); haptic(30); }
 function confetti(){ const colors = ['#38bdf8','#a855f7','#f59e0b','#22c55e','#ec4899']; for (let i = 0; i < 30; i++) { const c = document.createElement('div'); c.className = 'confetti'; c.style.left = Math.random() * 100 + '%'; c.style.top = '-10px'; c.style.background = colors[Math.floor(Math.random() * colors.length)]; c.style.animationDelay = Math.random() * 0.5 + 's'; document.body.appendChild(c); setTimeout(() => c.remove(), 3500); } }
 function openFaq(){ switchTab('faq', document.querySelector('.nav-item')); }
 function openStats(){ switchTab('analytics', document.querySelector('.nav-item')); }
 async function buyPremium(){
-  if (!selected) return; if ((userData.balance || 0) < selected.price) { errorSound(); return showToast('❌ Balance မလုံလောက်ပါ (' + selected.price.toLocaleString() + ' Ks လိုတယ်)', 'error'); }
-  if (!confirm('📱 App Premium ဝယ်မယ်\n\n🎁 ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks\n\nBalance ဖြတ်ပြီး Admin ဆီ ပို့မယ်\n\nOK နှိပ်ရင် အတည်ပြုမယ်')) return;
+  if (!selected) return; if ((userData.balance || 0) < selected.price) { playSound('error'); return showToast('❌ Balance မလုံလောက်ပါ', 'error'); }
+  if (!confirm('📱 App Premium ဝယ်မယ်\n\n🎁 ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks\n\nOK နှိပ်ရင် အတည်ပြုမယ်')) return;
   showToast('⏳ Order တင်နေတယ်...', 'info');
   const d = await api('/api/order', { method: 'POST', body: JSON.stringify({ productId: selected.id, playerId: 'App Premium Buy' }) });
-  if (!d.success) { errorSound(); return showToast('❌ ' + d.error, 'error'); }
-  successSound(); haptic(100); confetti(); sendPush('Order တင်ပြီး', selected.game + ' - ' + selected.name); showToast('✅ Balance ဖြတ်ပြီး — Admin ဆီ ပို့မယ်', 'success'); loadMe(); loadOrders();
-  setTimeout(function(){ const navBtns = document.querySelectorAll('.nav-item'); switchTab('chat', navBtns[3]); setTimeout(function(){ const inp = document.getElementById('chatInput'); if (inp) { inp.value = '📱 App Premium ဝယ်ပြီးပါပြီ\n\n🎁 ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks\n🔖 Order: ' + d.orderId + '\n\nAdmin ရေ — ဆောင်ရွက်ပေးပါ 🙏'; inp.focus(); } showToast('📩 ➤ နှိပ်ပြီး Admin ဆီ ပို့ပါ', 'info'); }, 500); }, 500);
+  if (!d.success) { playSound('error'); return showToast('❌ ' + d.error, 'error'); }
+  playSound('success'); haptic(100); confetti(); showToast('✅ Balance ဖြတ်ပြီး — Admin ဆီ ပို့မယ်', 'success'); loadMe(); loadOrders();
+  setTimeout(function(){ const navBtns = document.querySelectorAll('.nav-item'); switchTab('chat', navBtns[3]); setTimeout(function(){ const inp = document.getElementById('chatInput'); if (inp) { inp.value = '📱 App Premium ဝယ်ပြီးပါပြီ\n\n🎁 ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks\n🔖 Order: ' + d.orderId; inp.focus(); } showToast('📩 ➤ နှိပ်ပြီး Admin ဆီ ပို့ပါ', 'info'); }, 500); }, 500);
 }
-let musicCtx = null; let _customMusicEl = null; let _customMusicReady = false; let musicPlaying = false; let musicTimer = null; let musicNodes = [];
+let musicCtx = null; let _customMusicEl = null; let musicPlaying = false; let musicTimer = null; let musicNodes = [];
 const MUSIC_MELODY = [[523.25, 500],[587.33, 500],[659.25, 500],[783.99, 500],[659.25, 500],[587.33, 500],[523.25, 1000],[0, 500],[587.33, 500],[659.25, 500],[698.46, 500],[880.00, 500],[698.46, 500],[659.25, 500],[587.33, 1000],[0, 500],[523.25, 500],[587.33, 500],[659.25, 500],[523.25, 500],[440.00, 500],[493.88, 500],[523.25, 1500],[0, 1000]];
 function playNote(freq, duration) { if (!musicCtx) return; try { const osc = musicCtx.createOscillator(); const gain = musicCtx.createGain(); osc.type = 'sine'; osc.frequency.value = freq; osc.connect(gain); gain.connect(musicCtx.destination); const now = musicCtx.currentTime; const attack = 0.05; const release = 0.3; gain.gain.setValueAtTime(0, now); gain.gain.linearRampToValueAtTime(0.08, now + attack); gain.gain.setValueAtTime(0.08, now + (duration/1000) - release); gain.gain.exponentialRampToValueAtTime(0.001, now + (duration/1000)); osc.start(now); osc.stop(now + (duration/1000) + 0.1); musicNodes.push(osc); setTimeout(() => { try { osc.disconnect(); } catch(e){} const i = musicNodes.indexOf(osc); if (i >= 0) musicNodes.splice(i, 1); }, duration + 200); } catch(e){} }
 function playMelody() { if (!musicPlaying || !musicCtx) return; let totalDelay = 0; MUSIC_MELODY.forEach(([freq, dur]) => { setTimeout(() => { if (!musicPlaying) return; if (freq > 0) playNote(freq, dur); }, totalDelay); totalDelay += dur; }); musicTimer = setTimeout(() => { if (musicPlaying) playMelody(); }, totalDelay + 500); }
 function startMusicWithCustom() { const musicUrl = siteData && siteData.musicUrl; if (musicUrl) { try { if (!_customMusicEl) { _customMusicEl = new Audio(musicUrl); _customMusicEl.loop = true; _customMusicEl.volume = 0.3; } _customMusicEl.play().then(() => { musicPlaying = true; updateMusicBtn(); showToast('🎵 Music On', 'info'); }).catch(e => { console.log('Play err:', e.message); startMusic(); }); return; } catch(e) { console.log('Custom music err:', e.message); } } startMusic(); }
 function stopMusicWithCustom() { if (_customMusicEl) { try { _customMusicEl.pause(); _customMusicEl.currentTime = 0; } catch(e){} } stopMusic(); }
 function toggleMusicWithCustom() { if (musicPlaying) stopMusicWithCustom(); else startMusicWithCustom(); haptic(30); }
-function startMusic() { const musicUrl = siteData && siteData.musicUrl; if (musicUrl) { try { if (!_customMusicEl) { _customMusicEl = new Audio(musicUrl); _customMusicEl.loop = true; _customMusicEl.volume = 0.3; _customMusicEl.addEventListener('loadeddata', () => { _customMusicReady = true; }); _customMusicEl.addEventListener('error', () => { console.log('Music load err — fallback to melody'); _customMusicEl = null; startMelody(); }); } _customMusicEl.play().then(() => { musicPlaying = true; updateMusicBtn(); showToast('🎵 Music On', 'info'); }).catch(e => { console.log('Play err:', e.message); startMelody(); }); return; } catch(e) { console.log('Custom music err:', e.message); } } startMelody(); }
-function startMelody() { try { if (!musicCtx) musicCtx = new (window.AudioContext || window.webkitAudioContext)(); if (musicCtx.state === 'suspended') musicCtx.resume(); musicPlaying = true; playMelody(); updateMusicBtn(); showToast('🎵 Music On', 'info'); } catch(e){ console.log('music err', e.message); } }
+function startMusic() { const musicUrl = siteData && siteData.musicUrl; if (musicUrl) { try { if (!_customMusicEl) { _customMusicEl = new Audio(musicUrl); _customMusicEl.loop = true; _customMusicEl.volume = 0.3; _customMusicEl.addEventListener('loadeddata', () => { }); _customMusicEl.addEventListener('error', () => { _customMusicEl = null; startMelody(); }); } _customMusicEl.play().then(() => { musicPlaying = true; updateMusicBtn(); showToast('🎵 Music On', 'info'); }).catch(e => { startMelody(); }); return; } catch(e) { } } startMelody(); }
+function startMelody() { try { if (!musicCtx) musicCtx = new (window.AudioContext || window.webkitAudioContext)(); if (musicCtx.state === 'suspended') musicCtx.resume(); musicPlaying = true; playMelody(); updateMusicBtn(); showToast('🎵 Music On', 'info'); } catch(e){ } }
 function stopMusic() { musicPlaying = false; if (_customMusicEl) { try { _customMusicEl.pause(); _customMusicEl.currentTime = 0; } catch(e){} } if (musicTimer) { clearTimeout(musicTimer); musicTimer = null; } musicNodes.forEach(n => { try { n.stop(); } catch(e){} }); musicNodes = []; if (musicCtx) { try { musicCtx.suspend(); } catch(e){} } updateMusicBtn(); showToast('🔇 Music Off', 'info'); }
-function toggleMusic() { if (musicPlaying) stopMusic(); else startMusic(); haptic(30); }
 function updateMusicBtn() { const b = document.getElementById('musicBtn'); if (!b) return; b.textContent = musicPlaying ? '🎵' : '🔇'; b.classList.toggle('playing', musicPlaying); }
-async function shareOrder(orderId){ var orders = await api('/api/orders'); if (orders.error) return; var o = orders.find(function(x) { return x.id === orderId; }); if (!o) return showToast('Order မတွေ့', 'error'); var text = '🎮 Safe Zone Topup\n\n📦 ' + o.game + ' - ' + o.product + '\n💵 ' + o.price.toLocaleString() + ' Ks\n🆔 ' + o.playerId + (o.serverId ? ' · S:' + o.serverId : '') + '\n📌 Status: ' + o.status + '\n🔖 ' + o.id; if (navigator.share) { try { await navigator.share({ title: 'My Order', text: text, url: location.origin }); } catch(e){} } else { navigator.clipboard.writeText(text + '\n\n' + location.origin).then(function() { showToast('✅ Order ကူးပြီး — share လုပ်ပါ', 'success'); }).catch(function(){ alert(text); }); } }
 var _spinPrize = 0; var _spinCanPlay = true;
 function renderSpinWheel() { var cfg = (siteData && siteData.spinConfig) || {}; var prizes = (cfg.prizes && cfg.prizes.length) ? cfg.prizes : [{ value: 50 }, { value: 100 }, { value: 200 }, { value: 500 },{ value: 1000 }, { value: 2000 }, { value: 5000 }, { value: 0 }]; var n = prizes.length; if (n < 2) n = 8; var angle = 360 / n; var colors = ['#ef4444','#f59e0b','#22c55e','#3b82f6','#a855f7','#ec4899','#38bdf8','#10b981','#f43f5e','#14b8a6']; var grad = 'conic-gradient('; for (var i = 0; i < n; i++) { grad += colors[i % colors.length] + ' ' + (i * angle) + 'deg ' + ((i + 1) * angle) + 'deg,'; } grad = grad.slice(0, -1) + ')'; var wheel = document.getElementById('spinWheel'); if (wheel) wheel.style.background = grad; }
-function openSpinWheel(){ renderSpinWheel(); document.getElementById('spinResult').textContent = 'Spin နှိပ်ပြီး ကံစမ်းပါ'; document.getElementById('spinWheel').style.transform = 'rotate(0deg)'; document.getElementById('spinBtn').textContent = '🎰 Spin!'; document.getElementById('spinBtn').onclick = doSpin; document.getElementById('spinModal').classList.add('show'); }
-async function doSpin(){ if (!_spinCanPlay) return; var btn = document.getElementById('spinBtn'); btn.textContent = '⏳ လှည့်နေတယ်...'; _spinCanPlay = false; var prizes = [50, 100, 200, 500, 1000, 2000, 5000, 0]; var weights = [30, 25, 20, 12, 8, 3, 1, 1]; var r = Math.random() * 100, sum = 0, idx = 0; for (var i = 0; i < prizes.length; i++) { sum += weights[i]; if (r < sum) { idx = i; break; } } var rotations = 360 * 5 + (idx * 45); document.getElementById('spinWheel').style.transform = 'rotate(' + rotations + 'deg)'; await new Promise(function(res) { setTimeout(res, 4200); }); var d = await api('/api/spin', { method: 'POST' }); if (d.success) { _spinPrize = d.reward; if (d.reward > 0) { playSound('success'); haptic(100); confetti(); document.getElementById('spinResult').innerHTML = '<b style="color:#22c55e;font-size:18px">🎉 +' + d.reward.toLocaleString() + ' Ks!</b>'; sendPush('Spin Win!', '+' + d.reward + ' Ks'); } else { document.getElementById('spinResult').innerHTML = '<b style="color:#ef4444">😢 မရပါ</b>'; } loadMe(); } else { document.getElementById('spinResult').innerHTML = '<b style="color:#ef4444">' + (d.error || 'Error') + '</b>'; } btn.textContent = 'Close'; btn.onclick = function(){ closeModal('spinModal'); _spinCanPlay = true; }; }
+function openSpinWheel(){ renderSpinWheel(); const res = document.getElementById('spinResult'); if(res) res.textContent = 'Spin နှိပ်ပြီး ကံစမ်းပါ'; const wheel = document.getElementById('spinWheel'); if(wheel) wheel.style.transform = 'rotate(0deg)'; const btn = document.getElementById('spinBtn'); if(btn) { btn.textContent = '🎰 Spin!'; btn.onclick = doSpin; } const m = document.getElementById('spinModal'); if(m) m.classList.add('show'); }
+async function doSpin(){ if (!_spinCanPlay) return; var btn = document.getElementById('spinBtn'); if(!btn) return; btn.textContent = '⏳ လှည့်နေတယ်...'; _spinCanPlay = false; var prizes = [50, 100, 200, 500, 1000, 2000, 5000, 0]; var weights = [30, 25, 20, 12, 8, 3, 1, 1]; var r = Math.random() * 100, sum = 0, idx = 0; for (var i = 0; i < prizes.length; i++) { sum += weights[i]; if (r < sum) { idx = i; break; } } var rotations = 360 * 5 + (idx * 45); const wheel = document.getElementById('spinWheel'); if(wheel) wheel.style.transform = 'rotate(' + rotations + 'deg)'; await new Promise(function(res) { setTimeout(res, 4200); }); var d = await api('/api/spin', { method: 'POST' }); const resEl = document.getElementById('spinResult'); if (d.success) { _spinPrize = d.reward; if (d.reward > 0) { playSound('success'); haptic(100); confetti(); if(resEl) resEl.innerHTML = '<b style="color:#22c55e;font-size:18px">🎉 +' + d.reward.toLocaleString() + ' Ks!</b>'; } else { if(resEl) resEl.innerHTML = '<b style="color:#ef4444">😢 မရပါ</b>'; } loadMe(); } else { if(resEl) resEl.innerHTML = '<b style="color:#ef4444">' + (d.error || 'Error') + '</b>'; } btn.textContent = 'Close'; btn.onclick = function(){ closeModal('spinModal'); _spinCanPlay = true; }; }
 function updateSpinVisibility() { var cfg = (siteData && siteData.spinConfig) || {}; var cards = document.querySelectorAll('.quick-card'); for (var i = 0; i < cards.length; i++) { if (cards[i].innerHTML.indexOf('🎰') > -1) { cards[i].style.display = (cfg.enabled === false) ? 'none' : ''; break; } } }
 async function logout(){ if (!confirm('Logout လုပ်မှာသေချာလား?')) return; await api('/api/logout', {method:'POST'}); localStorage.clear(); location.href = '/'; }
-let lastBalance = 0; let lastNotifCount = 0;
-async function quickCheck() {
-  try {
-    const d = await api('/api/me'); if (!d || d.error) return;
-    if (lastBalance > 0 && d.balance > lastBalance) { const diff = d.balance - lastBalance; playSound('success'); haptic(80); confetti(); showToast('💰 +' + diff.toLocaleString() + ' Ks ဝင်ပါပြီ!', 'success'); sendPush('💰 Balance ဝင်ပြီ', '+' + diff.toLocaleString() + ' Ks'); loadDeposits(); }
-    lastBalance = d.balance;
-    if (d.unread && d.unread > lastNotifCount) { playSound('info'); showToast('🔔 Notification အသစ် ' + d.unread + ' ခု', 'info'); }
-    lastNotifCount = d.unread || 0;
-  } catch(e){}
-}
-setInterval(quickCheck, 3000);
 (async () => {
   try {
     await checkMaint();
     await loadSite();
     await loadMe();
     await loadProducts();
-    requestPushPermission();
-    setTimeout(startTour, 2500);
-    setTimeout(initPushNotifications, 2000);
-    setTimeout(initIOSPush, 2500);
-    if (isIOS() && !isInStandaloneMode()) { const b = document.getElementById("iosInstallBtn"); if (b) b.style.display = "block"; }
-    showIOSHint();
-    setInterval(loadMe, 5000);
-    setInterval(async () => {
-      try {
-        const d = await api('/api/me');
-        if (d.unread > 0) { const b = document.getElementById('notifBadge'); b.textContent = d.unread; b.style.display = 'inline-block'; if (d.unread > lastUnread) { playSound('success'); haptic(50); showToast('🔔 Notification အသစ်', 'info'); } } else { document.getElementById('notifBadge').style.display = 'none'; }
-        lastUnread = d.unread || 0;
-      } catch(e){}
-    }, 3000);
+    setInterval(loadMe, 10000);
   } catch (err) {
     console.error('Init Error:', err);
     const s = document.getElementById('splash'); if (s) { s.classList.add('hide'); setTimeout(() => s.remove(), 700); }
@@ -740,12 +566,14 @@ setInterval(quickCheck, 3000);
 })();
 </script>
 <script>
-(function(){
-  function hideSplash() { var s = document.getElementById('splash'); if (s) { s.classList.add('hide'); setTimeout(function(){ if (s && s.parentNode) s.parentNode.removeChild(s); }, 700); } }
-  setTimeout(hideSplash, 2200); window.addEventListener('load', function(){ setTimeout(hideSplash, 100); }); setTimeout(hideSplash, 5000); window.addEventListener('error', function(){ setTimeout(hideSplash, 300); });
-})();
+window.addEventListener('error', function(e) {
+  console.log('Global Error Caught:', e.message);
+  var splash = document.getElementById('splash');
+  if (splash) {
+    splash.classList.add('hide');
+    setTimeout(function(){ if (splash.parentNode) splash.parentNode.removeChild(splash); }, 700);
+  }
+});
 </script>
-
-<div id="toast" class="toast"></div>
 </body>
 </html>
