@@ -68,6 +68,29 @@ button.main:active{transform:scale(0.97)}
 input, select, textarea { font-size: 16px !important; -webkit-appearance: none; -webkit-border-radius: 14px; border-radius: 14px; }
 button { -webkit-appearance: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
 * { -webkit-tap-highlight-color: transparent; }
+
+/* CHECKBOX FIX */
+input[type="checkbox"] {
+  -webkit-appearance: checkbox !important;
+  appearance: checkbox !important;
+  width: 20px !important;
+  height: 20px !important;
+  min-width: 20px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  flex-shrink: 0 !important;
+  accent-color: #38bdf8;
+  cursor: pointer;
+  border-radius: 4px !important;
+  background: #0f172a;
+  border: 1.5px solid #334155;
+  position: relative;
+}
+input[type="checkbox"]:checked {
+  background: #38bdf8;
+  border-color: #38bdf8;
+}
+
 </style>
 </head>
 <body>
@@ -119,9 +142,9 @@ button { -webkit-appearance: none; -webkit-tap-highlight-color: transparent; tou
     <div class="field"><input id="rp2" type="password" placeholder="Password ထပ်ရိုက်ပါ"><button class="toggle-pw" onclick="togglePw('rp2',this)">👁</button></div>
     <div class="field"><input id="rph" placeholder="Phone (09xxxxxxxxx)"></div>
     <div class="field"><input id="rref" placeholder="Referral Code (optional)"></div>
-    <div style="display:flex;align-items:center;gap:8px;font-size:12px;color:#94a3b8;margin-bottom:12px">
-      <input type="checkbox" id="rterms" style="width:auto;padding:0">
-      <label for="rterms"><a href="/terms.html" target="_blank" style="color:#38bdf8">Terms & Privacy</a> လက်ခံပါ</label>
+    <div style="display:flex;align-items:center;gap:10px;font-size:13px;color:#94a3b8;margin-bottom:14px;padding:8px 0">
+      <input type="checkbox" id="rterms">
+      <label for="rterms" style="font-size:13px;color:#94a3b8;cursor:pointer;user-select:none"><a href="/terms.html" target="_blank" style="color:#38bdf8;text-decoration:none">Terms & Privacy</a> လက်ခံပါ</label>
     </div>
     <button class="main" onclick="register(event)">✨ Register</button>
     <div class="switch">Account ရှိပြီးသားလား? <a onclick="show('login')">Login</a></div>
