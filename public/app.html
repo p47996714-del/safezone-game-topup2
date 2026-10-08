@@ -1,6 +1,14 @@
 <!DOCTYPE html>
 <html lang="my">
-<head>
+<head>\n<script>
+var soundOn = true;
+var hapticOn = true;
+
+window.onerror = function(msg, url, line, col, error) {
+  alert("⚠️ JS Error: " + msg + "\nLine: " + line + "\nCol: " + col);
+  return false;
+};
+</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0b1120">
@@ -580,8 +588,6 @@ setTimeout(() => {
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 let customAudio = new Audio();
-var soundOn = true;
-var hapticOn = true;
 function playSound(type){
   if (soundOn && siteData && siteData.customSound) { try { customAudio.src = siteData.customSound; customAudio.volume = 0.3; customAudio.play().catch(()=>{}); return; } catch(e){} }
   try {
@@ -631,8 +637,8 @@ if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').cat
 
 
 // Sound/Haptic toggles
-let soundOn = localStorage.getItem('soundOn') !== 'off';
-let hapticOn = localStorage.getItem('hapticOn') !== 'off';
+
+
 function updateToggles(){
   const st = document.getElementById('soundToggle');
   const ht = document.getElementById('hapticToggle');
