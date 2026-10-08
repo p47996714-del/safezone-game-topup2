@@ -35,7 +35,7 @@ const DB_FILE = 'db.json';
 
 function defaultDB() {
   return {
-    users: [], orders: [], deposits: [], sessions: {}, chats: [], notifications: [], activityLog: [], uploads: {},
+    users: [], orders: [], deposits: [], sessions: {}, chats: [], notifications: [], activityLog: [],
     otps: {}, banned: [], broadcasts: [], coupons: {}, cashbacks: {},
     boxesOpened: {}, missions: {}, reviews: [],
     products: [
@@ -747,51 +747,6 @@ app.delete('/api/admin/admins/:username', adminAuth, superAdmin, (req, res) => {
 });
 
 // CONFIG
-app.post('/api/admin/upload', adminAuth, (req, res) => {
-  const { dataUrl } = req.body;
-  if (!dataUrl || !dataUrl.startsWith('data:')) return res.status(400).json({error:'မှား'});
-  const m = dataUrl.match(/^data:([^;]+);base64,(.+)$/);
-  if (!m) return res.status(400).json({error:'Format မှား'});
-  const mime = m[1];
-  const b64 = m[2];
-  const size = b64.length * 0.75;
-  if (size > 3 * 1024 * 1024) return res.status(400).json({error:'ပုံ 3MB အောက်သာ'});
-  if (!db.uploads) db.uploads = {};
-  const id = 'u' + Date.now() + Math.random().toString(36).substring(2, 6);
-  db.uploads[id] = { mime, data: b64, size: Math.floor(size), at: Date.now() };
-  const keys = Object.keys(db.uploads);
-  if (keys.length > 100) {
-    keys.slice(0, keys.length - 100).forEach(k => delete db.uploads[k]);
-  }
-  saveDB();
-  logActivity(req.admin.username, 'upload', id + ' (' + Math.floor(size/1024) + 'KB)');
-  res.json({ success: true, url: '/api/upload/' + id, id: id, size: Math.floor(size) });
-});
-
-app.get('/api/upload/:id', (req, res) => {
-  if (!db.uploads || !db.uploads[req.params.id]) return res.status(404).send('Not found');
-  const u = db.uploads[req.params.id];
-  const buf = Buffer.from(u.data, 'base64');
-  res.setHeader('Content-Type', u.mime);
-  res.setHeader('Cache-Control', 'public, max-age=31536000');
-  res.send(buf);
-});
-
-app.get('/api/admin/uploads', adminAuth, (req, res) => {
-  const list = Object.entries(db.uploads || {}).map(([id, u]) => ({
-    id, url: '/api/upload/' + id, size: u.size, mime: u.mime, at: u.at
-  })).sort((a, b) => b.at - a.at);
-  res.json(list);
-});
-
-app.delete('/api/admin/uploads/:id', adminAuth, superAdmin, (req, res) => {
-  if (db.uploads && db.uploads[req.params.id]) {
-    delete db.uploads[req.params.id];
-    saveDB();
-    res.json({success: true});
-  } else res.status(404).json({error: 'Not found'});
-});
-
 app.get('/api/admin/config', adminAuth, (req, res) => res.json(db.config));
 app.post('/api/admin/config/section', adminAuth, superAdmin, (req, res) => {
   const { section, value } = req.body;

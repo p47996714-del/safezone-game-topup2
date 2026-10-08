@@ -105,27 +105,6 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 .splash-loader{margin-top:40px;width:180px;height:4px;background:#1e293b;border-radius:4px;overflow:hidden}
 .splash-bar{height:100%;background:linear-gradient(90deg,#a855f7,#38bdf8,#ec4899);border-radius:4px;animation:loadBar 2s ease-in-out forwards}
 @keyframes loadBar{0%{width:0}100%{width:100%}}
-
-.upload-row{display:flex;gap:8px;align-items:center;margin-bottom:10px;flex-wrap:wrap}
-.upload-row input[type="text"]{flex:1;min-width:120px;padding:10px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:13px;font-family:inherit}
-.upload-btn{padding:10px 14px;border-radius:10px;background:linear-gradient(135deg,#3b82f6,#8b5cf6);color:#fff;border:none;font-weight:bold;cursor:pointer;font-size:13px;font-family:inherit;white-space:nowrap}
-.upload-btn.green{background:linear-gradient(135deg,#10b981,#059669)}
-.upload-btn.red{background:linear-gradient(135deg,#ef4444,#dc2626)}
-.upload-preview{margin-top:8px;padding:10px;background:rgba(15,23,42,0.6);border-radius:12px;border:1px dashed #38bdf8;text-align:center;display:none}
-.upload-preview img{max-width:100%;max-height:200px;border-radius:10px}
-.upload-preview.show{display:block}
-.upload-progress{margin-top:6px;height:4px;background:#1e293b;border-radius:2px;overflow:hidden;display:none}
-.upload-progress.show{display:block}
-.upload-progress-bar{height:100%;background:linear-gradient(90deg,#38bdf8,#a855f7);width:0;transition:width 0.3s}
-.upload-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(100px,1fr));gap:8px;margin-top:10px}
-.upload-grid-item{position:relative;background:rgba(15,23,42,0.6);border-radius:10px;overflow:hidden;border:1px solid #334155;aspect-ratio:1;cursor:pointer}
-.upload-grid-item img{width:100%;height:100%;object-fit:cover;display:block}
-.upload-grid-item .del{position:absolute;top:4px;right:4px;background:rgba(239,68,68,0.9);color:#fff;border:none;width:22px;height:22px;border-radius:50%;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center}
-.upload-zone{padding:20px;border:2px dashed #38bdf8;border-radius:14px;text-align:center;background:rgba(56,189,248,0.05);cursor:pointer;transition:0.2s}
-.upload-zone:hover{background:rgba(56,189,248,0.1);border-color:#a855f7}
-.upload-zone .icon{font-size:32px;margin-bottom:8px}
-.upload-zone .text{font-size:13px;color:#94a3b8}
-
 </style>
 </head>
 <body>
@@ -218,12 +197,6 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
         <input id="giUrl" placeholder="Image URL">
         <button onclick="saveGameImg()">Save</button>
       </div>
-      <div class="upload-row" style="margin-top:-4px">
-        <button class="upload-btn" onclick="pickGameImg()">📸 Gallery ကနေ ရွေး</button>
-      </div>
-      <div class="upload-preview" id="giPreview">
-        <img id="giPreviewImg" src="">
-      </div>
       <div id="gameImgList" style="margin-top:10px"></div>
     </div>
     <div class="section"><h3>📦 Products စာရင်း</h3><div id="prodList"></div></div>
@@ -266,21 +239,10 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
   <div class="section">
     <h3>🌐 Site Info</h3>
     <div class="row"><input id="ws_siteName" placeholder="Site Name"></div>
-    <div class="upload-row">
-      <input id="ws_logoUrl" type="text" placeholder="Logo URL">
-      <button class="upload-btn" onclick="pickFile('logo')">📸 Upload</button>
-      <button class="upload-btn red" onclick="clearLogo()">✕</button>
-    </div>
-    <div class="upload-preview" id="logoPreview">
-      <img id="logoPreviewImg" src="">
-    </div>
+    <div class="row"><input id="ws_logoUrl" placeholder="Logo URL"></div>
     <div class="row"><input id="ws_heroTitle" placeholder="Hero Title"></div>
     <div class="row"><input id="ws_heroSubtitle" placeholder="Hero Subtitle"></div>
-    <div class="upload-row">
-      <input id="ws_videoUrl" type="text" placeholder="Video URL (mp4)">
-      <button class="upload-btn" onclick="pickFile('video')">🎬 Upload</button>
-      <button class="upload-btn red" onclick="clearField('ws_videoUrl')">✕</button>
-    </div>
+    <div class="row"><input id="ws_videoUrl" placeholder="Video URL (mp4)"></div>
     <div class="row">
       <input id="ws_themePrimary" placeholder="Primary color (#38bdf8)">
       <input id="ws_themeSecondary" placeholder="Secondary color (#a855f7)">
@@ -352,21 +314,6 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     <div class="row"><textarea id="ws_privacy" placeholder="Privacy Policy"></textarea></div>
     <div class="row"><button onclick="saveLegal2()">💾 Save Legal</button></div>
   </div>
-</div>
-
-
-<div class="section">
-  <h3>📸 Upload Manager</h3>
-  <p style="font-size:12px;color:#94a3b8;margin-bottom:10px">ဖုန်း Gallery ကနေ ပုံတင်ပြီး — Game Image တွေမှာ သုံးလို့ရမယ်</p>
-  <div class="upload-zone" onclick="pickFile('manager')">
-    <div class="icon">📤</div>
-    <div class="text">ပုံ ရွေးရန် နှိပ်ပါ</div>
-    <div style="font-size:11px;color:#64748b;margin-top:5px">Max 3MB · JPG/PNG/GIF</div>
-  </div>
-  <div class="upload-progress" id="uploadProgress">
-    <div class="upload-progress-bar" id="uploadProgressBar"></div>
-  </div>
-  <div class="upload-grid" id="uploadGrid"></div>
 </div>
 
 <div class="panel" id="settings">
@@ -1133,148 +1080,6 @@ const _origTab2 = tab;
 tab = function(name, btn){
   _origTab2(name, btn);
   if (name==='site') loadWebsiteConfig();
-};
-
-
-// ===== IMAGE UPLOAD SYSTEM =====
-let _hiddenFileInput = null;
-let _uploadContext = null;
-
-function ensureFileInput() {
-  if (_hiddenFileInput) return _hiddenFileInput;
-  _hiddenFileInput = document.createElement('input');
-  _hiddenFileInput.type = 'file';
-  _hiddenFileInput.accept = 'image/*,video/mp4';
-  _hiddenFileInput.style.display = 'none';
-  _hiddenFileInput.addEventListener('change', onFileSelected);
-  document.body.appendChild(_hiddenFileInput);
-  return _hiddenFileInput;
-}
-
-function pickFile(context) {
-  _uploadContext = context;
-  const inp = ensureFileInput();
-  if (context === 'video') inp.accept = 'video/mp4,video/*';
-  else inp.accept = 'image/*';
-  inp.value = '';
-  inp.click();
-}
-
-function pickGameImg() {
-  _uploadContext = 'gameImg';
-  const inp = ensureFileInput();
-  inp.accept = 'image/*';
-  inp.value = '';
-  inp.click();
-}
-
-async function onFileSelected(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  if (file.size > 3 * 1024 * 1024) { alert('❌ ပုံ 3MB အောက်သာ'); return; }
-  const reader = new FileReader();
-  const prog = document.getElementById('uploadProgress');
-  const bar = document.getElementById('uploadProgressBar');
-  if (prog) { prog.classList.add('show'); bar.style.width = '30%'; }
-  reader.onload = async (ev) => {
-    const dataUrl = ev.target.result;
-    if (bar) bar.style.width = '70%';
-    try {
-      const r = await api('/api/admin/upload', { method: 'POST', body: JSON.stringify({ dataUrl }) });
-      if (bar) bar.style.width = '100%';
-      setTimeout(() => { if (prog) prog.classList.remove('show'); if (bar) bar.style.width = '0'; }, 400);
-      if (!r || !r.success) { alert('❌ Upload failed: ' + ((r && r.error) || 'Unknown')); return; }
-      handleUploadSuccess(r.url, _uploadContext);
-    } catch (err) {
-      if (prog) prog.classList.remove('show');
-      alert('❌ ' + err.message);
-    }
-  };
-  reader.readAsDataURL(file);
-}
-
-async function handleUploadSuccess(url, context) {
-  if (context === 'logo') {
-    const inp = document.getElementById('ws_logoUrl');
-    if (inp) inp.value = url;
-    const pv = document.getElementById('logoPreview');
-    const pi = document.getElementById('logoPreviewImg');
-    if (pi) pi.src = url;
-    if (pv) pv.classList.add('show');
-    alert('✅ Logo တင်ပြီး — Site Info Save နှိပ်ပါ');
-  } else if (context === 'video') {
-    const inp = document.getElementById('ws_videoUrl');
-    if (inp) inp.value = url;
-    alert('✅ Video တင်ပြီး — Site Info Save နှိပ်ပါ');
-  } else if (context === 'gameImg') {
-    const inp = document.getElementById('giUrl');
-    if (inp) inp.value = url;
-    const pv = document.getElementById('giPreview');
-    const pi = document.getElementById('giPreviewImg');
-    if (pi) pi.src = url;
-    if (pv) pv.classList.add('show');
-    alert('✅ Game image တင်ပြီး — ဂိမ်းနာမည်ထည့်ပြီး Save နှိပ်ပါ');
-  } else if (context === 'manager') {
-    loadUploads();
-    alert('✅ Upload ပြီး');
-  }
-}
-
-function clearLogo() {
-  const inp = document.getElementById('ws_logoUrl');
-  if (inp) inp.value = '';
-  const pv = document.getElementById('logoPreview');
-  if (pv) pv.classList.remove('show');
-}
-function clearField(id) {
-  const el = document.getElementById(id);
-  if (el) el.value = '';
-}
-
-async function loadUploads() {
-  try {
-    const list = await api('/api/admin/uploads');
-    const grid = document.getElementById('uploadGrid');
-    if (!grid) return;
-    if (!list || !list.length) { grid.innerHTML = '<p class="empty" style="font-size:12px;grid-column:1/-1">ပုံ မရှိသေးပါ</p>'; return; }
-    grid.innerHTML = list.map(u =>
-      '<div class="upload-grid-item" title="Click to copy URL">' +
-      '<img src="' + u.url + '" onclick="copyUploadUrl(\'' + u.url + '\')">' +
-      '<button class="del" onclick="event.stopPropagation();delUpload(\'' + u.id + '\')">✕</button>' +
-      '</div>'
-    ).join('');
-  } catch (e) { console.log('loadUploads err', e.message); }
-}
-
-function copyUploadUrl(url) {
-  const full = location.origin + url;
-  if (navigator.clipboard) {
-    navigator.clipboard.writeText(full).then(() => alert('✅ URL ကူးပြီး:\n' + full)).catch(() => prompt('URL:', full));
-  } else prompt('URL:', full);
-}
-
-async function delUpload(id) {
-  if (!confirm('ပုံ ဖျက်မှာလား?')) return;
-  const r = await api('/api/admin/uploads/' + id, { method: 'DELETE' });
-  if (r.success) loadUploads(); else alert('❌ Failed');
-}
-
-// Hook tab switch to load uploads
-const _origTab3 = tab;
-tab = function(name, btn) {
-  _origTab3(name, btn);
-  if (name === 'site') {
-    setTimeout(() => {
-      loadUploads();
-      const logo = document.getElementById('ws_logoUrl');
-      if (logo && logo.value) {
-        const pv = document.getElementById('logoPreview');
-        const pi = document.getElementById('logoPreviewImg');
-        if (pi) pi.src = logo.value;
-        if (pv) pv.classList.add('show');
-      }
-    }, 300);
-  }
 };
 
 if (ap) showPanel();
