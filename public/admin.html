@@ -997,63 +997,89 @@ let wsConfig = {};
 
 async function loadWebsiteConfig() {
   try {
-    const c = await api('/api/admin/config');
+    const c = await api("/api/admin/config");
     wsConfig = c;
-    // Site
-    document.getElementById('ws_siteName').value = c.siteName || '';
-    document.getElementById('ws_logoUrl').value = c.logoUrl || '';
-    document.getElementById('ws_heroTitle').value = c.hero?.title || '';
-    document.getElementById('ws_heroSubtitle').value = c.hero?.subtitle || '';
-    document.getElementById('ws_videoUrl').value = c.hero?.videoUrl || '';
-    document.getElementById('ws_musicUrl').value = c.musicUrl || '';
-    if (c.musicUrl) {
-      const pv = document.getElementById('musicPreview');
-      const pl = document.getElementById('musicPreviewPlayer');
-      if (pv && pl) { pv.classList.add('show'); pl.src = c.musicUrl; }
-    }
-    document.getElementById('ws_themePrimary').value = c.theme?.primary || '';
-    document.getElementById('ws_themeSecondary').value = c.theme?.secondary || '';
+    const D = {
+      siteName: "Safe Zone Game Topup",
+      logoUrl: "https://i.imgur.com/iRwIfqs.png",
+      heroTitle: "Safe Zone Topup",
+      heroSubtitle: "⚡ Instant Delivery · 24/7 Service",
+      videoUrl: "https://cdn.pixabay.com/video/2023/10/20/185683-876929862_tiny.mp4",
+      themePrimary: "#38bdf8",
+      themeSecondary: "#a855f7",
+      lblBalance: "💰 လက်ကျန်ငွေ",
+      lblGames: "🎮 ဂိမ်းများ",
+      lblSearch: "🔍 ဂိမ်း ရှာပါ...",
+      lblPopular: "🔥 Popular Games",
+      lblPayment: "💰 Wallet ဖြည့်ရန်",
+      fb: "https://facebook.com/safezone",
+      tt: "https://tiktok.com/@safezone",
+      wa: "09763442881",
+      vb: "09763442881",
+      tg: "",
+      terms: "Safe Zone Game Topup ကို အသုံးပြုခြင်းဖြင့် စည်းကမ်းချက်များကို လက်ခံပါသည်။",
+      privacy: "Safe Zone သည် သင့် Data များကို လုံခြုံစွာ ထိန်းသိမ်းပါသည်။"
+    };
+    // Site info
+    document.getElementById("ws_siteName").value = c.siteName || D.siteName;
+    document.getElementById("ws_logoUrl").value = c.logoUrl || D.logoUrl;
+    document.getElementById("ws_heroTitle").value = (c.hero && c.hero.title) || D.heroTitle;
+    document.getElementById("ws_heroSubtitle").value = (c.hero && c.hero.subtitle) || D.heroSubtitle;
+    document.getElementById("ws_videoUrl").value = (c.hero && c.hero.videoUrl) || D.videoUrl;
+    document.getElementById("ws_themePrimary").value = (c.theme && c.theme.primary) || D.themePrimary;
+    document.getElementById("ws_themeSecondary").value = (c.theme && c.theme.secondary) || D.themeSecondary;
+    // Music (if field exists)
+    const musicField = document.getElementById("ws_musicUrl");
+    if (musicField) musicField.value = c.musicUrl || "";
     // Labels
     const L = c.labels || {};
-    document.getElementById('ws_lblBalance').value = L.balance || '';
-    document.getElementById('ws_lblGames').value = L.gamesTitle || '';
-    document.getElementById('ws_lblSearch').value = L.searchPlaceholder || '';
-    document.getElementById('ws_lblPopular').value = L.popularTitle || '';
-    document.getElementById('ws_lblPayment').value = L.paymentTitle || '';
+    document.getElementById("ws_lblBalance").value = L.balance || D.lblBalance;
+    document.getElementById("ws_lblGames").value = L.gamesTitle || D.lblGames;
+    document.getElementById("ws_lblSearch").value = L.searchPlaceholder || D.lblSearch;
+    document.getElementById("ws_lblPopular").value = L.popularTitle || D.lblPopular;
+    document.getElementById("ws_lblPayment").value = L.paymentTitle || D.lblPayment;
     // Social
     const S = c.social || {};
-    document.getElementById('ws_fb').value = S.facebook || '';
-    document.getElementById('ws_tt').value = S.tiktok || '';
-    document.getElementById('ws_wa').value = S.whatsapp || '';
-    document.getElementById('ws_vb').value = S.viber || '';
-    document.getElementById('ws_tg').value = S.telegram || '';
-    // Legal
-    document.getElementById('ws_terms').value = c.terms || '';
-    document.getElementById('ws_privacy').value = c.privacy || '';
+    document.getElementById("ws_fb").value = S.facebook || D.fb;
+    document.getElementById("ws_tt").value = S.tiktok || D.tt;
+    document.getElementById("ws_wa").value = S.whatsapp || D.wa;
+    document.getElementById("ws_vb").value = S.viber || D.vb;
+    document.getElementById("ws_tg").value = S.telegram || D.tg;
+    // Terms
+    document.getElementById("ws_terms").value = c.terms || D.terms;
+    document.getElementById("ws_privacy").value = c.privacy || D.privacy;
+    // Render lists
     renderPayments();
     renderBadges();
     renderFaq();
-  } catch(e){ console.log('loadWebsiteConfig err', e.message); }
+  } catch(e) { console.log("loadWebsiteConfig err", e.message); }
 }
 
 function renderPayments() {
-  const list = wsConfig.payments || [];
-  if (!list.length) { document.getElementById('ws_paymentList').innerHTML = '<p class="empty">Payment method မရှိပါ</p>'; return; }
-  document.getElementById('ws_paymentList').innerHTML = list.map((p, i) => {
-    const preview = p.image
-      ? '<img src="' + p.image + '" style="width:50px;height:50px;object-fit:contain;border-radius:8px;background:#fff;padding:3px">'
-      : '<div style="width:50px;height:50px;border-radius:8px;background:#334155;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;color:#94a3b8">' + (p.short || '?') + '</div>';
-    return '<div class="admin-item" style="flex-wrap:wrap;gap:8px">' +
-      '<div style="display:flex;align-items:center;gap:10px;flex:1">' +
+  const DEF = [
+    { name: "KBZ Pay", short: "KBZ", cls: "kbz" },
+    { name: "Wave Money", short: "Wave", cls: "wave" },
+    { name: "UAB Pay", short: "UAB", cls: "uab" },
+    { name: "AYA Pay", short: "AYA", cls: "aya" }
+  ];
+  if (!wsConfig.payments || wsConfig.payments.length === 0) wsConfig.payments = DEF;
+  const list = wsConfig.payments;
+  if (!list.length) { document.getElementById("ws_paymentList").innerHTML = "<p class=\"empty\">Payment method မရှိပါ</p>"; return; }
+  document.getElementById("ws_paymentList").innerHTML = list.map(function(p, i) {
+    var preview = p.image
+      ? "<img src=\"" + p.image + "\" style=\"width:50px;height:50px;object-fit:contain;border-radius:8px;background:#fff;padding:3px\">"
+      : "<div style=\"width:50px;height:50px;border-radius:8px;background:#334155;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:bold;color:#94a3b8\">" + (p.short || "?") + "</div>";
+    return "<div class=\"admin-item\" style=\"flex-wrap:wrap;gap:8px\">" +
+      "<div style=\"display:flex;align-items:center;gap:10px;flex:1\">" +
         preview +
-        '<div><b style="color:#38bdf8">' + p.name + '</b><div class="meta">Short: ' + (p.short || '-') + ' · Class: ' + (p.cls || '-') + '</div></div>' +
-      '</div>' +
-      '<div style="display:flex;gap:6px;flex-wrap:wrap">' +
-        '<button class="upload-btn" style="padding:6px 12px;font-size:11px" onclick="pickPayImg(' + i + ')">📸 ပုံ</button>' +
-        '<button class="btn red" style="margin:0;padding:6px 12px;font-size:11px" onclick="delPayment(' + i + ')">✕</button>' +
-      '</div>' +
-    '</div>';
-  }).join('');
+        "<div><b style=\"color:#38bdf8\">" + p.name + "</b><div class=\"meta\">Short: " + (p.short || "-") + " · Class: " + (p.cls || "-") + "</div></div>" +
+      "</div>" +
+      "<div style=\"display:flex;gap:6px;flex-wrap:wrap\">" +
+        "<button class=\"upload-btn\" style=\"padding:6px 12px;font-size:11px\" onclick=\"pickPayImg(" + i + ")\">📸 ပုံ</button>" +
+        "<button class=\"btn red\" style=\"margin:0;padding:6px 12px;font-size:11px\" onclick=\"delPayment(" + i + ")\">✕</button>" +
+      "</div>" +
+    "</div>";
+  }).join("");
 }
 
 // Pick image for specific payment
@@ -1095,11 +1121,17 @@ async function delPayment(i) {
 }
 
 function renderBadges() {
-  const list = wsConfig.trustBadges || [];
-  document.getElementById('ws_badgeList').innerHTML = list.map((b, i) =>
-    '<div class="admin-item"><div><b style="color:#38bdf8">' + b.icon + ' ' + b.text + '</b></div>' +
-    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delBadge(' + i + ')">✕</button></div>'
-  ).join('') || '<p class="empty">Badge မရှိပါ</p>';
+  var DEF = [
+    { icon: "✅", text: "Verified Shop" },
+    { icon: "⚡", text: "Fast Delivery" },
+    { icon: "🛡️", text: "Safe Payment" }
+  ];
+  if (!wsConfig.trustBadges || wsConfig.trustBadges.length === 0) wsConfig.trustBadges = DEF;
+  var list = wsConfig.trustBadges;
+  document.getElementById("ws_badgeList").innerHTML = list.map(function(b, i) {
+    return "<div class=\"admin-item\"><div><b style=\"color:#38bdf8\">" + b.icon + " " + b.text + "</b></div>" +
+    "<button class=\"btn red\" style=\"margin:0;padding:6px 12px;font-size:12px\" onclick=\"delBadge(" + i + ")\">✕</button></div>";
+  }).join("") || "<p class=\"empty\">Badge မရှိပါ</p>";
 }
 async function addBadge() {
   const icon = document.getElementById('ws_badgeIcon').value.trim() || '✅';
@@ -1118,11 +1150,18 @@ async function delBadge(i) {
 }
 
 function renderFaq() {
-  const list = wsConfig.faq || [];
-  document.getElementById('ws_faqList').innerHTML = list.map((f, i) =>
-    '<div class="admin-item"><div><b style="color:#38bdf8">' + f.q + '</b><div class="meta">' + String(f.a).substring(0, 80) + '</div></div>' +
-    '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delFaq(' + i + ')">✕</button></div>'
-  ).join('') || '<p class="empty">FAQ မရှိပါ</p>';
+  var DEF = [
+    { q: "💰 Deposit တင်ပြီး ဘယ်လောက်ကြာမလဲ?", a: "ပုံမှန် ၅-၁၅ မိနစ်အတွင်း approve လုပ်ပေးပါတယ်။" },
+    { q: "❌ Order Reject ဖြစ်ရင် ငွေပြန်ရလား?", a: "ရပါတယ်။ Balance ကို အလိုအလျောက် ပြန်အမ်းပါတယ်။" },
+    { q: "🆔 Server ID ဆိုတာ ဘာလဲ?", a: "MLBB/Magic Chess မှာ Player ID နဲ့အတူ Server ID လိုအပ်ပါတယ်။" },
+    { q: "💬 Live Chat ဖွင့်ချိန်?", a: "၂၄ နာရီ ဖွင့်ပါတယ်။" }
+  ];
+  if (!wsConfig.faq || wsConfig.faq.length === 0) wsConfig.faq = DEF;
+  var list = wsConfig.faq;
+  document.getElementById("ws_faqList").innerHTML = list.map(function(f, i) {
+    return "<div class=\"admin-item\"><div><b style=\"color:#38bdf8\">" + f.q + "</b><div class=\"meta\">" + String(f.a).substring(0, 80) + "</div></div>" +
+    "<button class=\"btn red\" style=\"margin:0;padding:6px 12px;font-size:12px\" onclick=\"delFaq(" + i + ")\">✕</button></div>";
+  }).join("") || "<p class=\"empty\">FAQ မရှိပါ</p>";
 }
 async function addFaq() {
   const q = document.getElementById('ws_faqQ').value.trim();
