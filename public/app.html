@@ -580,6 +580,8 @@ setTimeout(() => {
 const AudioCtx = window.AudioContext || window.webkitAudioContext;
 let audioCtx = null;
 let customAudio = new Audio();
+var soundOn = true;
+var hapticOn = true;
 function playSound(type){
   if (soundOn && siteData && siteData.customSound) { try { customAudio.src = siteData.customSound; customAudio.volume = 0.3; customAudio.play().catch(()=>{}); return; } catch(e){} }
   try {
@@ -1928,6 +1930,24 @@ setInterval(quickCheck, 3000);
       lastUnread = d.unread || 0;
     } catch(e){}
   }, 3000);
+})();
+</script>
+
+<script>
+/* SPLASH FALLBACK — force hide */
+(function(){
+  function hideSplash() {
+    var s = document.getElementById('splash');
+    if (s) {
+      s.classList.add('hide');
+      setTimeout(function(){ if (s && s.parentNode) s.parentNode.removeChild(s); }, 700);
+    }
+  }
+  setTimeout(hideSplash, 2200);
+  window.addEventListener('load', function(){ setTimeout(hideSplash, 100); });
+  setTimeout(hideSplash, 5000);
+  // Also on any error
+  window.addEventListener('error', function(){ setTimeout(hideSplash, 300); });
 })();
 </script>
 </body>
