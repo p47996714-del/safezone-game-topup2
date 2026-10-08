@@ -575,5 +575,23 @@ window.addEventListener('error', function(e) {
   }
 });
 </script>
+
+<script>
+/* SPLASH FALLBACK — force hide */
+(function(){
+  function hideSplash() {
+    var s = document.getElementById('splash');
+    if (s) {
+      s.classList.add('hide');
+      setTimeout(function(){ if (s && s.parentNode) s.parentNode.removeChild(s); }, 700);
+    }
+  }
+  setTimeout(hideSplash, 2200);
+  window.addEventListener('load', function(){ setTimeout(hideSplash, 100); });
+  setTimeout(hideSplash, 5000);
+  // Also on any error
+  window.addEventListener('error', function(){ setTimeout(hideSplash, 300); });
+})();
+</script>
 </body>
 </html>
