@@ -104,6 +104,11 @@ function logActivity(admin, action, detail) {
 }
 let db = loadDB();
 
+if (!db.config.githubBackup) {
+  db.config.githubBackup = { enabled: false, token: '', owner: '', repo: '', branch: 'main', path: 'db.json', intervalMin: 5, lastBackup: 0 };
+  fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+}
+
 function auth(req, res, next) {
   const token = req.headers['authorization'];
   if (!token || !db.sessions[token]) return res.status(401).json({error:'Login လိုပါတယ်'});
@@ -644,6 +649,32 @@ app.get('/api/admin/user-report/:username', adminAuth, (req, res) => {
     orders: orders.slice(0,10), deposits: deps.slice(0,10)
   });
 });
+app.post('/api/admin/backup-now', adminAuth, async (req, res) => {
+  const r = await backupToGitHub(false);
+  res.json(r);
+});
+app.get('/api/admin/backup-config', adminAuth, (req, res) => {
+  const c = db.config.githubBackup || {};
+  res.json({ enabled: c.enabled, owner: c.owner, repo: c.repo, branch: c.branch, intervalMin: c.intervalMin, hasToken: !!c.token, lastBackup: c.lastBackup });
+});
+app.post('/api/admin/backup-config', adminAuth, superAdmin, (req, res) => {
+  const { enabled, token, owner, repo, branch, intervalMin } = req.body;
+  if (!db.config.githubBackup) db.config.githubBackup = {};
+  const c = db.config.githubBackup;
+  if (typeof enabled === 'boolean') c.enabled = enabled;
+  if (token !== undefined && token !== '') c.token = token;
+  if (owner !== undefined) c.owner = owner;
+  if (repo !== undefined) c.repo = repo;
+  if (branch !== undefined) c.branch = branch;
+  if (intervalMin !== undefined) c.intervalMin = Number(intervalMin);
+  if (!c.path) c.path = 'db.json';
+  saveDB();
+  res.json({ success: true });
+});
+app.post('/api/admin/restore', adminAuth, superAdmin, async (req, res) => {
+  const ok = await restoreFromGitHub();
+  res.json({ success: ok });
+});
 app.get('/api/admin/admins', adminAuth, superAdmin, (req, res) => res.json(db.admins.map(a => ({username:a.username, role:a.role, createdAt:a.createdAt}))));
 app.post('/api/admin/admins', adminAuth, superAdmin, (req, res) => {
   const { username, password, role } = req.body;
@@ -681,7 +712,87 @@ app.post('/api/admin/banners', adminAuth, superAdmin, (req, res) => {
   saveDB(); res.json({success:true});
 });
 
+async function ghApi(method, url, token, body) {
+  try {
+    const r = await fetch('https://api.github.com' + url, {
+      method: method,
+      headers: {
+        'Authorization': 'token ' + token,
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'SafeZone-Backup'
+      },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    return await r.json();
+  } catch(e) { console.log('ghApi err:', e.message); return null; }
+}
+
+async function backupToGitHub(silent) {
+  const cfg = db.config.githubBackup;
+  if (!cfg || !cfg.enabled || !cfg.token || !cfg.owner || !cfg.repo) {
+    if (!silent) console.log('GitHub backup: not configured');
+    return { error: 'Not configured' };
+  }
+  const path = cfg.path || 'db.json';
+  const data = fs.readFileSync(DB_FILE, 'utf8');
+  const content = Buffer.from(data).toString('base64');
+  const apiPath = '/repos/' + cfg.owner + '/' + cfg.repo + '/contents/' + path;
+  let sha = null;
+  const existing = await ghApi('GET', apiPath + '?ref=' + (cfg.branch || 'main'), cfg.token);
+  if (existing && existing.sha) sha = existing.sha;
+  const body = {
+    message: 'Auto backup ' + new Date().toISOString(),
+    content: content,
+    branch: cfg.branch || 'main'
+  };
+  if (sha) body.sha = sha;
+  const res = await ghApi('PUT', apiPath, cfg.token, body);
+  if (res && res.commit) {
+    cfg.lastBackup = Date.now();
+    saveDB();
+    console.log('GitHub backup OK:', res.commit.sha.substring(0, 7));
+    return { success: true, sha: res.commit.sha };
+  } else {
+    console.log('GitHub backup FAILED:', res && res.message);
+    return { error: (res && res.message) || 'Failed' };
+  }
+}
+
+async function restoreFromGitHub() {
+  const cfg = db.config.githubBackup;
+  if (!cfg || !cfg.enabled || !cfg.token || !cfg.owner || !cfg.repo) return false;
+  const path = cfg.path || 'db.json';
+  const apiPath = '/repos/' + cfg.owner + '/' + cfg.repo + '/contents/' + path;
+  const res = await ghApi('GET', apiPath + '?ref=' + (cfg.branch || 'main'), cfg.token);
+  if (res && res.content) {
+    try {
+      const data = Buffer.from(res.content, 'base64').toString('utf8');
+      const parsed = JSON.parse(data);
+      if (parsed && parsed.users) {
+        db = parsed;
+        fs.writeFileSync(DB_FILE, JSON.stringify(db, null, 2));
+        console.log('Restored from GitHub:', parsed.users.length, 'users');
+        return true;
+      }
+    } catch(e) { console.log('Restore parse err:', e.message); }
+  }
+  return false;
+}
+
+function startBackupLoop() {
+  setInterval(function() {
+    const cfg = db.config.githubBackup;
+    if (!cfg || !cfg.enabled || !cfg.token) return;
+    const minMs = (cfg.intervalMin || 5) * 60 * 1000;
+    if (Date.now() - (cfg.lastBackup || 0) >= minMs) {
+      backupToGitHub(true);
+    }
+  }, 60000);
+  console.log('Backup loop started');
+}
+
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
+try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });
 console.log('🤖 Telegram bot starting...');
