@@ -1,8 +1,9 @@
 {
+  "id": "/sz-admin-pwa",
   "name": "Safe Zone Admin",
   "short_name": "SZ Admin",
   "start_url": "/admin.html",
-  "scope": "/",
+  "scope": "/admin.html",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0b1120",

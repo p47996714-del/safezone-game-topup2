@@ -1365,17 +1365,54 @@ tab = function(name, btn) {
 if (ap) showPanel();
 setTimeout(function(){ try { loadBackupConfig(); } catch(e){} }, 1200);
 </script>
+
+
 <script>
-window._adminPrompt = null;
-window.addEventListener("beforeinstallprompt", function(e){ e.preventDefault(); window._adminPrompt = e; });
-window.installAdminPWA = function(){
-  if(window._adminPrompt){
-    window._adminPrompt.prompt();
-    window._adminPrompt.userChoice.then(function(r){ if(r.outcome==="accepted") alert("Install OK!"); window._adminPrompt=null; });
+// ===== ADMIN PWA INSTALL — Native First =====
+var _adminPrompt = null;
+var _adminInstallReady = false;
+
+window.addEventListener('beforeinstallprompt', function(e) {
+  console.log('[PWA] beforeinstallprompt fired');
+  e.preventDefault();
+  _adminPrompt = e;
+  _adminInstallReady = true;
+  var b = document.getElementById('adminInstallBtn');
+  if (b) {
+    b.style.background = 'linear-gradient(135deg,#22c55e,#059669)';
+    b.textContent = '📱 Install';
+  }
+});
+
+window.addEventListener('appinstalled', function() {
+  console.log('[PWA] appinstalled');
+  _adminPrompt = null;
+  var b = document.getElementById('adminInstallBtn');
+  if (b) { b.textContent = '✅ Installed'; b.disabled = true; b.style.background = '#334155'; }
+});
+
+window.installAdminPWA = async function() {
+  // Already installed?
+  if (window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone) {
+    alert('✅ Install လုပ်ပြီးသား');
     return;
   }
-  alert("Install လုပ်ရန်:\n\n1. Chrome Menu (⋮) ကို နှိပ်\n2. \"Install app\" ကို ရွေး\n3. \"Install\" နှိပ်");
+  // Native prompt available?
+  if (_adminPrompt) {
+    _adminPrompt.prompt();
+    var choice = await _adminPrompt.userChoice;
+    if (choice.outcome === 'accepted') alert('✅ Install ပြီးပါပြီ!');
+    _adminPrompt = null;
+    return;
+  }
+  // Manual guide
+  alert('Install လုပ်ရန်:' + String.fromCharCode(10,10) + '1. Chrome Menu ⋮ ကို နှိပ်' + String.fromCharCode(10) + '2. "Install app" ကို ရွေး' + String.fromCharCode(10) + '3. "Install" နှိပ်' + String.fromCharCode(10,10) + '💡 Install app မပါရင် — Chrome cache clear လုပ်ပြီး ပြန်စမ်း');
 };
+
+// Register SW
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(r){ console.log('SW OK:', r.scope); }).catch(function(e){ console.log('SW err:', e.message); });
+}
 </script>
 </body>
 </html>
