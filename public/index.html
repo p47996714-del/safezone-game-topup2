@@ -64,6 +64,10 @@ button.main:active{transform:scale(0.97)}
 @keyframes twinkle{0%,100%{opacity:0.2;transform:scale(0.8)}50%{opacity:1;transform:scale(1.2)}}
 .theme-btn{position:fixed;top:15px;right:15px;background:rgba(30,41,59,0.8);border:1px solid #334155;color:#fff;width:42px;height:42px;border-radius:50%;font-size:18px;cursor:pointer;z-index:100}
 #otpForm{display:none}
+/* iOS FIX */
+input, select, textarea { font-size: 16px !important; -webkit-appearance: none; -webkit-border-radius: 14px; border-radius: 14px; }
+button { -webkit-appearance: none; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+* { -webkit-tap-highlight-color: transparent; }
 </style>
 </head>
 <body>
@@ -125,6 +129,25 @@ button.main:active{transform:scale(0.97)}
 </div>
 
 <script>
+
+// iOS localStorage check
+function checkStorage() {
+  try {
+    localStorage.setItem('__test__', '1');
+    localStorage.removeItem('__test__');
+    return true;
+  } catch(e) {
+    alert('⚠️ iPhone Settings → Safari → Cookies ကို Allow လုပ်ပါ\n\nPrivate Browsing mode မှာ မဖြစ်နိုင်ပါ');
+    return false;
+  }
+}
+if (!checkStorage()) {
+  document.body.innerHTML = '<div style="padding:40px;text-align:center;color:#fff;background:#0f172a;min-height:100vh">' +
+    '<h2 style="color:#ef4444;margin-bottom:15px">⚠️ Safari Setting ပြင်ပါ</h2>' +
+    '<p style="color:#cbd5e1;line-height:1.8">iPhone Settings → Safari →<br>"Block All Cookies" ကို ပိတ်ပါ<br><br>ပြီးရင် Website ပြန် refresh လုပ်ပါ</p>' +
+    '</div>';
+}
+
 setTimeout(() => {
   const s = document.getElementById('splash');
   if (s) { s.classList.add('hide'); setTimeout(() => s.remove(), 700); }
