@@ -1,4 +1,5 @@
-const BOT_VER = 'v5-FINAL-' + Date.now();
+const BOT_VER = 'v6-BUY-' + Date.now();
+const WEB_URL = 'https://safezone-game-topup2.onrender.com';
 let offset = 0, running = false, getDb, saveDb;
 const states = {};
 
@@ -37,11 +38,12 @@ const MENU = {
     [{ text: '💰 Balance', callback_data: 'U_balance' }, { text: '📦 Orders', callback_data: 'U_orders' }],
     [{ text: '🛒 Buy Now', callback_data: 'U_buy' }, { text: '💳 Deposit', callback_data: 'U_how' }],
     [{ text: '💬 Chat', callback_data: 'U_chat' }, { text: '❓ FAQ', callback_data: 'U_faq' }],
-    [{ text: '👤 Profile', callback_data: 'U_profile' }, { text: '🚪 Unlink', callback_data: 'U_unlink' }]
+    [{ text: '👤 Profile', callback_data: 'U_profile' }, { text: '🌐 Website', url: WEB_URL }]
   ],
   guest: [
     [{ text: '🔗 Account ချိတ်', callback_data: 'G_link' }],
-    [{ text: '❓ FAQ', callback_data: 'G_faq' }]
+    [{ text: '❓ FAQ', callback_data: 'G_faq' }],
+    [{ text: '🌐 Website ဖွင့်', url: WEB_URL }]
   ],
   back_a: [[{ text: '🏠 Admin Home', callback_data: 'A_home' }]],
   back_u: [[{ text: '🏠 Home', callback_data: 'U_home' }]],
@@ -89,6 +91,45 @@ async function showUser(cid, user, mid) {
     '💎 ' + (user.vip || 'Bronze') + ' VIP\n\nခလုတ်တွေ နှိပ်ပါ 👇';
   if (mid) return edit(cid, mid, t, MENU.user);
   return send(cid, t, MENU.user);
+}
+
+async function finishOrder(cid, user, p, playerId, serverId, mid) {
+  const db = getDb();
+  if (user.balance < p.price) {
+    const t = '❌ <b>Balance မလုံလောက်ပါ</b>\n━━━━━━━━━━━━━\n\n💵 လိုအပ်: <b>' + p.price.toLocaleString() + ' Ks</b>\n💰 လက်ရှိ: <b>' + user.balance.toLocaleString() + ' Ks</b>\n\nWallet ထဲ Deposit ဖြည့်ပါ';
+    const kb = [[{ text: '💳 Deposit နည်း', callback_data: 'U_how' }], [{ text: '🏠 Home', callback_data: 'U_home' }]];
+    if (mid) return edit(cid, mid, t, kb);
+    return send(cid, t, kb);
+  }
+  user.balance -= p.price;
+  user.points = (user.points || 0) + Math.floor(p.price / 100);
+  user.totalSpent = (user.totalSpent || 0) + p.price;
+  const order = {
+    id: 'ORD' + Date.now(), userId: user.id, username: user.username,
+    product: p.name, game: p.game, price: p.price,
+    playerId: playerId, serverId: serverId || null,
+    status: 'pending', createdAt: Date.now()
+  };
+  db.orders.push(order);
+  db.chats.push({
+    id: 'C' + Date.now() + Math.random().toString(36).substring(2, 5),
+    userId: user.id, username: user.username, from: 'admin',
+    text: '✅ Order ' + order.id + ' (' + p.name + ') လက်ခံရရှိပါပြီ',
+    createdAt: Date.now(), read: false
+  });
+  saveDb();
+  try { await notifyOrder(order); } catch(e) {}
+  const sid = serverId ? ' • S:' + serverId : '';
+  const t = '✅ <b>Order တင်ပြီးပါပြီ!</b>\n━━━━━━━━━━━━━\n\n' +
+    '🎮 ' + p.game + '\n' +
+    '📦 ' + p.name + '\n' +
+    '💵 ' + p.price.toLocaleString() + ' Ks\n' +
+    '🆔 ' + playerId + sid + '\n' +
+    '🔖 <code>' + order.id + '</code>\n\n' +
+    '💰 လက်ကျန်: <b>' + user.balance.toLocaleString() + ' Ks</b>';
+  const kb = [[{ text: '📦 My Orders', callback_data: 'U_orders' }], [{ text: '🏠 Home', callback_data: 'U_home' }]];
+  if (mid) return edit(cid, mid, t, kb);
+  return send(cid, t, kb);
 }
 
 async function handleCallback(cq) {
@@ -210,10 +251,48 @@ async function handleCallback(cq) {
     }
     if (d === 'U_how') return edit(cid, mid, '<b>💳 Deposit နည်း</b>\n━━━━━━━━━━━━━\n\n1. KBZ/Wave/UAB/AYA ဖွင့်\n2. ငွေလွှဲ:\n   📱 <code>' + db.config.payNumber + '</code>\n   👤 ' + db.config.payName + '\n3. Ref copy\n4. Website → Wallet → Deposit\n\n⏱ 5-15 မိနစ်', MENU.back_u);
     if (d === 'U_chat') return edit(cid, mid, '<b>💬 Chat Admin</b>\n━━━━━━━━━━━━━\n\nWebsite → Chat tab\nဒါမှမဟုတ် ဒီ bot မှာ စာရေး\n\n👉 စာရေးလိုက်ပါ', MENU.back_u);
-    if (d === 'U_buy') return edit(cid, mid, '<b>🛒 Buy</b>\n━━━━━━━━━━━━━\n\nWebsite ကနေ ဝယ်ပါ 👇\n\nWebsite → ဂိမ်းရွေး → Order', MENU.back_u);
     if (d === 'U_faq') return edit(cid, mid, FAQ, MENU.back_u);
-    if (d === 'U_profile') return edit(cid, mid, '<b>👤 Profile</b>\n━━━━━━━━━━━━━\n\n👤 ' + user.username + '\n📱 ' + (user.phone || '-') + '\n💰 ' + (user.balance || 0).toLocaleString() + ' Ks\n⭐ ' + (user.points || 0) + ' Points\n💎 ' + (user.vip || 'Bronze') + ' VIP', MENU.back_u);
+    if (d === 'U_profile') return edit(cid, mid, '<b>👤 Profile</b>\n━━━━━━━━━━━━━\n\n👤 ' + user.username + '\n📱 ' + (user.phone || '-') + '\n💰 ' + (user.balance || 0).toLocaleString() + ' Ks\n⭐ ' + (user.points || 0) + ' Points\n💎 ' + (user.vip || 'Bronze') + ' VIP', [
+      [{ text: '🌐 Website', url: WEB_URL }],
+      [{ text: '🚪 Unlink', callback_data: 'U_unlink' }],
+      [{ text: '🏠 Home', callback_data: 'U_home' }]
+    ]);
     if (d === 'U_unlink') { user.telegramId = null; saveDb(); return showGuest(cid, mid); }
+
+    // ===== BUY NOW =====
+    if (d === 'U_buy') {
+      const games = [...new Set(db.products.map(p => p.game))];
+      if (!games.length) return edit(cid, mid, '<b>🛒 Buy Now</b>\n\nဂိမ်း မရှိသေးပါ', MENU.back_u);
+      const kb = games.map(g => [{ text: '🎮 ' + g, callback_data: 'U_bg|' + g }]);
+      kb.push([{ text: '🌐 Website ဖွင့်', url: WEB_URL }]);
+      kb.push([{ text: '🏠 Home', callback_data: 'U_home' }]);
+      return edit(cid, mid, '<b>🛒 Buy Now</b>\n━━━━━━━━━━━━━\n\nဂိမ်း ရွေးပါ 👇', kb);
+    }
+
+    if (d.startsWith('U_bg|')) {
+      const gameName = d.substring(5);
+      const prods = db.products.filter(p => p.game === gameName);
+      if (!prods.length) return edit(cid, mid, '❌ ဂိမ်း မတွေ့', MENU.back_u);
+      const kb = prods.map(p => [{ text: (p.image || '🎮') + ' ' + p.name + ' — ' + p.price.toLocaleString() + ' Ks', callback_data: 'U_bp|' + p.id }]);
+      kb.push([{ text: '🔙 Back', callback_data: 'U_buy' }]);
+      return edit(cid, mid, '<b>🎮 ' + gameName + '</b>\n━━━━━━━━━━━━━\n\nPackage ရွေးပါ 👇', kb);
+    }
+
+    if (d.startsWith('U_bp|')) {
+      const pid = Number(d.substring(5));
+      const p = db.products.find(x => x.id === pid);
+      if (!p) return edit(cid, mid, '❌ Product မတွေ့', MENU.back_u);
+      if (user.balance < p.price) {
+        return edit(cid, mid, '❌ <b>Balance မလုံလောက်ပါ</b>\n━━━━━━━━━━━━━\n\n💵 လိုအပ်: <b>' + p.price.toLocaleString() + ' Ks</b>\n💰 လက်ရှိ: <b>' + user.balance.toLocaleString() + ' Ks</b>\n\nWallet ထဲ Deposit ဖြည့်ပါ', [
+          [{ text: '💳 Deposit နည်း', callback_data: 'U_how' }],
+          [{ text: '🔙 Back', callback_data: 'U_buy' }]
+        ]);
+      }
+      states[cid] = { step: 'order_playerid', productId: pid, promptMid: mid };
+      return edit(cid, mid, '<b>📦 ' + p.name + '</b>\n━━━━━━━━━━━━━\n\n💵 ' + p.price.toLocaleString() + ' Ks\n🎮 ' + p.game + '\n\n<b>Player ID / UID</b> ရိုက်ပါ', [
+        [{ text: '❌ Cancel', callback_data: 'U_buy' }]
+      ]);
+    }
   } catch (e) { console.log('CB error:', e.message); }
 }
 
@@ -270,10 +349,40 @@ async function handleMessage(msg) {
       return showGuest(cid);
     }
 
+    // ===== BUY FLOW STATES =====
+    if (st.step === 'order_playerid') {
+      const p = db.products.find(x => x.id === st.productId);
+      if (!p) { delete states[cid]; return send(cid, '❌ Product မတွေ့', MENU.user); }
+      const needsServer = ['Mobile Legends', 'Magic Chess'].includes(p.game);
+      if (needsServer) {
+        states[cid] = { step: 'order_serverid', productId: st.productId, playerId: text, promptMid: st.promptMid };
+        const kb = [[{ text: '❌ Cancel', callback_data: 'U_buy' }]];
+        if (st.promptMid) return edit(cid, st.promptMid, '<b>🌐 Server ID</b>\n━━━━━━━━━━━━━\n\nPlayer ID: <code>' + text + '</code>\n\n<b>Server ID</b> ရိုက်ပါ\n\nဥပမာ: 2001', kb);
+        return send(cid, '<b>🌐 Server ID</b>\n\nServer ID ရိုက်ပါ', kb);
+      }
+      delete states[cid];
+      return finishOrder(cid, user, p, text, null, st.promptMid);
+    }
+
+    if (st.step === 'order_serverid') {
+      const p = db.products.find(x => x.id === st.productId);
+      if (!p) { delete states[cid]; return send(cid, '❌ Product မတွေ့', MENU.user); }
+      delete states[cid];
+      return finishOrder(cid, user, p, st.playerId, text, st.promptMid);
+    }
+
     if (cmd === '/version') return send(cid, '🤖 Version: <code>' + BOT_VER + '</code>', MENU.user);
     if (cmd === '/start' || cmd === '/menu') return showUser(cid, user);
     if (cmd === '/balance') return send(cid, '💰 <b>' + user.balance.toLocaleString() + ' Ks</b>', MENU.user);
     if (cmd === '/faq') return send(cid, FAQ, MENU.back_u);
+    if (cmd === '/buy') {
+      const games = [...new Set(db.products.map(p => p.game))];
+      if (!games.length) return send(cid, '❌ ဂိမ်း မရှိပါ', MENU.user);
+      const kb = games.map(g => [{ text: '🎮 ' + g, callback_data: 'U_bg|' + g }]);
+      kb.push([{ text: '🌐 Website', url: WEB_URL }]);
+      kb.push([{ text: '🏠 Home', callback_data: 'U_home' }]);
+      return send(cid, '<b>🛒 Buy Now</b>\n\nဂိမ်း ရွေးပါ 👇', kb);
+    }
     if (cmd === '/unlink') { user.telegramId = null; saveDb(); return showGuest(cid); }
 
     db.chats.push({ id: 'C' + Date.now() + Math.random().toString(36).substring(2, 5), userId: user.id, username: user.username, from: 'user', text: text, createdAt: Date.now(), read: false });
@@ -299,7 +408,6 @@ async function setupBot() {
     console.log('deleteWebhook:', r1 && r1.ok ? 'OK' : 'FAIL');
     const r2 = await api('getMe', {}, token);
     if (r2 && r2.ok) { console.log('Bot ready:', r2.result.username); return true; }
-    console.log('getMe failed:', r2 && r2.description);
     return false;
   } catch (e) { console.log('setupBot err:', e.message); return false; }
 }
@@ -359,6 +467,6 @@ module.exports = function initBot(opts) {
   getDb = opts.getDb;
   saveDb = opts.saveDb;
   poll();
-  console.log('Bot v5 loaded:', BOT_VER);
+  console.log('Bot v6 loaded:', BOT_VER);
   return { notifyDeposit, notifyOrder, notifyChat, notifyUser };
 };
