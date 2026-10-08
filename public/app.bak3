@@ -193,72 +193,6 @@ body.light .faq-item{background:#fff}
 .toggle-switch::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:3px;left:3px;transition:0.3s}
 .toggle-switch.on::after{left:23px}
 
-
-/* ===== SKELETON LOADING (Feature 1) ===== */
-.skeleton{background:linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);background-size:200% 100%;animation:skelShimmer 1.5s infinite;border-radius:12px}
-@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.skel-card{height:120px;border-radius:16px;margin-bottom:12px}
-.skel-line{height:14px;border-radius:7px;margin:6px 0}
-.skel-line.short{width:60%}
-
-/* ===== ANIMATED GRADIENT BG (Feature 5) ===== */
-.balance-card{background:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899,#3b82f6);background-size:300% 300%;animation:gradientShift 8s ease infinite}
-@keyframes gradientShift{0%{background-position:0% 50%}50%{background-position:100% 50%}100%{background-position:0% 50%}}
-.carousel{box-shadow:0 12px 40px rgba(56,189,248,0.25)}
-
-/* ===== CARD HOVER (Feature 6) ===== */
-.game-card{transition:transform 0.25s cubic-bezier(0.4,0,0.2,1),box-shadow 0.25s,border-color 0.25s}
-.game-card:hover{transform:translateY(-4px) scale(1.02);box-shadow:0 12px 30px rgba(56,189,248,0.25);border-color:#38bdf8}
-.quick-card{transition:transform 0.2s,box-shadow 0.2s,border-color 0.2s}
-.quick-card:hover{transform:translateY(-3px);box-shadow:0 8px 20px rgba(56,189,248,0.2)}
-button.main{transition:transform 0.15s,box-shadow 0.15s}
-button.main:hover{transform:translateY(-2px);box-shadow:0 12px 25px rgba(56,189,248,0.4)}
-button.main:active{transform:scale(0.97)}
-
-/* ===== CUSTOM CURSOR (Feature 7) - desktop only ===== */
-@media (hover: hover) and (pointer: fine) {
-  body{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%2338bdf8' stroke-width='2'/%3E%3Ccircle cx='12' cy='12' r='2' fill='%2338bdf8'/%3E%3C/svg%3E") 12 12,auto}
-  button,a,input,select{cursor:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%2338bdf8' opacity='0.3'/%3E%3Ccircle cx='12' cy='12' r='3' fill='%2338bdf8'/%3E%3C/svg%3E") 12 12,pointer}
-}
-
-/* ===== GAME SLIDER (Feature 18) ===== */
-.slider-wrap{margin:0 15px 15px;overflow:hidden;border-radius:20px;position:relative}
-.slider-track{display:flex;gap:12px;animation:slideScroll 25s linear infinite;padding:5px 0}
-.slider-track:hover{animation-play-state:paused}
-@keyframes slideScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.slider-card{min-width:150px;background:rgba(30,41,59,0.8);border-radius:16px;overflow:hidden;border:1px solid #334155;cursor:pointer;flex-shrink:0}
-.slider-card img{width:100%;height:90px;object-fit:cover}
-.slider-card .title{padding:8px;font-size:11px;text-align:center;font-weight:600}
-
-/* ===== VIDEO BACKGROUND (Feature 21) ===== */
-.video-hero{margin:15px;position:relative;height:180px;border-radius:22px;overflow:hidden;background:linear-gradient(135deg,#0f172a,#1e293b);display:flex;align-items:center;justify-content:center}
-.video-hero video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.35}
-.video-hero .overlay{position:relative;z-index:1;text-align:center;padding:20px}
-.video-hero h2{font-size:22px;font-weight:bold;background:linear-gradient(135deg,#38bdf8,#a855f7,#ec4899);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradientShift 3s ease infinite}
-.video-hero p{font-size:13px;color:#cbd5e1;margin-top:8px}
-
-/* ===== LIVE STATS (Feature 13) ===== */
-.live-stats{margin:0 15px 15px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px}
-.live-stat{background:rgba(30,41,59,0.8);padding:14px 8px;border-radius:14px;text-align:center;border:1px solid #334155}
-.live-stat .num{font-size:20px;font-weight:bold;color:#38bdf8;font-variant-numeric:tabular-nums}
-.live-stat .lbl{font-size:10px;color:#94a3b8;margin-top:3px}
-
-/* ===== MUSIC TOGGLE (Feature 10) ===== */
-.music-btn{position:fixed;bottom:90px;right:15px;width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#a855f7);border:none;color:#fff;font-size:20px;cursor:pointer;z-index:99;box-shadow:0 8px 20px rgba(56,189,248,0.4);display:flex;align-items:center;justify-content:center;transition:transform 0.2s}
-.music-btn:active{transform:scale(0.9)}
-.music-btn.playing{animation:pulseBtn 1.5s ease-in-out infinite}
-@keyframes pulseBtn{0%,100%{box-shadow:0 8px 20px rgba(56,189,248,0.4)}50%{box-shadow:0 8px 30px rgba(168,85,247,0.7)}}
-
-/* ===== ANALYTICS CHART (Feature 20) ===== */
-.chart-bars{display:flex;align-items:flex-end;gap:6px;height:120px;margin-top:15px;padding:0 5px}
-.chart-bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
-.chart-bar{width:100%;background:linear-gradient(180deg,#38bdf8,#a855f7);border-radius:5px 5px 0 0;min-height:3px;transition:height 0.6s}
-.chart-bar-lbl{font-size:9px;color:#94a3b8}
-.chart-bar-val{font-size:9px;color:#38bdf8;font-weight:bold}
-
-/* ===== SMART RECOMMEND (Feature 22) ===== */
-.recommend-badge{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:bold;padding:3px 8px;border-radius:10px;z-index:2}
-
 </style>
 </head>
 <body>
@@ -312,25 +246,6 @@ button.main:active{transform:scale(0.97)}
       <div class="vip-badge vip-Bronze" id="vipBadge">Bronze</div>
     </div>
   </div>
-  <div class="video-hero">
-    <video autoplay muted loop playsinline>
-      <source src="https://cdn.pixabay.com/video/2023/10/20/185683-876929862_tiny.mp4" type="video/mp4">
-    </video>
-    <div class="overlay">
-      <h2>Safe Zone Topup</h2>
-      <p>⚡ Instant Delivery · 24/7 Service</p>
-    </div>
-  </div>
-
-  <div class="live-stats" id="liveStats">
-    <div class="live-stat"><div class="num" id="statUsers">0</div><div class="lbl">Users</div></div>
-    <div class="live-stat"><div class="num" id="statOrders">0</div><div class="lbl">Orders</div></div>
-    <div class="live-stat"><div class="num" id="statDone">0</div><div class="lbl">Completed</div></div>
-  </div>
-
-  <div class="section-title">🔥 Popular Games</div>
-  <div class="slider-wrap"><div class="slider-track" id="gameSlider"></div></div>
-
   <div class="carousel" id="carousel"><div class="dots" id="dots"></div></div>
   <div class="quick-grid">
     <div class="quick-card" onclick="openCoupon()"><div class="icon">🎟️</div><div class="label">Coupon</div><div class="value red">Redeem</div></div>
@@ -403,23 +318,6 @@ button.main:active{transform:scale(0.97)}
   </div>
 </div>
 
-<div id="view-analytics" style="display:none;padding:15px">
-  <h2 style="color:#38bdf8;margin-bottom:15px;font-size:18px">📊 My Analytics</h2>
-  <div class="live-stats">
-    <div class="live-stat"><div class="num" id="aOrders">0</div><div class="lbl">Orders</div></div>
-    <div class="live-stat"><div class="num" id="aSpent">0</div><div class="lbl">Spent</div></div>
-    <div class="live-stat"><div class="num" id="aPoints">0</div><div class="lbl">Points</div></div>
-  </div>
-  <div style="background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155;margin-top:15px">
-    <h3 style="color:#38bdf8;font-size:15px;margin-bottom:10px">📅 Last 7 Days</h3>
-    <div class="chart-bars" id="userChartBars"></div>
-  </div>
-  <div style="background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155;margin-top:15px">
-    <h3 style="color:#38bdf8;font-size:15px;margin-bottom:10px">💎 Top Games</h3>
-    <div id="topGamesBox"></div>
-  </div>
-</div>
-
 <div id="view-profile" style="display:none;padding:15px">
   <h2 style="color:#38bdf8;margin-bottom:15px;font-size:18px">👤 ပရိုဖိုင်</h2>
   <div style="background:rgba(30,41,59,0.8);padding:24px;border-radius:18px;text-align:center;border:1px solid #334155">
@@ -447,7 +345,7 @@ button.main:active{transform:scale(0.97)}
 <div class="modal" id="orderModal"><div class="modal-box">
   <h3 id="mTitle">Order</h3>
   <input id="playerId" placeholder="Player ID / UID">
-  <div id="serverIdField" style="display:none"><input id="serverId" placeholder="Server ID"></div>
+  <div id="serverIdField" style="display:none"><input id="serverId" placeholder="Server ID (ဥပမာ 2001)"></div>
   <button onclick="submitOrder()">ဝယ်မယ်</button>
   <button class="cancel" onclick="closeModal('orderModal')">Cancel</button>
 </div></div>
@@ -499,16 +397,13 @@ button.main:active{transform:scale(0.97)}
   <button class="cancel" onclick="closeModal('notifModal')">Close</button>
 </div></div>
 
-<button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
-
 <div class="bottom-nav">
   <button class="nav-item active" onclick="switchTab('home',this)"><span class="nav-icon">🏠</span>ပင်မ</button>
   <button class="nav-item" onclick="switchTab('wallet',this)"><span class="nav-icon">💰</span>ငွေဖြည့်</button>
   <button class="nav-item" onclick="switchTab('orders',this)"><span class="nav-icon">📦</span>မှာတမ်း</button>
   <button class="nav-item" onclick="switchTab('chat',this)"><span class="nav-icon">💬</span>Chat</button>
   <button class="nav-item" onclick="switchTab('faq',this)"><span class="nav-icon">❓</span>FAQ</button>
-  <button class="nav-item" onclick="switchTab('analytics',this)"><span class="nav-icon">📊</span>Stats</button>
-  <button class="nav-item" onclick="switchTab('profile',this)"><span class="nav-icon">👤</span>Profile</button>
+  <button class="nav-item" onclick="switchTab('profile',this)"><span class="nav-icon">👤</span>ပရိုဖိုင်</button>
 </div>
 
 <script>
@@ -663,229 +558,6 @@ function checkTyping(list){
   }
 }
 
-
-// ===== LIVE STATS (Feature 13) =====
-function animateNumber(el, target, dur) {
-  if (!el) return;
-  const start = parseInt(el.textContent) || 0;
-  const startTime = Date.now();
-  function tick() {
-    const p = Math.min((Date.now() - startTime) / (dur || 1200), 1);
-    const val = Math.floor(start + (target - start) * p);
-    el.textContent = val.toLocaleString();
-    if (p < 1) requestAnimationFrame(tick);
-  }
-  tick();
-}
-async function loadLiveStats() {
-  try {
-    const site = await (await fetch('/api/site')).json();
-    const t = site.trustBadge || { users: 0, orders: 0, completed: 0 };
-    animateNumber(document.getElementById('statUsers'), t.users || 0);
-    animateNumber(document.getElementById('statOrders'), t.orders || 0);
-    animateNumber(document.getElementById('statDone'), t.completed || 0);
-  } catch(e){}
-}
-
-// ===== GAME SLIDER (Feature 18) =====
-function loadGameSlider() {
-  const el = document.getElementById('gameSlider');
-  if (!el) return;
-  const imgs = siteData?.gameImages || {};
-  const games = [...new Set(products.map(p => p.game))];
-  const items = games.map(g => {
-    const img = imgs[g] || 'https://via.placeholder.com/300x180/334155/38bdf8?text=Game';
-    return '<div class="slider-card" onclick="openGameProducts(\'' + g.replace(/'/g, "\\'") + '\')">' +
-      '<img src="' + img + '" onerror="this.src=\'https://via.placeholder.com/300x180/334155/38bdf8?text=Game\'">' +
-      '<div class="title">' + g + '</div></div>';
-  }).join('');
-  el.innerHTML = items + items;
-}
-
-// ===== SMART RECOMMEND (Feature 22) =====
-function getRecommendedGames() {
-  const favs = JSON.parse(localStorage.getItem('favs') || '[]');
-  const orderGames = {};
-  (userData.orders || []).forEach(o => { orderGames[o.game] = (orderGames[o.game] || 0) + 1; });
-  const scores = {};
-  products.forEach(p => {
-    let s = 0;
-    if (favs.includes(p.game)) s += 5;
-    if (orderGames[p.game]) s += orderGames[p.game] * 3;
-    scores[p.game] = Math.max(scores[p.game] || 0, s);
-  });
-  return Object.entries(scores).sort((a, b) => b[1] - a[1]).slice(0, 3).map(x => x[0]);
-}
-function markRecommended() {
-  const recs = getRecommendedGames();
-  document.querySelectorAll('#gamesGrid .game-card').forEach(card => {
-    const title = card.querySelector('.game-title')?.textContent || '';
-    if (recs.includes(title) && !card.querySelector('.recommend-badge')) {
-      const badge = document.createElement('div');
-      badge.className = 'recommend-badge';
-      badge.textContent = '⭐ For You';
-      card.appendChild(badge);
-    }
-  });
-}
-
-// ===== BACKGROUND MUSIC (Feature 10) =====
-let musicCtx = null;
-let musicPlaying = false;
-function startMusic() {
-  try {
-    if (musicCtx) { musicCtx.resume(); musicPlaying = true; updateMusicBtn(); return; }
-    musicCtx = new (window.AudioContext || window.webkitAudioContext)();
-    // Simple ambient chord progression
-    const notes = [262, 330, 392, 523, 392, 330];
-    let i = 0;
-    const osc = musicCtx.createOscillator();
-    const gain = musicCtx.createGain();
-    osc.type = 'sine';
-    osc.frequency.value = notes[0];
-    osc.connect(gain);
-    gain.connect(musicCtx.destination);
-    gain.gain.value = 0.03;
-    osc.start();
-    const iv = setInterval(() => {
-      if (!musicPlaying) return;
-      i = (i + 1) % notes.length;
-      try { osc.frequency.setValueAtTime(notes[i], musicCtx.currentTime); } catch(e){}
-    }, 700);
-    musicCtx._interval = iv;
-    musicPlaying = true;
-    updateMusicBtn();
-  } catch(e){ console.log('music err', e.message); }
-}
-function stopMusic() {
-  if (musicCtx) { try { musicCtx.suspend(); } catch(e){} }
-  musicPlaying = false;
-  updateMusicBtn();
-}
-function toggleMusic() {
-  if (musicPlaying) stopMusic(); else startMusic();
-  haptic(30);
-}
-function updateMusicBtn() {
-  const b = document.getElementById('musicBtn');
-  if (!b) return;
-  b.textContent = musicPlaying ? '🎵' : '🔇';
-  b.classList.toggle('playing', musicPlaying);
-}
-
-// ===== PUSH NOTIFICATION (Feature 9) =====
-async function requestPushPermission() {
-  if (!('Notification' in window)) return;
-  if (Notification.permission === 'default') {
-    try { await Notification.requestPermission(); } catch(e){}
-  }
-}
-async function sendPush(title, body) {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  try {
-    if (navigator.serviceWorker && navigator.serviceWorker.controller) {
-      const reg = await navigator.serviceWorker.ready;
-      reg.showNotification(title, { body: body, icon: 'https://i.imgur.com/iRwIfqs.png', badge: 'https://i.imgur.com/iRwIfqs.png', vibrate: [200,100,200] });
-    } else {
-      new Notification(title, { body: body, icon: 'https://i.imgur.com/iRwIfqs.png' });
-    }
-  } catch(e){}
-}
-
-// ===== ANALYTICS (Feature 20) =====
-function loadAnalytics() {
-  const orders = userData.orders || [];
-  const stats = {
-    total: orders.length,
-    spent: orders.filter(o => o.status === 'completed').reduce((s, o) => s + o.price, 0),
-    points: userData.points || 0
-  };
-  animateNumber(document.getElementById('aOrders'), stats.total);
-  const spentEl = document.getElementById('aSpent');
-  if (spentEl) spentEl.textContent = (stats.spent / 1000).toFixed(1) + 'k';
-  animateNumber(document.getElementById('aPoints'), stats.points);
-  // 7-day chart
-  const days = [];
-  for (let i = 6; i >= 0; i--) {
-    const d = new Date(); d.setDate(d.getDate() - i);
-    const ds = new Date(d.getFullYear(), d.getMonth(), d.getDate()).getTime();
-    const de = ds + 86400000;
-    const cnt = orders.filter(o => o.createdAt >= ds && o.createdAt < de).length;
-    days.push({ label: d.toLocaleDateString('en', { weekday: 'short' }), value: cnt });
-  }
-  const max = Math.max(...days.map(x => x.value), 1);
-  document.getElementById('userChartBars').innerHTML = days.map(x => {
-    const hgt = Math.max(3, (x.value / max) * 100);
-    return '<div class="chart-bar-wrap"><div class="chart-bar-val">' + (x.value || '') + '</div><div class="chart-bar" style="height:' + hgt + '%"></div><div class="chart-bar-lbl">' + x.label + '</div></div>';
-  }).join('');
-  // Top games
-  const gm = {};
-  orders.forEach(o => { gm[o.game] = (gm[o.game] || 0) + 1; });
-  const top = Object.entries(gm).sort((a, b) => b[1] - a[1]).slice(0, 5);
-  const tb = document.getElementById('topGamesBox');
-  if (tb) {
-    tb.innerHTML = top.length ? top.map(([g, c]) => '<div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid #334155;font-size:13px"><span>' + g + '</span><b style="color:#38bdf8">' + c + ' orders</b></div>').join('') : '<div style="color:#64748b;font-size:12px">Order မရှိသေးပါ</div>';
-  }
-}
-
-// ===== AUTO CHAT BOT (Feature 24) =====
-const AUTO_REPLIES = {
-  'hi': 'မင်္ဂလာပါ! 👋 Safe Zone မှ ကြိုဆိုပါတယ်',
-  'hello': 'မင်္ဂလာပါ! 👋 ဘာကူညီပေးရမလဲ?',
-  'မင်္ဂလာပါ': 'မင်္ဂလာပါ! 👋 ဘာကူညီပေးရမလဲ?',
-  'deposit': 'Deposit ဖြည့်ရန် Wallet tab မှာ ဖြည့်ပါ။ 5-15 မိနစ်အတွင်း approve ဖြစ်မယ် ⏱',
-  'order': 'Order တင်ရန် Home → ဂိမ်းရွေး → Player ID ထည့် → Order တင်ပါ 🎮',
-  'balance': 'Balance ကြည့်ရန် Home မှာ ကြည့်နိုင်ပါတယ် 💰',
-  'refund': 'Order Reject ဖြစ်ရင် Balance ကို auto ပြန်အမ်းပါတယ် ✅',
-  'app premium': 'App Premium ဝယ်ရန် Admin ဆီ Telegram မှာ ဆက်သွယ်ပါ 📱',
-};
-function autoReply(text) {
-  const lc = text.toLowerCase().trim();
-  for (const k in AUTO_REPLIES) {
-    if (lc.includes(k)) return AUTO_REPLIES[k];
-  }
-  return null;
-}
-
-// ===== ORDER SUCCESS SOUND (Feature 2) =====
-function successSound() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    [523, 659, 784, 1047].forEach((f, i) => {
-      const o = ctx.createOscillator();
-      const g = ctx.createGain();
-      o.connect(g); g.connect(ctx.destination);
-      o.frequency.value = f;
-      o.type = 'sine';
-      g.gain.setValueAtTime(0, ctx.currentTime + i * 0.1);
-      g.gain.linearRampToValueAtTime(0.15, ctx.currentTime + i * 0.1 + 0.02);
-      g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i * 0.1 + 0.3);
-      o.start(ctx.currentTime + i * 0.1);
-      o.stop(ctx.currentTime + i * 0.1 + 0.3);
-    });
-  } catch(e){}
-}
-function errorSound() {
-  try {
-    const ctx = new (window.AudioContext || window.webkitAudioContext)();
-    const o = ctx.createOscillator(); const g = ctx.createGain();
-    o.connect(g); g.connect(ctx.destination);
-    o.frequency.setValueAtTime(300, ctx.currentTime);
-    o.frequency.exponentialRampToValueAtTime(150, ctx.currentTime + 0.2);
-    g.gain.setValueAtTime(0.15, ctx.currentTime);
-    g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.25);
-    o.start(); o.stop(ctx.currentTime + 0.3);
-  } catch(e){}
-}
-
-// ===== SKELETON LOADING (Feature 1) =====
-function showSkeletons() {
-  const grid = document.getElementById('gamesGrid');
-  if (!grid) return;
-  grid.innerHTML = Array(4).fill('<div class="skeleton skel-card"></div>').join('');
-}
-
-
 async function api(url, opts={}) {
   const r = await fetch(url, {...opts, headers: {...H, ...(opts.headers||{})}});
   if (r.status === 401) { localStorage.clear(); location.href='/'; return {error:'unauth'}; }
@@ -982,11 +654,8 @@ async function loadMe(){
 }
 
 async function loadProducts(){
-  showSkeletons();
   products = await api('/api/products');
   renderGames();
-  loadGameSlider();
-  setTimeout(markRecommended, 300);
 }
 function renderGames(){
   const games = [...new Set(products.map(p => p.game))];
@@ -1087,7 +756,6 @@ function switchTab(name, btn){
   haptic(15);
   if (name==='wallet') loadDeposits();
   if (name==='orders') loadOrders();
-  if (name==='analytics') loadAnalytics();
   if (name==='chat') { loadChat(); lastChatId = null; if (chatPoll) clearInterval(chatPoll); chatPoll = setInterval(loadChat, 3000); }
   else { if (chatPoll) { clearInterval(chatPoll); chatPoll = null; } }
 }
@@ -1147,8 +815,7 @@ async function submitOrder(){
   if (sf && sf.style.display !== 'none' && !serverId) return showToast('Server ID ဖြည့်ပါ', 'error');
   const d = await api('/api/order', {method:'POST', body: JSON.stringify({productId: selected.id, playerId, serverId})});
   if (d.success){
-    successSound(); haptic(100); confetti();
-    sendPush('Order တင်ပြီး', 'Order ကို Admin ဆီ ပို့ပြီးပါပြီ');
+    playSound('success'); haptic(100); confetti();
     showToast('✅ Order တင်ပြီးပါပြီ', 'success');
     closeModal('orderModal');
     loadMe(); loadOrders();
@@ -1334,9 +1001,6 @@ async function logout(){
   await loadSite();
   await loadMe();
   await loadProducts();
-  loadLiveStats();
-  setInterval(loadLiveStats, 30000);
-  requestPushPermission();
   setTimeout(startTour, 2500);
   setInterval(loadMe, 15000);
   setInterval(async () => {

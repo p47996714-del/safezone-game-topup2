@@ -357,7 +357,7 @@ async function handleMessage(msg) {
       if (needsServer) {
         states[cid] = { step: 'order_serverid', productId: st.productId, playerId: text, promptMid: st.promptMid };
         const kb = [[{ text: '❌ Cancel', callback_data: 'U_buy' }]];
-        if (st.promptMid) return edit(cid, st.promptMid, '<b>🌐 Server ID</b>\n━━━━━━━━━━━━━\n\nPlayer ID: <code>' + text + '</code>\n\n<b>Server ID</b> ရိုက်ပါ\n\n', kb);
+        if (st.promptMid) return edit(cid, st.promptMid, '<b>🌐 Server ID</b>\n━━━━━━━━━━━━━\n\nPlayer ID: <code>' + text + '</code>\n\n<b>Server ID</b> ရိုက်ပါ\n\nဥပမာ: 2001', kb);
         return send(cid, '<b>🌐 Server ID</b>\n\nServer ID ရိုက်ပါ', kb);
       }
       delete states[cid];
