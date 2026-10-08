@@ -73,7 +73,7 @@ function defaultDB() {
       privacy: 'Safe Zone သည် သင့် Data များကို လုံခြုံစွာ ထိန်းသိမ်းပါသည်။ Phone number ကို Admin သာ မြင်နိုင်သည်။ Password ကို encrypt မလုပ်ထားပါ (Demo) — Production အတွက် bcrypt သုံးပါ။',
       adsBanner: { enabled: false, text: '' }, logoUrl: 'https://i.imgur.com/iRwIfqs.png',
       musicUrl: '', customSound: '',
-      autoReply: {}, maintenance: { enabled: false, message: '🔧 ပြုပြင်နေပါသည်။ မကြာမီ ပြန်လည်ဖွင့်ပါမည်။' },
+      autoReply: {}, maintenance: { enabled: false, message: '🔧 ခဏပိတ်ထားပါသည်။ မကြာမီ ပြန်လည်ဖွင့်ပေးပါမည်။' },
       logoUrl: 'https://i.imgur.com/iRwIfqs.png',
       hero: {
         title: 'Safe Zone Topup',
