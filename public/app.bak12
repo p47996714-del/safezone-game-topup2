@@ -444,7 +444,7 @@ button.main:active{transform:scale(0.97)}
 
 <div class="modal" id="orderModal"><div class="modal-box">
   <h3 id="mTitle">Order</h3>
-  <input id="playerId" placeholder="Player ID">
+  <input id="playerId" placeholder="Player ID / UID">
   <div id="serverIdField" style="display:none"><input id="serverId" placeholder="Server ID"></div>
   <button onclick="submitOrder()">ဝယ်မယ်</button>
   <button class="cancel" onclick="closeModal('orderModal')">Cancel</button>
@@ -1083,10 +1083,10 @@ function switchTab(name, btn){
   document.getElementById('view-'+name).style.display='block';
   if (btn) btn.classList.add('active');
   haptic(15);
-  if (name==='wallet') { loadDeposits(); setInterval(loadDeposits, 5000); }
+  if (name==='wallet') loadDeposits();
   if (name==='orders') loadOrders();
   if (name==='analytics') loadAnalytics();
-  if (name==='chat') { loadChat(); lastChatId = null; if (chatPoll) clearInterval(chatPoll); chatPoll = setInterval(loadChat, 1500); }
+  if (name==='chat') { loadChat(); lastChatId = null; if (chatPoll) clearInterval(chatPoll); chatPoll = setInterval(loadChat, 3000); }
   else { if (chatPoll) { clearInterval(chatPoll); chatPoll = null; } }
 }
 function gotoChat(){ switchTab('chat', document.querySelectorAll('.nav-item')[3]); }
@@ -1125,7 +1125,7 @@ function openModal(id){
   }
   document.getElementById('mTitle').textContent = selected.name + ' - ' + selected.price.toLocaleString() + ' Ks';
   document.getElementById('playerId').value = '';
-  document.getElementById('playerId').placeholder = 'Player ID';
+  document.getElementById('playerId').placeholder = 'Player ID / UID';
   const sf = document.getElementById('serverIdField');
   const needsServer = ['Mobile Legends', 'Magic Chess'].includes(selected.game);
   if (sf) sf.style.display = needsServer ? 'block' : 'none';
@@ -1370,35 +1370,6 @@ async function logout(){
   localStorage.clear(); location.href = '/';
 }
 
-
-// ===== AUTO REFRESH FOR PENDING ITEMS =====
-let lastBalance = 0;
-let lastNotifCount = 0;
-async function quickCheck() {
-  try {
-    const d = await api('/api/me');
-    if (!d || d.error) return;
-    // Balance changed? Show notification
-    if (lastBalance > 0 && d.balance > lastBalance) {
-      const diff = d.balance - lastBalance;
-      playSound('success');
-      haptic(80);
-      confetti();
-      showToast('💰 +' + diff.toLocaleString() + ' Ks ဝင်ပါပြီ!', 'success');
-      sendPush('💰 Balance ဝင်ပြီ', '+' + diff.toLocaleString() + ' Ks');
-      loadDeposits();
-    }
-    lastBalance = d.balance;
-    // New notification?
-    if (d.unread && d.unread > lastNotifCount) {
-      playSound('info');
-      showToast('🔔 Notification အသစ် ' + d.unread + ' ခု', 'info');
-    }
-    lastNotifCount = d.unread || 0;
-  } catch(e){}
-}
-setInterval(quickCheck, 3000);
-
 (async () => {
   await checkMaint();
   await loadSite();
@@ -1406,7 +1377,7 @@ setInterval(quickCheck, 3000);
   await loadProducts();
   requestPushPermission();
   setTimeout(startTour, 2500);
-  setInterval(loadMe, 5000);
+  setInterval(loadMe, 15000);
   setInterval(async () => {
     try {
       const d = await api('/api/me');
@@ -1420,7 +1391,7 @@ setInterval(quickCheck, 3000);
       }
       lastUnread = d.unread || 0;
     } catch(e){}
-  }, 3000);
+  }, 10000);
 })();
 </script>
 </body>
