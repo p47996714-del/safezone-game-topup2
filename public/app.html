@@ -1,218 +1,9 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-<script>
-var soundOn = true;
-var hapticOn = true;
-window.onerror = function(msg, url, line, col, error) { return false; };
-
-let musicPlaying = false; let _customMusicEl = null; let musicCtx = null;
-
-
-let deferredPrompt = null;
-window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
-async function installPWA() {
-  if (deferredPrompt) {
-    deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') showToast('✅ App install ပြီးပါပြီ', 'success');
-    deferredPrompt = null; return;
-  }
-  alert('📱 Install လုပ်နည်း:\n\n1. Chrome ⋮ menu နှိပ်\n2. "Add to Home screen" ရွေး\n3. "Add" နှိပ်\n\n✅ Home screen မှာ App လို ပေါ်မယ်');
-}
-async function testPush() {
-  try {
-    if (!('Notification' in window)) return showToast('Push not supported', 'error');
-    const permission = await Notification.requestPermission();
-    if (permission !== 'granted') return showToast('❌ Permission denied', 'error');
-    const r = await api('/api/push/test', { method:'POST' });
-    if (r && r.success) showToast('🔔 Test push sent (' + r.sent + ')', 'success');
-    else showToast('❌ Push failed', 'error');
-  } catch(e) { showToast('❌ Push error', 'error'); }
-}
-
-const THEME_COLORS = [
-  {name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},
-  {name:'Green', primary:'#10b981', secondary:'#3b82f6'},
-  {name:'Red', primary:'#ef4444', secondary:'#f59e0b'},
-  {name:'Pink', primary:'#ec4899', secondary:'#a855f7'},
-  {name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},
-  {name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}
-];
-function applyTheme() {
-  var name = localStorage.getItem('themeColor') || 'Blue';
-  setThemeColor(name);
-}
-
-
-// Patch openSettings to populate colors
-var _origOpenSettings = window.openSettings;
-
-applyTheme();
-
-
-// Override doSpin to force refresh balance
-var _origDoSpin = window.doSpin;
-
-};
-
-
-// Override doSpin to force balance update
-
-};
-
-
-
-function applyTheme() {
-  var name = localStorage.getItem('themeColor') || 'Blue';
-  setThemeColor(name);
-}
-
-
-
-applyTheme();
-
-
-async function doSpin() {
-  if (!_spinCanPlay) return;
-  var btn = document.getElementById('spinBtn');
-  if (!btn) return;
-  btn.textContent = '⏳ လှည့်နေတယ်...';
-  _spinCanPlay = false;
-  var r = Math.floor(Math.random() * 8);
-  var rotations = 360 * 5 + (r * 45);
-  var wheel = document.getElementById('spinWheel');
-  if (wheel) wheel.style.transform = 'rotate(' + rotations + 'deg)';
-  await new Promise(function(res){ setTimeout(res, 4200); });
-  
-  var d = await api('/api/spin', {method:'POST'});
-  var resEl = document.getElementById('spinResult');
-  
-  if (d.success) {
-    if (d.reward > 0) {
-      playSound('success'); haptic(100);
-      if (resEl) resEl.innerHTML = '<b style="color:#22c55e;font-size:18px">🎉 +' + d.reward.toLocaleString() + ' Ks!</b>';
-    } else {
-      if (resEl) resEl.innerHTML = '<b style="color:#ef4444">😢 မရပါ</b>';
-    }
-    // Force balance update
-    if (typeof d.balance !== 'undefined') {
-      userData.balance = d.balance;
-      var balEl = document.getElementById('bal');
-      if (balEl) balEl.innerHTML = d.balance.toLocaleString() + ' <span>Ks</span>';
-      var pBalEl = document.getElementById('pBal');
-      if (pBalEl) pBalEl.textContent = d.balance.toLocaleString() + ' Ks';
-    }
-    // Also call loadMe to be sure
-    if (typeof loadMe === 'function') loadMe();
-  } else {
-    if (resEl) resEl.innerHTML = '<b style="color:#ef4444">' + (d.error || 'Error') + '</b>';
-  }
-  btn.textContent = 'Close';
-  btn.onclick = function(){ closeModal('spinModal'); _spinCanPlay = true; };
-}
-var _spinCanPlay = true;
-
-
-// 1. Settings ဖွင့်တဲ့ Function ကို ပြန်ရေးခြင်း
-
-
-// 2. Theme Color ခလုတ်တွေ ဖန်တီးခြင်း
-
-
-
-// စတင်ဖွင့်တာနဲ့ Theme Color ကို Apply လုပ်ခြင်း
-(function(){ 
-  var name = localStorage.getItem('themeColor') || 'Blue'; 
-  setThemeColor(name); 
-  setTimeout(populateThemeColors, 1000); 
-})();
-
-// 3. Tab ပြောင်းရင် Modal တွေ ပိတ်သွားအောင် လုပ်ခြင်း
-var _origSwitchTab = window.switchTab;
-
-
-// 4. My Stats ကို Analytics ကို ပို့ခြင်း (Profile မဟုတ်တော့ပါ)
-
-
-// 5. Spin ရလာတဲ့ ပိုက်ဆံ ချက်ချင်းပေါ်အောင် ပြင်ခြင်း
-
-var _spinCanPlay = true;
-
-
-// === SETTINGS & THEME COLOR FIX ===
-
-
-
-
-
-// === TAB SWITCH - CLOSE MODALS ===
-var _origSwitchTab2 = window.switchTab;
-
-
-// === MY STATS - GO TO ANALYTICS ===
-
-
-// === SPIN BALANCE UPDATE ===
-
-var _spinCanPlay = true;
-
-// === INIT THEME ===
-(function(){ 
-  var name = localStorage.getItem('themeColor') || 'Blue'; 
-  setThemeColor(name); 
-})();
-
-
-/* ===== SETTINGS FUNCTIONS ===== */
-var soundOn = (localStorage.getItem('soundOn') !== 'off');
-var hapticOn = (localStorage.getItem('hapticOn') !== 'off');
-
-
-
-
-
-/* ===== THEME COLOR ===== */
-
-
-
-
-/* ===== OPEN SETTINGS ===== */
-
-
-/* ===== MUSIC TOGGLE ===== */
-var musicPlaying = false;
-var _musicAudio = null;
-
-
-/* ===== MY STATS → ANALYTICS ===== */
-window.openStats = function() {
-  var navItems = document.querySelectorAll('.nav-item');
-  if (typeof switchTab === 'function' && navItems[4]) switchTab('analytics', navItems[4]);
-};
-
-/* ===== TAB SWITCH → CLOSE MODALS ===== */
-var _origSwitchTab = window.switchTab;
-window.switchTab = function(name, btn) {
-  document.querySelectorAll('.modal').forEach(function(m){ m.classList.remove('show'); });
-  if (_origSwitchTab) _origSwitchTab(name, btn);
-};
-
-/* ===== SPIN BALANCE UPDATE ===== */
-var _spinCanPlay = true;
-
-
-/* INIT */
-(function(){
-  updateToggles();
-  var name = localStorage.getItem('themeColor') || 'Blue';
-  setThemeColor(name);
-  setTimeout(populateThemeColors, 500);
-})();
-
-</script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="theme-color" content="#0b1120">
 <title>Safe Zone Game Topup</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
@@ -225,7 +16,7 @@ body.light .header{background:rgba(255,255,255,0.95);border-color:#e2e8f0}
 .user-name{font-size:14px;font-weight:bold}
 .user-phone{font-size:11px;color:#94a3b8}
 .header-actions{display:flex;gap:8px;align-items:center}
-.theme-btn,.logout-btn,.bell-btn{background:rgba(56,189,248,0.15);border:1px solid #38bdf8;color:#38bdf8;font-size:14px;font-weight:bold;cursor:pointer;padding:6px 10px;border-radius:20px}
+.theme-btn,.logout-btn,.bell-btn{background:rgba(56,189,248,0.15);border:1px solid #38bdf8;color:#38bdf8;font-size:14px;font-weight:bold;cursor:pointer;padding:6px 10px;border-radius:20px;font-family:inherit}
 .logout-btn{background:rgba(239,68,68,0.15);border-color:#ef4444;color:#ef4444;font-size:11px}
 .bell-btn{position:relative;font-size:18px;padding:6px 10px}
 .bell-badge{position:absolute;top:-2px;right:-2px;background:#ef4444;color:#fff;font-size:9px;padding:2px 5px;border-radius:10px;font-weight:bold}
@@ -241,6 +32,14 @@ body.light .header{background:rgba(255,255,255,0.95);border-color:#e2e8f0}
 .vip-Silver{background:#c0c0c0;color:#000}
 .vip-Gold{background:linear-gradient(135deg,#ffd700,#ffb700);color:#000}
 .vip-Diamond{background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff}
+.carousel{margin:15px;position:relative;height:150px;border-radius:22px;overflow:hidden}
+.slide{position:absolute;inset:0;opacity:0;transition:opacity 0.6s;display:flex;flex-direction:column;justify-content:center;padding:24px}
+.slide.active{opacity:1}
+.slide h3{font-size:23px;margin-bottom:6px;font-weight:bold}
+.slide p{font-size:13px}
+.dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
+.dot{width:6px;height:6px;background:rgba(255,255,255,0.4);border-radius:50%;transition:all 0.3s}
+.dot.active{background:#fff;width:22px;border-radius:3px}
 .section-title{margin:20px 15px 10px;font-size:15px;font-weight:bold}
 .quick-grid{margin:0 15px;display:grid;grid-template-columns:1fr 1fr;gap:12px}
 .quick-card{background:rgba(30,41,59,0.8);padding:16px;border-radius:16px;display:flex;flex-direction:column;gap:5px;cursor:pointer;border:1px solid #334155;position:relative}
@@ -265,44 +64,61 @@ body.light .search-bar input{background:#fff;border-color:#cbd5e1;color:#0f172a}
 .category-tabs::-webkit-scrollbar{display:none}
 .category-tabs button{padding:8px 16px;background:rgba(30,41,59,0.8);color:#94a3b8;border:1px solid #334155;border-radius:20px;cursor:pointer;font-weight:bold;font-size:12px;white-space:nowrap;font-family:inherit}
 .category-tabs button.active{background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border-color:transparent}
-.carousel{margin:15px;position:relative;height:150px;border-radius:22px;overflow:hidden}
-.slide{position:absolute;inset:0;opacity:0;transition:opacity 0.6s;display:flex;flex-direction:column;justify-content:center;padding:24px}
-.slide.active{opacity:1}
-.slide h3{font-size:23px;margin-bottom:6px;font-weight:bold}
-.slide p{font-size:13px}
-.dots{position:absolute;bottom:12px;left:50%;transform:translateX(-50%);display:flex;gap:6px}
-.dot{width:6px;height:6px;background:rgba(255,255,255,0.4);border-radius:50%;transition:all 0.3s}
-.dot.active{background:#fff;width:22px;border-radius:3px}
 .bottom-nav{position:fixed;bottom:0;left:0;right:0;background:rgba(30,41,59,0.95);backdrop-filter:blur(10px);display:flex;border-top:1px solid #334155;z-index:100;padding:8px 0}
 body.light .bottom-nav{background:rgba(255,255,255,0.95);border-color:#e2e8f0}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#64748b;cursor:pointer;font-size:10px;background:none;border:none;padding:5px;font-family:inherit}
 .nav-item.active{color:#38bdf8}
 .nav-item .nav-icon{font-size:22px}
-
-
-
-body.light 
+.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:flex-end;justify-content:center;z-index:200}
+.modal.show{display:flex}
+.modal-box{background:#1e293b;padding:25px;border-radius:24px 24px 0 0;width:100%;max-width:500px;animation:slideUpModal 0.3s;max-height:85vh;overflow-y:auto;border-top:1px solid #334155}
+body.light .modal-box{background:#fff;color:#0f172a}
 @keyframes slideUpModal{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-box h3{margin-bottom:15px;color:#38bdf8;font-size:16px}
 .modal-box input{width:100%;padding:12px;margin-bottom:10px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px;font-family:inherit}
-.modal-box button{width:100%;padding:13px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;font-weight:bold;cursor:pointer;font-size:14px;margin-bottom:8px}
+body.light .modal-box input{background:#f1f5f9;color:#0f172a}
+.modal-box button{width:100%;padding:13px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;font-weight:bold;cursor:pointer;font-size:14px;margin-bottom:8px;font-family:inherit}
 .modal-box button.cancel{background:#334155}
 .empty{text-align:center;padding:30px;color:#64748b;font-size:13px}
 .status-badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:bold;margin-left:5px}
-.status-pending{background:#eab30822;color:#eab308;border:1px solid #eab30855}
-.status-processing{background:#3b82f622;color:#3b82f6;border:1px solid #3b82f655}
-.status-completed,.status-approved{background:#22c55e22;color:#22c55e;border:1px solid #22c55e55}
-.status-rejected{background:#ef444422;color:#ef4444;border:1px solid #ef444455}
+.status-pending{background:rgba(234,179,8,0.15);color:#eab308;border:1px solid rgba(234,179,8,0.4)}
+.status-processing{background:rgba(59,130,246,0.15);color:#3b82f6;border:1px solid rgba(59,130,246,0.4)}
+.status-completed,.status-approved{background:rgba(34,197,94,0.15);color:#22c55e;border:1px solid rgba(34,197,94,0.4)}
+.status-rejected{background:rgba(239,68,68,0.15);color:#ef4444;border:1px solid rgba(239,68,68,0.4)}
+.settings-toggle{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px}
+body.light .settings-toggle{background:#f1f5f9}
+.toggle-switch{position:relative;width:46px;height:26px;background:#334155;border-radius:13px;cursor:pointer;transition:0.3s;flex-shrink:0}
+.toggle-switch.on{background:#22c55e}
+.toggle-switch::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:3px;left:3px;transition:0.3s}
+.toggle-switch.on::after{left:23px}
+.theme-color-row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+.theme-color-dot{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:0.2s}
+.theme-color-dot.active{border-color:#fff;transform:scale(1.1)}
+.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:14px 24px;border-radius:14px;font-weight:bold;font-size:14px;z-index:10000;transition:all 0.4s;box-shadow:0 8px 25px rgba(16,185,129,0.4);max-width:90vw;text-align:center;opacity:0}
+.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+.toast.error{background:linear-gradient(135deg,#ef4444,#dc2626)}
+.toast.info{background:linear-gradient(135deg,#38bdf8,#3b82f6)}
+.skeleton{background:linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);background-size:200% 100%;animation:skelShimmer 1.5s infinite;border-radius:12px}
+@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.skel-card{height:180px;border-radius:16px;margin-bottom:12px}
+.splash{position:fixed;inset:0;background:radial-gradient(circle at 50% 50%,#1e293b,#0b1120);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s}
+.splash.hide{opacity:0;visibility:hidden;pointer-events:none}
+.splash img{width:120px;height:120px;object-fit:contain;animation:pulse 1.5s ease-in-out infinite}
+@keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.splash-title{margin-top:25px;font-size:24px;font-weight:bold;background:linear-gradient(135deg,#38bdf8,#a855f7,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent}
+.splash-sub{margin-top:8px;font-size:12px;color:#94a3b8;letter-spacing:3px}
+.music-btn{position:fixed;bottom:90px;right:15px;width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#a855f7);border:none;color:#fff;font-size:20px;cursor:pointer;z-index:99;box-shadow:0 8px 20px rgba(56,189,248,0.4);display:flex;align-items:center;justify-content:center}
+.music-btn:active{transform:scale(0.9)}
+.spin-wheel{width:240px;height:240px;border-radius:50%;margin:20px auto;position:relative;background:conic-gradient(#ef4444 0deg 45deg,#f59e0b 45deg 90deg,#22c55e 90deg 135deg,#3b82f6 135deg 180deg,#a855f7 180deg 225deg,#ec4899 225deg 270deg,#38bdf8 270deg 315deg,#10b981 315deg 360deg);box-shadow:0 0 30px rgba(56,189,248,0.4);transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99);border:4px solid #1e293b}
+.spin-wheel::after{content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:25px solid #38bdf8}
+.spin-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;background:#0f172a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;z-index:2;border:3px solid #38bdf8}
 .chat-wrap{padding:15px;display:flex;flex-direction:column;height:calc(100vh - 190px)}
 .chat-head{background:linear-gradient(135deg,#38bdf8,#a855f7);padding:15px;border-radius:16px;display:flex;align-items:center;gap:12px;margin-bottom:12px}
 .chat-head .admin-av{width:44px;height:44px;background:#fff;color:#0f172a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:22px}
-.chat-head .admin-name{font-weight:bold}
-.chat-head .admin-status{font-size:11px}
 .chat-messages{flex:1;overflow-y:auto;padding:10px 0;display:flex;flex-direction:column;gap:8px}
 .chat-bubble{max-width:75%;padding:10px 14px;border-radius:16px;font-size:13px;line-height:1.4;word-wrap:break-word}
 .chat-bubble.user{align-self:flex-end;background:linear-gradient(135deg,#38bdf8,#3b82f6);border-bottom-right-radius:4px}
 .chat-bubble.admin{align-self:flex-start;background:#1e293b;border:1px solid #334155;border-bottom-left-radius:4px}
-.chat-bubble .time{font-size:10px;opacity:0.7;margin-top:4px;text-align:right}
 .chat-input-row{display:flex;gap:8px;padding-top:10px;border-top:1px solid #334155}
 .chat-input-row input[type="text"]{flex:1;padding:12px 16px;border-radius:24px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px}
 .chat-input-row button{width:auto;padding:12px 16px;border-radius:24px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;font-weight:bold;cursor:pointer;margin:0;font-size:16px}
@@ -316,6 +132,7 @@ body.light .payment-method{background:#f8fafc}
 .pay-owner{background:linear-gradient(135deg,#f59e0b,#ef4444);padding:12px 16px;border-radius:12px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;font-size:13px}
 .copy-btn{background:rgba(255,255,255,0.25);border:none;color:#fff;padding:6px 12px;border-radius:20px;font-size:11px;cursor:pointer;font-weight:bold}
 .deposit-box{background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155;margin-top:15px}
+body.light .deposit-box{background:#fff}
 .deposit-box input[type="number"]{width:100%;padding:12px;margin-bottom:12px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px}
 .deposit-label{display:block;font-size:12px;color:#94a3b8;margin-bottom:6px}
 .deposit-file{width:100%;padding:10px;margin-bottom:10px;border-radius:12px;border:1px dashed #38bdf8;background:rgba(56,189,248,0.05);color:#94a3b8;font-size:12px}
@@ -328,108 +145,31 @@ body.light .payment-method{background:#f8fafc}
 .deposit-list-meta{font-size:12px;color:#94a3b8}
 .faq-item{background:rgba(30,41,59,0.8);border:1px solid #334155;border-radius:14px;margin-bottom:10px;overflow:hidden}
 body.light .faq-item{background:#fff}
-.faq-item[open]{border-color:#38bdf8;background:rgba(56,189,248,0.05)}
-.faq-item summary{padding:16px;cursor:pointer;font-weight:bold;font-size:14px;list-style:none;display:flex;justify-content:space-between;align-items:center}
+.faq-item summary{padding:16px;cursor:pointer;font-weight:bold;font-size:14px;list-style:none;display:flex;justify-content:space-between;align-items:center;color:#fff}
+body.light .faq-item summary{color:#0f172a}
 .faq-item summary::-webkit-details-marker{display:none}
 .faq-item summary::after{content:'＋';color:#38bdf8;font-size:18px;font-weight:bold}
 .faq-item[open] summary::after{content:'−'}
 .faq-item p{padding:0 16px 16px;color:#cbd5e1;font-size:13px;line-height:1.6}
-.toast{position:fixed;top:70px;left:50%;transform:translateX(-50%) translateY(-100px);background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:14px 24px;border-radius:14px;font-weight:bold;font-size:14px;z-index:10000;transition:all 0.4s;box-shadow:0 8px 25px rgba(16,185,129,0.4);max-width:90vw;text-align:center;opacity:0}
-.toast.show{transform:translateX(-50%) translateY(0);opacity:1}
-.toast.error{background:linear-gradient(135deg,#ef4444,#dc2626)}
-.toast.info{background:linear-gradient(135deg,#38bdf8,#3b82f6)}
-.settings-toggle{display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px}
-.toggle-switch{position:relative;width:46px;height:26px;background:#334155;border-radius:13px;cursor:pointer;transition:0.3s}
-.toggle-switch.on{background:#22c55e}
-.toggle-switch::after{content:'';position:absolute;width:20px;height:20px;background:#fff;border-radius:50%;top:3px;left:3px;transition:0.3s}
-.toggle-switch.on::after{left:23px}
-.skeleton{background:linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);background-size:200% 100%;animation:skelShimmer 1.5s infinite;border-radius:12px}
-@keyframes skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.skel-card{height:120px;border-radius:16px;margin-bottom:12px}
-.splash{position:fixed;inset:0;background:radial-gradient(circle at 50% 50%,#1e293b,#0b1120);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;animation:forceHideSplash 0.1s ease 2.5s forwards !important}
-@keyframes forceHideSplash{to{opacity:0;visibility:hidden;pointer-events:none;display:none !important;z-index:-9999}}
-.splash-logo img{width:140px;height:140px;object-fit:contain}
-.splash-title{margin-top:35px;font-size:26px;font-weight:bold;background:linear-gradient(135deg,#38bdf8,#a855f7,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent}
-.splash-sub{margin-top:8px;font-size:13px;color:#94a3b8;letter-spacing:3px}
-
-
-
-.music-btn{position:fixed;bottom:90px;right:15px;width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#a855f7);border:none;color:#fff;font-size:20px;cursor:pointer;z-index:99;box-shadow:0 8px 20px rgba(56,189,248,0.4);display:flex;align-items:center;justify-content:center;transition:transform 0.2s}.music-btn:active{transform:scale(0.9)}
-
-/* Splash Screen Style */
-.splash{position:fixed;inset:0;background:radial-gradient(circle at 50% 50%,#1e293b,#0b1120);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s,visibility 0.6s}
-.splash.hide{opacity:0;visibility:hidden}
-.splash-logo img{width:130px;height:130px;object-fit:contain;animation:pulseLogo 1.5s ease-in-out infinite}
-@keyframes pulseLogo{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
-.splash-title{margin-top:30px;font-size:24px;font-weight:bold;background:linear-gradient(135deg,#38bdf8,#a855f7,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradShift 2s ease infinite}
-@keyframes gradShift{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
-.splash-sub{margin-top:8px;font-size:12px;color:#94a3b8;letter-spacing:3px}
-
-
-
-
-
-
-
-.spin-wheel-container{position:relative;width:240px;height:240px;margin:20px auto}
-.spin-pointer{position:absolute;top:-12px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:16px solid transparent;border-right:16px solid transparent;border-top:28px solid #38bdf8;z-index:10;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5))}
-
-
-
-.spin-wheel{width:240px;height:240px;border-radius:50%;margin:20px auto;position:relative;background:conic-gradient(#ef4444 0deg 45deg,#f59e0b 45deg 90deg,#22c55e 90deg 135deg,#3b82f6 135deg 180deg,#a855f7 180deg 225deg,#ec4899 225deg 270deg,#38bdf8 270deg 315deg,#10b981 315deg 360deg);box-shadow:0 0 30px rgba(56,189,248,0.4);transition:transform 4s cubic-bezier(0.17,0.67,0.12,0.99);border:4px solid #1e293b}
-.spin-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;background:#0f172a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;z-index:2;border:3px solid #38bdf8}
-
-
-
-
-
-
-
-/* Modal တွေကို ပုံမှန်အတိုင်း ပြန်ထားခြင်း */
-
-
-
-@keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
-/* Theme Color dots */
-
-
-
-
-
-/* === MODAL FIX === */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none !important; align-items: flex-end; justify-content: center; z-index: 9999; }
-.modal.show { display: flex !important; }
-.modal-box { background: #1e293b; padding: 25px; border-radius: 24px 24px 0 0; width: 100%; max-width: 500px; animation: slideUpModal 0.3s; max-height: 85vh; overflow-y: auto; border-top: 1px solid #334155; }
-body.light .modal-box { background: #fff; color: #0f172a; }
-@keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
-.modal-box h3 { margin-bottom: 15px; color: #38bdf8; font-size: 16px; }
-.modal-box button { width: 100%; padding: 13px; background: linear-gradient(135deg,#38bdf8,#a855f7); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 8px; }
-.modal-box button.cancel { background: #334155; }
-
-/* === THEME COLOR FIX === */
-.theme-color-row { display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; min-height: 40px; }
-.theme-color-dot { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: 0.2s; }
-.theme-color-dot.active { border-color: #fff; transform: scale(1.1); }
-
-/* === SETTINGS TOGGLE FIX === */
-.settings-toggle { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(15,23,42,0.6); border-radius: 12px; margin-bottom: 8px; }
-.toggle-switch { position: relative; width: 46px; height: 26px; background: #334155; border-radius: 13px; cursor: pointer; transition: 0.3s; }
-.toggle-switch.on { background: #22c55e; }
-.toggle-switch::after { content: ''; position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: 0.3s; }
-.toggle-switch.on::after { left: 23px; }
-
+body.light .faq-item p{color:#334155}
+.view{padding:15px}
+.view h2{color:#38bdf8;margin-bottom:15px;font-size:18px}
+.profile-box{background:rgba(30,41,59,0.8);padding:24px;border-radius:18px;text-align:center;border:1px solid #334155}
+body.light .profile-box{background:#fff}
 </style>
-<link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <div id="toast" class="toast"></div>
 <div class="splash" id="splash">
-  <div class="splash-logo"><img src="https://i.imgur.com/iRwIfqs.png" alt="logo"></div>
+  <img src="https://i.imgur.com/iRwIfqs.png" alt="logo">
   <div class="splash-title">SAFE ZONE</div>
   <div class="splash-sub">GAME TOPUP</div>
 </div>
 <div class="header">
-  <div class="user-info"><div class="avatar" id="avatar">P</div><div><div class="user-name" id="uName">User</div><div class="user-phone" id="uPhone">09xxxxxxxxx</div></div></div>
+  <div class="user-info">
+    <div class="avatar" id="avatar">P</div>
+    <div><div class="user-name" id="uName">User</div><div class="user-phone" id="uPhone">09xxxxxxxxx</div></div>
+  </div>
   <div class="header-actions">
     <button class="bell-btn" onclick="openNotif()">🔔<span class="bell-badge" id="notifBadge" style="display:none">0</span></button>
     <button class="theme-btn" onclick="toggleTheme()" id="themeBtn">🌙</button>
@@ -439,9 +179,13 @@ body.light .modal-box { background: #fff; color: #0f172a; }
 </div>
 
 <div id="view-home">
-  <div class="balance-card"><div class="balance-label">💰 လက်ကျန်ငွေ</div><div class="balance-amount" id="bal">0 <span>Ks</span></div><div class="points-row"><div>⭐ <span id="pts">0</span> Points</div><div class="vip-badge vip-Bronze" id="vipBadge">Bronze</div></div></div>
+  <div class="balance-card">
+    <div class="balance-label">💰 လက်ကျန်ငွေ</div>
+    <div class="balance-amount" id="bal">0 <span>Ks</span></div>
+    <div class="points-row"><div>⭐ <span id="pts">0</span> Points</div><div class="vip-badge vip-Bronze" id="vipBadge">Bronze</div></div>
+  </div>
   <div class="carousel" id="carousel"><div class="dots" id="dots"></div></div>
-  <div class="section-title">🔥 Popular Games</div>
+  <div class="section-title">⚡ Quick Actions</div>
   <div class="quick-grid">
     <div class="quick-card" onclick="openFaq()"><div class="icon">❓</div><div class="label">FAQ</div><div class="value blue">Help</div></div>
     <div class="quick-card" onclick="openStats()"><div class="icon">📊</div><div class="label">My Stats</div><div class="value purple">View</div></div>
@@ -462,8 +206,8 @@ body.light .modal-box { background: #fff; color: #0f172a; }
   <div class="games-grid" id="gamesGrid"></div>
 </div>
 
-<div id="view-wallet" style="display:none;padding:15px">
-  <h2 style="color:#38bdf8;margin-bottom:15px;font-size:18px">💰 Wallet ဖြည့်ရန်</h2>
+<div id="view-wallet" class="view" style="display:none">
+  <h2>💰 Wallet ဖြည့်ရန်</h2>
   <div class="pay-owner"><div>👤 <b id="payName">-</b></div><button class="copy-btn" onclick="copyNum()">📋 Copy</button></div>
   <div id="paymentList"></div>
   <div class="deposit-box">
@@ -477,20 +221,21 @@ body.light .modal-box { background: #fff; color: #0f172a; }
   <div id="depList"></div>
 </div>
 
-<div id="view-orders" style="display:none;padding:15px">
-  <h2 style="color:#38bdf8;margin-bottom:15px;font-size:18px">📦 မှာယူမှု မှတ်တမ်း</h2><div id="ordList"></div>
+<div id="view-orders" class="view" style="display:none">
+  <h2>📦 မှာယူမှု မှတ်တမ်း</h2>
+  <div id="ordList"></div>
 </div>
 
 <div id="view-chat" style="display:none">
   <div class="chat-wrap">
-    <div class="chat-head"><div class="admin-av">👨‍💼</div><div><div class="admin-name">Admin Support</div><div class="admin-status">🟢 Online</div></div></div>
+    <div class="chat-head"><div class="admin-av">👨‍💼</div><div><div class="admin-name">Admin Support</div><div style="font-size:11px">🟢 Online</div></div></div>
     <div class="chat-messages" id="chatMessages"></div>
     <div class="chat-input-row"><input type="text" id="chatInput" placeholder="စာ ရေးပါ..." onkeypress="if(event.key==='Enter')sendChat()"><button onclick="sendChat()">➤</button></div>
   </div>
 </div>
 
-<div id="view-faq" style="display:none;padding:15px">
-  <h2 style="color:#38bdf8;margin-bottom:15px;font-size:18px">❓ FAQ</h2>
+<div id="view-faq" class="view" style="display:none">
+  <h2>❓ FAQ</h2>
   <div class="faq-list">
     <details class="faq-item"><summary>💰 Deposit တင်ပြီး ဘယ်လောက်ကြာမလဲ?</summary><p>ပုံမှန် ၅-၁၅ မိနစ်အတွင်း approve လုပ်ပေးပါတယ်။</p></details>
     <details class="faq-item"><summary>❌ Order Reject ဖြစ်ရင် ငွေပြန်ရလား?</summary><p>ရပါတယ်။ Balance ကို အလိုအလျောက် ပြန်အမ်းပါတယ်။</p></details>
@@ -500,50 +245,84 @@ body.light .modal-box { background: #fff; color: #0f172a; }
   </div>
 </div>
 
-<div id="view-profile" style="display:none;padding:15px">
-  <h2 style="color:#38bdf8;margin-bottom:15px;font-size:18px">👤 ပရိုဖိုင်</h2>
-  <div style="background:rgba(30,41,59,0.8);padding:24px;border-radius:18px;text-align:center;border:1px solid #334155">
+<div id="view-analytics" class="view" style="display:none">
+  <h2>📊 My Stats</h2>
+  <div style="background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155;margin-bottom:15px">
+    <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">Total Orders</div>
+    <div style="font-size:28px;font-weight:bold;color:#38bdf8" id="aOrders">0</div>
+  </div>
+  <div style="background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155;margin-bottom:15px">
+    <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">Total Spent</div>
+    <div style="font-size:28px;font-weight:bold;color:#22c55e" id="aSpent">0 Ks</div>
+  </div>
+  <div style="background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155">
+    <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">Total Points</div>
+    <div style="font-size:28px;font-weight:bold;color:#a855f7" id="aPoints">0</div>
+  </div>
+</div>
+
+<div id="view-profile" class="view" style="display:none">
+  <h2>👤 Profile</h2>
+  <div class="profile-box">
     <div style="width:80px;height:80px;background:linear-gradient(135deg,#38bdf8,#a855f7);border-radius:50%;margin:0 auto 12px;display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:bold" id="pAvatar">P</div>
-    <div style="font-size:20px;font-weight:bold" id="pName">User</div><div style="font-size:13px;color:#94a3b8;margin-top:5px" id="pPhone">-</div>
+    <div style="font-size:20px;font-weight:bold" id="pName">User</div>
+    <div style="font-size:13px;color:#94a3b8;margin-top:5px" id="pPhone">-</div>
     <div class="vip-badge vip-Bronze" id="pVip" style="margin-top:10px;display:inline-block;padding:4px 12px">Bronze</div>
-    <div style="margin-top:20px;padding:15px;background:#0f172a;border-radius:14px"><div style="font-size:12px;color:#94a3b8">လက်ကျန်ငွေ</div><div style="font-size:26px;font-weight:bold;color:#22c55e" id="pBal">0 Ks</div></div>
+    <div style="margin-top:20px;padding:15px;background:#0f172a;border-radius:14px">
+      <div style="font-size:12px;color:#94a3b8">လက်ကျန်ငွေ</div>
+      <div style="font-size:26px;font-weight:bold;color:#22c55e" id="pBal">0 Ks</div>
+    </div>
     <div style="margin-top:12px;padding:12px;background:#0f172a;border-radius:14px;font-size:13px;text-align:left">
       <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#94a3b8">⭐ Points</span><b id="pPts">0</b></div>
       <div style="display:flex;justify-content:space-between;margin-bottom:6px"><span style="color:#94a3b8">💎 Total Spent</span><b id="pSpent">0 Ks</b></div>
       <div style="display:flex;justify-content:space-between"><span style="color:#94a3b8">🎁 Referral</span><b id="pRef" style="color:#38bdf8">-</b></div>
     </div>
-    <button onclick="openTerms()" style="width:100%;padding:12px;background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;border-radius:12px;font-weight:bold;margin-top:15px;cursor:pointer">📜 Terms & Privacy</button>
-    
-    <button onclick="testPush()" style="width:100%;padding:12px;background:rgba(168,85,247,0.15);color:#a855f7;border:1px solid #a855f7;border-radius:12px;font-weight:bold;margin-top:12px;cursor:pointer">🔔 Test Notification</button>
-    <button onclick="installPWA()" id="pwaBtn" style="width:100%;padding:12px;background:rgba(16,185,129,0.15);color:#10b981;border:1px solid #10b981;border-radius:12px;font-weight:bold;margin-top:12px;cursor:pointer">📱 Install App</button>
-  <button onclick="logout()" style="width:100%;padding:13px;background:rgba(127,29,29,0.9);color:#fff;border:none;border-radius:12px;font-weight:bold;margin-top:12px">Logout</button>
+    <button onclick="testPush()" style="width:100%;padding:12px;background:rgba(168,85,247,0.15);color:#a855f7;border:1px solid #a855f7;border-radius:12px;font-weight:bold;margin-top:12px;cursor:pointer;font-family:inherit">🔔 Test Notification</button>
+    <button onclick="installPWA()" style="width:100%;padding:12px;background:rgba(16,185,129,0.15);color:#10b981;border:1px solid #10b981;border-radius:12px;font-weight:bold;margin-top:12px;cursor:pointer;font-family:inherit">📱 Install App</button>
+    <button onclick="logout()" style="width:100%;padding:13px;background:rgba(127,29,29,0.9);color:#fff;border:none;border-radius:12px;font-weight:bold;margin-top:12px;font-family:inherit">Logout</button>
   </div>
 </div>
 
-<div class="modal" id="orderModal"><div class="modal-box"><h3 id="mTitle">Order</h3><input id="playerId" placeholder="Player ID"><div id="serverIdField" style="display:none"><input id="serverId" placeholder="Server ID"></div><button onclick="submitOrder()">ဝယ်မယ်</button><button class="cancel" onclick="closeModal('orderModal')">Cancel</button></div></div>
+<div class="modal" id="orderModal"><div class="modal-box">
+  <h3 id="mTitle">Order</h3>
+  <input id="playerId" placeholder="Player ID">
+  <div id="serverIdField" style="display:none"><input id="serverId" placeholder="Server ID"></div>
+  <button onclick="submitOrder()">ဝယ်မယ်</button>
+  <button class="cancel" onclick="closeModal('orderModal')">Cancel</button>
+</div></div>
+
 <div class="modal" id="productModal"><div class="modal-box" id="productModalBox"></div></div>
 <div class="modal" id="leaderModal"><div class="modal-box"><h3>🏆 Top Spenders</h3><div id="leaderBox"></div><button class="cancel" onclick="closeModal('leaderModal')">Close</button></div></div>
 <div class="modal" id="couponModal"><div class="modal-box"><h3>🎟️ Coupon Redeem</h3><input id="couponCode" placeholder="Coupon Code" style="text-transform:uppercase;text-align:center;font-size:18px;letter-spacing:2px"><button onclick="redeemCoupon()">✅ Redeem</button><button class="cancel" onclick="closeModal('couponModal')">Close</button></div></div>
-<div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div></div>
-  
-  
-  
-  
-</div></div>
-  
-
-
-  
-</div></div>
 <div class="modal" id="notifModal"><div class="modal-box"><h3>🔔 Notifications</h3><div id="notifList"></div><button class="cancel" onclick="closeModal('notifModal')">Close</button></div></div>
-<div class="modal" id="spinModal"><div class="modal-box"><h3>🎰 Lucky Spin</h3>
-<div class="spin-wheel-container">
-  <div class="spin-pointer"></div>
-  <div class="spin-wheel" id="spinWheel">
-    <div class="spin-center" style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;background:#0f172a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;z-index:2;border:3px solid #38bdf8">🎁</div>
+
+<div class="modal" id="settingsModal"><div class="modal-box">
+  <h3>⚙️ Settings</h3>
+  <div class="settings-toggle">
+    <div><b style="font-size:14px">🔊 Sound</b><div style="font-size:11px;color:#94a3b8">Sound Effect</div></div>
+    <div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div>
   </div>
-</div>
-<div id="spinResult" style="text-align:center;padding:10px;font-size:14px;color:#94a3b8;margin-top:10px">Spin နှိပ်ပြီး ကံစမ်းပါ</div><button onclick="doSpin()" id="spinBtn" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🎰 Spin!</button><button class="cancel" onclick="closeModal('spinModal')">Close</button></div></div>
+  <div class="settings-toggle">
+    <div><b style="font-size:14px">📳 Haptic</b><div style="font-size:11px;color:#94a3b8">တုန်ခါမှု</div></div>
+    <div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div>
+  </div>
+  <div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px">
+    <b style="font-size:14px">🎨 Theme Color</b>
+    <div class="theme-color-row" id="themeColorRow"></div>
+  </div>
+  <button onclick="shareApp()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">📤 Share App</button>
+  <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
+</div></div>
+
+<div class="modal" id="spinModal"><div class="modal-box">
+  <h3>🎰 Lucky Spin</h3>
+  <div class="spin-wheel" id="spinWheel"><div class="spin-center">🎁</div></div>
+  <div id="spinResult" style="text-align:center;padding:10px;font-size:14px;color:#94a3b8;margin-top:10px">Spin နှိပ်ပြီး ကံစမ်းပါ</div>
+  <button onclick="doSpin()" id="spinBtn" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🎰 Spin!</button>
+  <button class="cancel" onclick="closeModal('spinModal')">Close</button>
+</div></div>
+
+<button class="music-btn" id="musicBtn" onclick="toggleMusic()">🔇</button>
 
 <div class="bottom-nav">
   <button class="nav-item active" onclick="switchTab('home',this)"><span class="nav-icon">🏠</span>ပင်မ</button>
@@ -553,32 +332,228 @@ body.light .modal-box { background: #fff; color: #0f172a; }
   <button class="nav-item" onclick="switchTab('profile',this)"><span class="nav-icon">👤</span>Profile</button>
 </div>
 <script>
-const token = localStorage.getItem('token');
+var token = localStorage.getItem('token');
 if (!token) location.href = '/';
-const H = {'Content-Type':'application/json','Authorization':token};
-let products = [], selected = null, siteData = null, selectedPay = 'KBZ Pay';
-let currentCategory = 'all', searchTerm = '', userData = {};
-let chatPoll = null, lastChatId = null, slideIdx = 0;
+var H = {'Content-Type':'application/json','Authorization':token};
+var products = [], selected = null, siteData = null, selectedPay = 'KBZ Pay';
+var currentCategory = 'all', searchTerm = '', userData = {};
+var lastChatId = null, chatPoll = null, slideIdx = 0;
+var soundOn = (localStorage.getItem('soundOn') !== 'off');
+var hapticOn = (localStorage.getItem('hapticOn') !== 'off');
+var musicPlaying = false, _musicAudio = null, _spinCanPlay = true;
 
-// CAROUSEL AUTO-SLIDE
-setInterval(function() {
-  var slides = document.querySelectorAll('.slide');
-  var dots = document.querySelectorAll('.dot');
-  if (!slides.length) return;
-  slides[slideIdx].classList.remove('active');
-  if (dots[slideIdx]) dots[slideIdx].classList.remove('active');
-  slideIdx = (slideIdx + 1) % slides.length;
-  slides[slideIdx].classList.add('active');
-  if (dots[slideIdx]) dots[slideIdx].classList.add('active');
-}, 3500);
+/* ===== SPLASH ===== */
+setTimeout(function(){ 
+  var s = document.getElementById('splash');
+  if (s) { s.classList.add('hide'); setTimeout(function(){ if(s.parentNode) s.parentNode.removeChild(s); }, 700); }
+}, 2500);
 
-function playSound(type){ try { var c = new (window.AudioContext||window.webkitAudioContext)(); var o = c.createOscillator(); var g = c.createGain(); o.connect(g); g.connect(c.destination); o.frequency.setValueAtTime(type==='error'?300:700, c.currentTime); o.frequency.exponentialRampToValueAtTime(type==='error'?150:1100, c.currentTime+0.15); g.gain.setValueAtTime(0.1, c.currentTime); g.gain.exponentialRampToValueAtTime(0.01, c.currentTime+0.2); o.start(); o.stop(c.currentTime+0.2); } catch(e){} }
-function haptic(ms){ if (navigator.vibrate) navigator.vibrate(ms || 30); }
-function showToast(text, type){ var t = document.getElementById('toast'); if (!t) return; t.textContent = text; t.className = 'toast show ' + (type || ''); clearTimeout(t._timer); t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2000); }
-if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light'); document.getElementById('themeBtn').textContent = '☀️'; }
-function toggleTheme(){ document.body.classList.toggle('light'); var isLight = document.body.classList.contains('light'); document.getElementById('themeBtn').textContent = isLight ? '☀️' : '🌙'; localStorage.setItem('theme', isLight ? 'light' : 'dark'); haptic(20); }
+/* ===== SOUND & HAPTIC ===== */
+function playSound(type){
+  if (!soundOn) return;
+  try {
+    var ctx = new (window.AudioContext || window.webkitAudioContext)();
+    var o = ctx.createOscillator(), g = ctx.createGain();
+    o.connect(g); g.connect(ctx.destination);
+    if (type === 'error') { o.frequency.setValueAtTime(400, ctx.currentTime); o.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.2); }
+    else { o.frequency.setValueAtTime(800, ctx.currentTime); o.frequency.exponentialRampToValueAtTime(1200, ctx.currentTime + 0.1); }
+    g.gain.setValueAtTime(0.1, ctx.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+    o.start(); o.stop(ctx.currentTime + 0.2);
+  } catch(e){}
+}
+function haptic(ms){ if (hapticOn && navigator.vibrate) navigator.vibrate(ms || 30); }
 
+/* ===== TOAST ===== */
+function showToast(text, type){
+  var t = document.getElementById('toast');
+  if (!t) return;
+  t.textContent = text;
+  t.className = 'toast show ' + (type || '');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(function(){ 
+    t.classList.remove('show');
+    setTimeout(function(){ t.textContent = ''; t.className = 'toast'; }, 400);
+  }, 2500);
+}
 
+/* ===== THEME (Light/Dark) ===== */
+if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light'); var tb = document.getElementById('themeBtn'); if(tb) tb.textContent = '☀️'; }
+function toggleTheme(){ 
+  document.body.classList.toggle('light'); 
+  var isLight = document.body.classList.contains('light'); 
+  document.getElementById('themeBtn').textContent = isLight ? '☀️' : '🌙'; 
+  localStorage.setItem('theme', isLight ? 'light' : 'dark'); 
+  haptic(20); 
+}
+
+/* ===== THEME COLOR ===== */
+var THEME_COLORS = [
+  {name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},
+  {name:'Green', primary:'#10b981', secondary:'#3b82f6'},
+  {name:'Red', primary:'#ef4444', secondary:'#f59e0b'},
+  {name:'Pink', primary:'#ec4899', secondary:'#a855f7'},
+  {name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},
+  {name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}
+];
+function setThemeColor(name){
+  var c = THEME_COLORS.find(function(x){ return x.name === name; });
+  if (!c) return;
+  localStorage.setItem('themeColor', name);
+  var dots = document.querySelectorAll('.theme-color-dot');
+  for (var i = 0; i < dots.length; i++) dots[i].classList.remove('active');
+  var activeDot = document.querySelector('.theme-color-dot[data-name="' + name + '"]');
+  if (activeDot) activeDot.classList.add('active');
+}
+function populateThemeColors(){
+  var cur = localStorage.getItem('themeColor') || 'Blue';
+  var row = document.getElementById('themeColorRow');
+  if (!row) return;
+  var html = '';
+  for (var i = 0; i < THEME_COLORS.length; i++) {
+    var c = THEME_COLORS[i];
+    html += '<div class="theme-color-dot ' + (cur===c.name?'active':'') + '" data-name="' + c.name + '" style="background:linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')" onclick="setThemeColor(\'' + c.name + '\')" title="' + c.name + '"></div>';
+  }
+  row.innerHTML = html;
+}
+
+/* ===== TOGGLES ===== */
+function updateToggles(){
+  var s = document.getElementById('soundToggle'), h = document.getElementById('hapticToggle');
+  if (s) s.classList.toggle('on', soundOn);
+  if (h) h.classList.toggle('on', hapticOn);
+}
+function toggleSound(){
+  soundOn = !soundOn;
+  localStorage.setItem('soundOn', soundOn ? 'on' : 'off');
+  updateToggles();
+  if (navigator.vibrate && hapticOn) navigator.vibrate(20);
+  showToast(soundOn ? '🔊 Sound On' : '🔇 Sound Off', 'info');
+}
+function toggleHaptic(){
+  hapticOn = !hapticOn;
+  localStorage.setItem('hapticOn', hapticOn ? 'on' : 'off');
+  updateToggles();
+  if (navigator.vibrate && hapticOn) navigator.vibrate(30);
+  showToast(hapticOn ? '📳 Haptic On' : '📴 Haptic Off', 'info');
+}
+
+/* ===== SETTINGS ===== */
+function openSettings(){
+  var m = document.getElementById('settingsModal');
+  if (m) {
+    m.classList.add('show');
+    updateToggles();
+    populateThemeColors();
+  }
+}
+function shareApp(){
+  var url = location.origin;
+  if (navigator.share) {
+    navigator.share({title:'Safe Zone Game Topup', text:'🎮 Safe Zone - Game Topup', url:url}).catch(function(){});
+  } else {
+    navigator.clipboard.writeText(url).then(function(){ showToast('✅ Link ကူးပြီးပါပြီ', 'success'); }).catch(function(){ showToast('URL: ' + url, 'info'); });
+  }
+}
+
+/* ===== API ===== */
+async function api(url, opts){
+  opts = opts || {};
+  try {
+    var r = await fetch(url, {method: opts.method || 'GET', headers: Object.assign({}, H, opts.headers || {}), body: opts.body});
+    if (r.status === 401) { localStorage.clear(); location.href='/'; return {error:'unauth'}; }
+    if (!r.ok) return {error:'HTTP ' + r.status};
+    return r.json();
+  } catch(e) { return {error:'Network'}; }
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+
+/* ===== LOAD SITE ===== */
+async function loadSite(){
+  siteData = await api('/api/site');
+  if (siteData.error) return;
+  document.title = siteData.siteName || 'Safe Zone';
+  var car = document.getElementById('carousel'), dotsBox = document.getElementById('dots');
+  if (car && dotsBox) {
+    var banners = siteData.banners || [];
+    for (var i = 0; i < banners.length; i++) {
+      var b = banners[i];
+      var div = document.createElement('div');
+      div.className = 'slide' + (i===0?' active':'');
+      div.style.background = b.bg || 'linear-gradient(135deg,#38bdf8,#a855f7)';
+      div.innerHTML = '<h3>' + (b.title||'') + '</h3><p>' + (b.subtitle||'') + '</p>';
+      car.insertBefore(div, dotsBox);
+      var dot = document.createElement('div');
+      dot.className = 'dot' + (i===0?' active':'');
+      dotsBox.appendChild(dot);
+    }
+    // Auto slide
+    setInterval(function(){
+      var slides = document.querySelectorAll('.slide');
+      var dots = document.querySelectorAll('.dot');
+      if (!slides.length) return;
+      slides[slideIdx].classList.remove('active');
+      if (dots[slideIdx]) dots[slideIdx].classList.remove('active');
+      slideIdx = (slideIdx + 1) % slides.length;
+      slides[slideIdx].classList.add('active');
+      if (dots[slideIdx]) dots[slideIdx].classList.add('active');
+    }, 3500);
+  }
+  var pn = document.getElementById('payName'); 
+  if (pn) pn.textContent = (siteData.payName||'') + ' — ' + (siteData.payNumber||'');
+  var pays = (siteData.payments && siteData.payments.length) ? siteData.payments : [{name:'KBZ Pay'},{name:'Wave Money'},{name:'UAB Pay'},{name:'AYA Pay'}];
+  var pl = document.getElementById('paymentList');
+  if (pl) {
+    var html = '';
+    for (var i = 0; i < pays.length; i++) {
+      var p = pays[i];
+      html += '<div class="payment-method ' + (p.name===selectedPay?'selected':'') + '" onclick="selectPay(\'' + p.name + '\',this)"><div class="pay-logo">' + (p.short||p.name.substring(0,4)) + '</div><div class="pay-info"><div class="pay-name">' + p.name + '</div><div class="pay-num">' + (siteData.payNumber||'') + ' · ' + (siteData.payName||'') + '</div></div></div>';
+    }
+    pl.innerHTML = html;
+  }
+}
+function selectPay(name, el){ 
+  selectedPay = name; 
+  var ms = document.querySelectorAll('.payment-method');
+  for (var i = 0; i < ms.length; i++) ms[i].classList.remove('selected');
+  el.classList.add('selected'); 
+  haptic(15); 
+}
+function copyNum(){ 
+  if (siteData && siteData.payNumber) {
+    navigator.clipboard.writeText(siteData.payNumber).then(function(){ showToast('✅ နံပါတ် ကူးပြီးပါပြီ', 'success'); });
+  }
+}
+
+/* ===== LOAD ME ===== */
+async function loadMe(){
+  var d = await api('/api/me');
+  if (d.error) return;
+  userData = d;
+  var set = function(id, val){ var el = document.getElementById(id); if (el) el.textContent = val; };
+  var setH = function(id, val){ var el = document.getElementById(id); if (el) el.innerHTML = val; };
+  setH('bal', d.balance.toLocaleString() + ' <span>Ks</span>');
+  set('pBal', d.balance.toLocaleString() + ' Ks');
+  set('pts', d.points || 0);
+  set('pPts', d.points || 0);
+  set('pSpent', (d.totalSpent||0).toLocaleString() + ' Ks');
+  set('pRef', d.referralCode || '-');
+  set('uName', d.username);
+  set('uPhone', d.phone || '09xxxxxxxxx');
+  set('pName', d.username);
+  set('pPhone', d.phone || '-');
+  set('avatar', d.username.charAt(0).toUpperCase());
+  set('pAvatar', d.username.charAt(0).toUpperCase());
+  var vip = d.vip || 'Bronze';
+  var vb = document.getElementById('vipBadge');
+  if (vb) { vb.textContent = vip; vb.className = 'vip-badge vip-' + vip; }
+  var pv = document.getElementById('pVip');
+  if (pv) { pv.textContent = vip; pv.className = 'vip-badge vip-' + vip; }
+  var nb = document.getElementById('notifBadge');
+  if (nb) { if (d.unread > 0) { nb.textContent = d.unread; nb.style.display = 'inline-block'; } else nb.style.display = 'none'; }
+}
+
+/* ===== LOAD PRODUCTS ===== */
 async function loadProducts(){
   var grid = document.getElementById('gamesGrid');
   if (grid) grid.innerHTML = '<div class="skeleton skel-card"></div><div class="skeleton skel-card"></div>';
@@ -587,76 +562,183 @@ async function loadProducts(){
   renderGames();
 }
 function renderGames(){
-  var games = Array.from(new Set(products.map(function(p){ return p.game; })));
+  var games = [];
+  for (var i = 0; i < products.length; i++) {
+    if (games.indexOf(products[i].game) === -1) games.push(products[i].game);
+  }
   var imgs = (siteData && siteData.gameImages) || {};
   var favs = JSON.parse(localStorage.getItem('favs') || '[]');
   var filtered = games.filter(function(g){
     if (searchTerm && g.toLowerCase().indexOf(searchTerm.toLowerCase()) === -1) return false;
-    if (currentCategory !== 'all') { var p = products.find(function(x){ return x.game === g; }); if (!p || p.category !== currentCategory) return false; }
+    if (currentCategory !== 'all') {
+      var p = products.find(function(x){ return x.game === g; });
+      if (!p || p.category !== currentCategory) return false;
+    }
     return true;
   });
-  var grid = document.getElementById('gamesGrid'); if (!grid) return;
+  var grid = document.getElementById('gamesGrid');
+  if (!grid) return;
   if (!filtered.length) { grid.innerHTML = '<div class="empty" style="grid-column:1/-1">ဂိမ်း မတွေ့ပါ</div>'; return; }
-  grid.innerHTML = filtered.map(function(g){
+  var html = '';
+  for (var i = 0; i < filtered.length; i++) {
+    var g = filtered[i];
     var img = imgs[g] || 'https://via.placeholder.com/200x120/334155/38bdf8?text=Game';
     var isFav = favs.indexOf(g) >= 0;
     var safeG = g.replace(/'/g, "\\'");
-    return '<div class="game-card" onclick="openGameProducts(\'' + safeG + '\')"><button class="fav-btn" onclick="event.stopPropagation();toggleFav(\'' + safeG + '\',this)">' + (isFav?'❤️':'🤍') + '</button><img class="game-img" src="' + img + '" onerror="this.src=\'https://via.placeholder.com/200x120/334155/38bdf8?text=Game\'"><div class="game-title">' + g + '</div></div>';
-  }).join('');
+    html += '<div class="game-card" onclick="openGameProducts(\'' + safeG + '\')"><button class="fav-btn" onclick="event.stopPropagation();toggleFav(\'' + safeG + '\',this)">' + (isFav?'❤️':'🤍') + '</button><img class="game-img" src="' + img + '" onerror="this.src=\'https://via.placeholder.com/200x120/334155/38bdf8?text=Game\'"><div class="game-title">' + g + '</div></div>';
+  }
+  grid.innerHTML = html;
 }
-function filterGames(){ var el = document.getElementById('searchInput'); searchTerm = el ? el.value : ''; renderGames(); }
-function setCategory(cat, el){ currentCategory = cat; document.querySelectorAll('.category-tabs button').forEach(function(b){ b.classList.remove('active'); }); el.classList.add('active'); haptic(15); renderGames(); }
-function toggleFav(game, el){ var favs = JSON.parse(localStorage.getItem('favs') || '[]'); var i = favs.indexOf(game); if (i >= 0) { favs.splice(i,1); el.textContent = '🤍'; } else { favs.push(game); el.textContent = '❤️'; showToast('⭐ Favorite', 'info'); } localStorage.setItem('favs', JSON.stringify(favs)); haptic(20); }
+function filterGames(){ searchTerm = document.getElementById('searchInput').value; renderGames(); }
+function setCategory(cat, el){
+  currentCategory = cat;
+  var btns = document.querySelectorAll('.category-tabs button');
+  for (var i = 0; i < btns.length; i++) btns[i].classList.remove('active');
+  el.classList.add('active');
+  haptic(15);
+  renderGames();
+}
+function toggleFav(game, el){
+  var favs = JSON.parse(localStorage.getItem('favs') || '[]');
+  var idx = favs.indexOf(game);
+  if (idx >= 0) { favs.splice(idx,1); el.textContent = '🤍'; }
+  else { favs.push(game); el.textContent = '❤️'; showToast('⭐ Favorite', 'info'); }
+  localStorage.setItem('favs', JSON.stringify(favs));
+  haptic(20);
+}
 
-async function loadDeposits(){ var d = await api('/api/deposits'); if (d.error || !Array.isArray(d)) return; var el = document.getElementById('depList'); if (!el) return; el.innerHTML = d.length ? d.map(function(x){ return '<div class="deposit-list-item"><div class="deposit-list-head"><b class="deposit-list-amount">' + x.amount.toLocaleString() + ' Ks</b><span class="status-badge status-' + x.status + '">' + x.status + '</span></div><div class="deposit-list-meta">' + x.method + '</div></div>'; }).join('') : '<div class="empty">မှတ်တမ်း မရှိပါ</div>'; }
-async function loadOrders(){ var d = await api('/api/orders'); if (d.error || !Array.isArray(d)) return; var el = document.getElementById('ordList'); if (!el) return; el.innerHTML = d.length ? d.map(function(x){ return '<div style="background:rgba(30,41,59,0.8);padding:14px;border-radius:14px;margin-bottom:10px;font-size:13px;border:1px solid #334155"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="color:#38bdf8">' + x.game + '</b><span class="status-badge status-' + x.status + '">' + x.status + '</span></div><div>' + x.product + '</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">ID: ' + x.playerId + ' · ' + x.price.toLocaleString() + ' Ks</div></div>'; }).join('') : '<div class="empty">မှတ်တမ်း မရှိပါ</div>'; }
-async function loadChat(){ var list = await api('/api/chat'); if (list.error || !Array.isArray(list)) return; var box = document.getElementById('chatMessages'); if (!box) return; box.innerHTML = list.length ? list.map(function(m){ var html = '<div class="chat-bubble ' + m.from + '">' + escapeHtml(m.text || '') + '<div class="time">' + new Date(m.createdAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}) + '</div></div>'; return html; }).join('') : '<div class="empty">Admin ဆီ စာ ရေးလို့ရပါပြီ 👋</div>'; var last = list[list.length-1]; if (last && last.id !== lastChatId) { lastChatId = last.id; box.scrollTop = box.scrollHeight; } }
-async function sendChat(){ var inp = document.getElementById('chatInput'); if (!inp) return; var text = inp.value.trim(); if (!text) return; inp.value = ''; var r = await api('/api/chat', {method:'POST', body: JSON.stringify({text:text})}); if (r.success) loadChat(); }
+/* ===== LOAD DEPOSITS ===== */
+async function loadDeposits(){
+  var d = await api('/api/deposits');
+  if (d.error || !Array.isArray(d)) return;
+  var el = document.getElementById('depList');
+  if (!el) return;
+  if (!d.length) { el.innerHTML = '<div class="empty">မှတ်တမ်း မရှိပါ</div>'; return; }
+  var html = '';
+  for (var i = 0; i < d.length; i++) {
+    var x = d[i];
+    html += '<div class="deposit-list-item"><div class="deposit-list-head"><b class="deposit-list-amount">' + x.amount.toLocaleString() + ' Ks</b><span class="status-badge status-' + x.status + '">' + x.status + '</span></div><div class="deposit-list-meta">' + x.method + '</div></div>';
+  }
+  el.innerHTML = html;
+}
 
+/* ===== LOAD ORDERS ===== */
+async function loadOrders(){
+  var d = await api('/api/orders');
+  if (d.error || !Array.isArray(d)) return;
+  var el = document.getElementById('ordList');
+  if (!el) return;
+  if (!d.length) { el.innerHTML = '<div class="empty">မှတ်တမ်း မရှိပါ</div>'; return; }
+  var html = '';
+  for (var i = 0; i < d.length; i++) {
+    var x = d[i];
+    var mins = Math.floor((Date.now() - x.createdAt) / 60000);
+    var timeStr = mins < 1 ? 'အခုလေးတင်' : (mins < 60 ? mins + ' မိနစ်က' : Math.floor(mins/60) + ' နာရီက');
+    html += '<div style="background:rgba(30,41,59,0.8);padding:14px;border-radius:14px;margin-bottom:10px;font-size:13px;border:1px solid #334155"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><b style="color:#38bdf8">' + x.game + '</b><span class="status-badge status-' + x.status + '">' + x.status + '</span></div><div>' + x.product + '</div><div style="font-size:12px;color:#94a3b8;margin-top:4px">ID: ' + x.playerId + (x.serverId ? ' · S:' + x.serverId : '') + ' · ' + x.price.toLocaleString() + ' Ks</div><div style="margin-top:6px;font-size:11px;color:#64748b">⏱ ' + timeStr + '</div></div>';
+  }
+  el.innerHTML = html;
+}
+
+/* ===== CHAT ===== */
+async function loadChat(){
+  var list = await api('/api/chat');
+  if (list.error || !Array.isArray(list)) return;
+  var box = document.getElementById('chatMessages');
+  if (!box) return;
+  if (!list.length) { box.innerHTML = '<div class="empty">Admin ဆီ စာ ရေးလို့ရပါပြီ 👋</div>'; return; }
+  var html = '';
+  for (var i = 0; i < list.length; i++) {
+    var m = list[i];
+    html += '<div class="chat-bubble ' + m.from + '">' + escapeHtml(m.text || '') + '</div>';
+  }
+  box.innerHTML = html;
+  var last = list[list.length-1];
+  if (last && last.id !== lastChatId) { lastChatId = last.id; box.scrollTop = box.scrollHeight; }
+}
+async function sendChat(){
+  var inp = document.getElementById('chatInput');
+  if (!inp) return;
+  var text = inp.value.trim();
+  if (!text) return;
+  inp.value = '';
+  var r = await api('/api/chat', {method:'POST', body: JSON.stringify({text:text})});
+  if (r.success) loadChat();
+}
+
+/* ===== SWITCH TAB ===== */
 function switchTab(name, btn){
-  // Close all modals when switching tabs
-  document.querySelectorAll('.modal').forEach(function(m){ m.classList.remove('show'); });
-
-  document.querySelectorAll('[id^="view-"]').forEach(function(v){ v.style.display = 'none'; });
-  document.querySelectorAll('.nav-item').forEach(function(b){ b.classList.remove('active'); });
-  var t = document.getElementById('view-' + name); if (t) t.style.display = 'block';
-  if (btn) btn.classList.add('active'); haptic(15);
+  var views = document.querySelectorAll('[id^="view-"]');
+  for (var i = 0; i < views.length; i++) views[i].style.display = 'none';
+  var navs = document.querySelectorAll('.nav-item');
+  for (var i = 0; i < navs.length; i++) navs[i].classList.remove('active');
+  var t = document.getElementById('view-' + name);
+  if (t) t.style.display = 'block';
+  if (btn) btn.classList.add('active');
+  haptic(15);
   if (name === 'wallet') loadDeposits();
   if (name === 'orders') loadOrders();
+  if (name === 'analytics') loadAnalytics();
   if (name === 'chat') { loadChat(); lastChatId = null; if (chatPoll) clearInterval(chatPoll); chatPoll = setInterval(loadChat, 1500); }
   else { if (chatPoll) { clearInterval(chatPoll); chatPoll = null; } }
 }
-function openFaq(){ switchTab('faq', document.querySelector('.nav-item')); }
-function openStats(){ switchTab('profile', document.querySelector('.nav-item')); }
+function openFaq(){ switchTab('faq', document.querySelectorAll('.nav-item')[0]); }
+function openStats(){ switchTab('analytics', document.querySelectorAll('.nav-item')[0]); }
+function openAnalytics(){
+  if (!userData.orders) userData.orders = [];
+}
+function loadAnalytics(){
+  var orders = userData.orders || [];
+  var total = orders.length;
+  var spent = 0;
+  for (var i = 0; i < orders.length; i++) if (orders[i].status === 'completed') spent += orders[i].price;
+  var aO = document.getElementById('aOrders'); if (aO) aO.textContent = total;
+  var aS = document.getElementById('aSpent'); if (aS) aS.textContent = spent.toLocaleString() + ' Ks';
+  var aP = document.getElementById('aPoints'); if (aP) aP.textContent = userData.points || 0;
+}
 
+/* ===== PRODUCT MODAL ===== */
 function openGameProducts(game){
   var gProducts = products.filter(function(p){ return p.game === game; });
   var userVip = userData.vip || 'Bronze';
   var vipDisc = {Bronze:0, Silver:2, Gold:5, Diamond:8}[userVip] || 0;
-  var list = gProducts.map(function(p){
+  var html = '';
+  for (var i = 0; i < gProducts.length; i++) {
+    var p = gProducts[i];
     var final = Math.round(p.price * (1 - vipDisc/100));
-    var disc = vipDisc > 0 ? '<div style="font-size:11px;color:#22c55e;margin-top:2px">-' + vipDisc + '% → ' + final.toLocaleString() + ' Ks</div>' : '';
+    var disc = vipDisc > 0 ? '<div style="font-size:11px;color:#22c55e;margin-top:2px">-' + vipDisc + '%</div>' : '';
     var imgHtml = p.imgUrl ? '<img src="' + p.imgUrl + '" style="width:50px;height:50px;object-fit:cover;border-radius:10px">' : '<div style="font-size:26px">' + (p.image||'🎮') + '</div>';
-    return '<div class="game-card" onclick="openModal(' + p.id + ')" style="cursor:pointer"><div style="padding:15px;text-align:center">' + imgHtml + '<div style="font-weight:bold;margin-top:5px;font-size:13px">' + p.name + '</div><div style="color:#22c55e;margin-top:5px;font-weight:bold">' + p.price.toLocaleString() + ' Ks</div>' + disc + '</div></div>';
-  }).join('');
+    html += '<div class="game-card" onclick="openModal(' + p.id + ')" style="cursor:pointer"><div style="padding:15px;text-align:center">' + imgHtml + '<div style="font-weight:bold;margin-top:5px;font-size:13px">' + p.name + '</div><div style="color:#22c55e;margin-top:5px;font-weight:bold">' + p.price.toLocaleString() + ' Ks</div>' + disc + '</div></div>';
+  }
   var box = document.getElementById('productModalBox');
-  if (box) box.innerHTML = '<h3>' + game + ' - ရွေးပါ</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + list + '</div><button class="cancel" style="margin-top:15px" onclick="closeModal(\'productModal\')">Close</button>';
-  var m = document.getElementById('productModal'); if (m) m.classList.add('show');
+  if (box) box.innerHTML = '<h3>' + game + ' - ရွေးပါ</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + html + '</div><button class="cancel" style="margin-top:15px" onclick="closeModal(\'productModal\')">Close</button>';
+  var m = document.getElementById('productModal');
+  if (m) m.classList.add('show');
 }
 function openModal(id){
-  selected = products.find(function(p){ return p.id === id; }); if (!selected) return;
+  selected = products.find(function(p){ return p.id === id; });
+  if (!selected) return;
   closeModal('productModal');
-  var t = document.getElementById('mTitle'); if (t) t.textContent = selected.name + ' - ' + selected.price.toLocaleString() + ' Ks';
-  var pid = document.getElementById('playerId'); if (pid) pid.value = '';
+  var t = document.getElementById('mTitle');
+  if (t) t.textContent = selected.name + ' - ' + selected.price.toLocaleString() + ' Ks';
+  var pid = document.getElementById('playerId');
+  if (pid) pid.value = '';
   var sf = document.getElementById('serverIdField');
   var needsServer = ['Mobile Legends', 'Magic Chess'].indexOf(selected.game) >= 0;
   if (sf) sf.style.display = needsServer ? 'block' : 'none';
-  var m = document.getElementById('orderModal'); if (m) m.classList.add('show');
+  var m = document.getElementById('orderModal');
+  if (m) m.classList.add('show');
 }
-function closeModal(id){ var el = document.getElementById(id); if (el) el.classList.remove('show'); }
+function closeModal(id){
+  var el = document.getElementById(id);
+  if (el) el.classList.remove('show');
+}
+
+/* ===== SUBMIT ORDER ===== */
 async function submitOrder(){
-  var pidEl = document.getElementById('playerId'); var pid = pidEl ? pidEl.value.trim() : '';
-  var sf = document.getElementById('serverIdField'); var sidEl = document.getElementById('serverId');
+  var pidEl = document.getElementById('playerId');
+  var pid = pidEl ? pidEl.value.trim() : '';
+  var sf = document.getElementById('serverIdField');
+  var sidEl = document.getElementById('serverId');
   var sid = (sf && sf.style.display !== 'none' && sidEl) ? sidEl.value.trim() : '';
   if (!pid) return showToast('Player ID ဖြည့်ပါ', 'error');
   if (sf && sf.style.display !== 'none' && !sid) return showToast('Server ID ဖြည့်ပါ', 'error');
@@ -664,146 +746,246 @@ async function submitOrder(){
   if (!confirm('✅ Order တင်မလား?\n\n' + selected.game + ' - ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks')) return;
   var d = await api('/api/order', {method:'POST', body: JSON.stringify({productId:selected.id, playerId:pid, serverId:sid})});
   if (!d.success) { playSound('error'); return showToast('❌ ' + d.error, 'error'); }
-  playSound('success'); haptic(100); showToast('✅ Order တင်ပြီးပါပြီ', 'success');
-  closeModal('orderModal'); loadMe(); loadOrders();
+  playSound('success'); haptic(100);
+  showToast('✅ Order တင်ပြီးပါပြီ', 'success');
+  closeModal('orderModal');
+  loadMe(); loadOrders();
 }
-function previewReceipt(input){ var file = input.files[0]; if (!file) return; var reader = new FileReader(); reader.onload = function(e){ var img = document.getElementById('receiptImg'); if (img) img.src = e.target.result; var prev = document.getElementById('receiptPreview'); if (prev) prev.style.display = 'block'; }; reader.readAsDataURL(file); }
+
+/* ===== DEPOSIT ===== */
+function previewReceipt(input){
+  var file = input.files[0];
+  if (!file) return;
+  var reader = new FileReader();
+  reader.onload = function(e){
+    var img = document.getElementById('receiptImg');
+    if (img) img.src = e.target.result;
+    var prev = document.getElementById('receiptPreview');
+    if (prev) prev.style.display = 'block';
+  };
+  reader.readAsDataURL(file);
+}
 async function deposit(){
-  var amtEl = document.getElementById('dAmt'); var amount = amtEl ? amtEl.value : '';
+  var amtEl = document.getElementById('dAmt');
+  var amount = amtEl ? amtEl.value : '';
   if (!amount || amount < 1000) return showToast('အနည်းဆုံး 1000 Ks', 'error');
-  var receipt = null; var preview = document.getElementById('receiptPreview'); var img = document.getElementById('receiptImg');
+  var receipt = null;
+  var preview = document.getElementById('receiptPreview');
+  var img = document.getElementById('receiptImg');
   if (preview && preview.style.display !== 'none' && img && img.src) receipt = img.src;
   var d = await api('/api/deposit', {method:'POST', body: JSON.stringify({amount:amount, method:selectedPay, receipt:receipt})});
-  if (d.success) { playSound('success'); haptic(60); showToast('✅ ' + d.message, 'success'); if (amtEl) amtEl.value = ''; loadDeposits(); }
-  else { playSound('error'); showToast('❌ ' + d.error, 'error'); }
+  if (d.success) {
+    playSound('success'); haptic(60);
+    showToast('✅ ' + d.message, 'success');
+    if (amtEl) amtEl.value = '';
+    loadDeposits();
+  } else {
+    playSound('error');
+    showToast('❌ ' + d.error, 'error');
+  }
 }
-function openCoupon(){ var c = document.getElementById('couponCode'); if (c) c.value = ''; var m = document.getElementById('couponModal'); if (m) m.classList.add('show'); }
-async function redeemCoupon(){ var el = document.getElementById('couponCode'); if (!el) return; var code = el.value.trim(); if (!code) return showToast('Code ရိုက်ပါ', 'error'); var d = await api('/api/redeem-coupon', {method:'POST', body: JSON.stringify({code:code})}); if (d.success) { playSound('success'); haptic(60); showToast('✅ +' + d.reward.toLocaleString() + ' Ks!', 'success'); closeModal('couponModal'); loadMe(); } else { playSound('error'); showToast('❌ ' + d.error, 'error'); } }
-async function openLeaderboard(){ var list = await api('/api/leaderboard'); if (list.error || !Array.isArray(list)) return; var medals = ['🥇','🥈','🥉']; var box = document.getElementById('leaderBox'); if (box) box.innerHTML = list.length ? list.map(function(u,i){ return '<div style="display:flex;justify-content:space-between;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px;border:1px solid #334155"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px;width:28px">' + (medals[i]||('#'+(i+1))) + '</span><div><b style="color:#38bdf8">' + u.username + '</b></div></div><b style="color:#22c55e">' + u.total.toLocaleString() + ' Ks</b></div>'; }).join('') : '<div class="empty">ဒေတာ မရှိပါ</div>'; var m = document.getElementById('leaderModal'); if (m) m.classList.add('show'); }
-function copyRef(){ var code = userData.referralCode || ''; navigator.clipboard.writeText(code).then(function(){ showToast('✅ ' + code, 'success'); }); }
-function openTerms(){ window.open('/terms.html', '_blank'); }
+
+/* ===== COUPON ===== */
+function openCoupon(){
+  var c = document.getElementById('couponCode');
+  if (c) c.value = '';
+  var m = document.getElementById('couponModal');
+  if (m) m.classList.add('show');
+}
+async function redeemCoupon(){
+  var el = document.getElementById('couponCode');
+  if (!el) return;
+  var code = el.value.trim();
+  if (!code) return showToast('Code ရိုက်ပါ', 'error');
+  var d = await api('/api/redeem-coupon', {method:'POST', body: JSON.stringify({code:code})});
+  if (d.success) {
+    playSound('success'); haptic(60);
+    showToast('✅ +' + d.reward.toLocaleString() + ' Ks!', 'success');
+    closeModal('couponModal');
+    loadMe();
+  } else {
+    playSound('error');
+    showToast('❌ ' + d.error, 'error');
+  }
+}
+
+/* ===== LEADERBOARD ===== */
+async function openLeaderboard(){
+  var list = await api('/api/leaderboard');
+  if (list.error || !Array.isArray(list)) return;
+  var medals = ['🥇','🥈','🥉'];
+  var box = document.getElementById('leaderBox');
+  if (!box) return;
+  if (!list.length) { box.innerHTML = '<div class="empty">ဒေတာ မရှိပါ</div>'; }
+  else {
+    var html = '';
+    for (var i = 0; i < list.length; i++) {
+      var u = list[i];
+      html += '<div style="display:flex;justify-content:space-between;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px;border:1px solid #334155"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:20px;width:28px">' + (medals[i]||('#'+(i+1))) + '</span><b style="color:#38bdf8">' + u.username + '</b></div><b style="color:#22c55e">' + u.total.toLocaleString() + ' Ks</b></div>';
+    }
+    box.innerHTML = html;
+  }
+  var m = document.getElementById('leaderModal');
+  if (m) m.classList.add('show');
+}
+
+/* ===== NOTIFICATIONS ===== */
 async function openNotif(){
-  playSound('click'); haptic(20); var m = document.getElementById('notifModal'); if (m) m.classList.add('show');
-  var listEl = document.getElementById('notifList'); if (listEl) listEl.innerHTML = '<div class="empty">Loading...</div>';
+  playSound('click'); haptic(20);
+  var m = document.getElementById('notifModal');
+  if (m) m.classList.add('show');
+  var listEl = document.getElementById('notifList');
+  if (listEl) listEl.innerHTML = '<div class="empty">Loading...</div>';
   try {
-    var list = []; try { var r = await api('/api/notifications'); if (Array.isArray(r)) list = r; } catch(e){}
-    if (!list.length) { try { var chat = await api('/api/chat'); if (Array.isArray(chat)) { list = chat.slice(-30).reverse().map(function(m){ return {message: (m.from === 'admin' ? 'Admin: ' : 'You: ') + (m.text || '[Image]'), createdAt: m.createdAt, read: m.from === 'user'}; }); } } catch(e){} }
-    if (listEl) listEl.innerHTML = list.length ? list.map(function(n){ return '<div style="padding:14px;background:rgba(56,189,248,0.08);border-radius:12px;margin-bottom:8px;border:1px solid #334155"><div style="font-size:13px">' + escapeHtml(n.message) + '</div><div style="font-size:11px;color:#64748b;margin-top:5px">' + new Date(n.createdAt).toLocaleString() + '</div></div>'; }).join('') : '<div class="empty">Notification မရှိပါ</div>';
+    var list = [];
+    try { var r = await api('/api/notifications'); if (Array.isArray(r)) list = r; } catch(e){}
+    if (!list.length) {
+      try {
+        var chat = await api('/api/chat');
+        if (Array.isArray(chat)) {
+          list = chat.slice(-30).reverse().map(function(msg){
+            return {message: (msg.from === 'admin' ? 'Admin: ' : 'You: ') + (msg.text || ''), createdAt: msg.createdAt, read: msg.from === 'user'};
+          });
+        }
+      } catch(e){}
+    }
+    if (listEl) {
+      if (!list.length) listEl.innerHTML = '<div class="empty">Notification မရှိပါ</div>';
+      else {
+        var html = '';
+        for (var i = 0; i < list.length; i++) {
+          var n = list[i];
+          html += '<div style="padding:14px;background:rgba(56,189,248,0.08);border-radius:12px;margin-bottom:8px;border:1px solid #334155"><div style="font-size:13px">' + escapeHtml(n.message) + '</div><div style="font-size:11px;color:#64748b;margin-top:5px">' + new Date(n.createdAt).toLocaleString() + '</div></div>';
+        }
+        listEl.innerHTML = html;
+      }
+    }
     loadMe();
   } catch(e) { if (listEl) listEl.innerHTML = '<div class="empty">မရှိပါ</div>'; }
 }
 
-var _spinCanPlay = true;
-async function openSpinWheel(){ var m = document.getElementById('spinModal'); if (m) m.classList.add('show'); }
+/* ===== COPY REFERRAL ===== */
+function copyRef(){
+  var code = userData.referralCode || '';
+  navigator.clipboard.writeText(code).then(function(){ showToast('✅ ' + code, 'success'); }).catch(function(){ showToast('Code: ' + code, 'info'); });
+}
 
-async function logout(){ if (!confirm('Logout လုပ်မှာသေချာလား?')) return; await api('/api/logout', {method:'POST'}); localStorage.clear(); location.href = '/'; }
-
-(async function init(){
-  try {
-    await loadSite();
-    await loadMe();
-    await loadProducts();
-    setInterval(loadMe, 10000);
-  } catch (e) {
-    var s = document.getElementById('splash'); if (s) s.style.display = 'none';
+/* ===== SPIN WHEEL ===== */
+function openSpinWheel(){
+  var m = document.getElementById('spinModal');
+  if (m) m.classList.add('show');
+  var res = document.getElementById('spinResult');
+  if (res) res.textContent = 'Spin နှိပ်ပြီး ကံစမ်းပါ';
+  var btn = document.getElementById('spinBtn');
+  if (btn) { btn.textContent = '🎰 Spin!'; btn.onclick = doSpin; }
+}
+async function doSpin(){
+  if (!_spinCanPlay) return;
+  var btn = document.getElementById('spinBtn');
+  if (!btn) return;
+  btn.textContent = '⏳ လှည့်နေတယ်...';
+  _spinCanPlay = false;
+  var r = Math.floor(Math.random() * 8);
+  var rotations = 360 * 5 + (r * 45);
+  var wheel = document.getElementById('spinWheel');
+  if (wheel) wheel.style.transform = 'rotate(' + rotations + 'deg)';
+  await new Promise(function(res){ setTimeout(res, 4200); });
+  var d = await api('/api/spin', {method:'POST'});
+  var resEl = document.getElementById('spinResult');
+  if (d.success) {
+    if (d.reward > 0) {
+      playSound('success'); haptic(100);
+      if (resEl) resEl.innerHTML = '<b style="color:#22c55e;font-size:18px">🎉 +' + d.reward.toLocaleString() + ' Ks!</b>';
+    } else {
+      if (resEl) resEl.innerHTML = '<b style="color:#ef4444">😢 မရပါ</b>';
+    }
+    if (typeof d.balance !== 'undefined') {
+      var balEl = document.getElementById('bal');
+      if (balEl) balEl.innerHTML = d.balance.toLocaleString() + ' <span>Ks</span>';
+      var pBalEl = document.getElementById('pBal');
+      if (pBalEl) pBalEl.textContent = d.balance.toLocaleString() + ' Ks';
+    }
+    loadMe();
+  } else {
+    if (resEl) resEl.innerHTML = '<b style="color:#ef4444">' + (d.error || 'Error') + '</b>';
   }
+  btn.textContent = 'Close';
+  btn.onclick = function(){ closeModal('spinModal'); _spinCanPlay = true; };
+}
+
+/* ===== MUSIC ===== */
+function toggleMusic(){
+  var btn = document.getElementById('musicBtn');
+  if (musicPlaying) {
+    if (_musicAudio) { try { _musicAudio.pause(); _musicAudio.currentTime = 0; } catch(e){} }
+    musicPlaying = false;
+    if (btn) btn.textContent = '🔇';
+    showToast('🔇 Music Off', 'info');
+  } else {
+    var url = (siteData && siteData.musicUrl) ? siteData.musicUrl : '';
+    if (url) {
+      try {
+        if (!_musicAudio) { _musicAudio = new Audio(url); _musicAudio.loop = true; _musicAudio.volume = 0.3; }
+        _musicAudio.play().then(function(){
+          musicPlaying = true;
+          if (btn) btn.textContent = '🎵';
+          showToast('🎵 Music On', 'info');
+        }).catch(function(){
+          showToast('❌ Music ဖွင့်လို့မရပါ', 'error');
+        });
+      } catch(e) {}
+    } else {
+      showToast('🎵 Music URL မရှိပါ', 'info');
+    }
+  }
+  haptic(30);
+}
+
+/* ===== INSTALL PWA ===== */
+var deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e){ e.preventDefault(); deferredPrompt = e; });
+async function installPWA(){
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    var choice = await deferredPrompt.userChoice;
+    if (choice.outcome === 'accepted') showToast('✅ App install ပြီးပါပြီ', 'success');
+    deferredPrompt = null;
+    return;
+  }
+  alert('📱 Install လုပ်နည်း:\n\n1. Chrome ⋮ menu နှိပ်\n2. "Add to Home screen" ရွေး\n3. "Add" နှိပ်\n\n✅ Home Screen မှာ App လို ပေါ်မယ်');
+}
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('/sw.js').catch(function(){});
+
+/* ===== PUSH TEST ===== */
+async function testPush(){
+  try {
+    if (!('Notification' in window)) return showToast('Push not supported', 'error');
+    var perm = await Notification.requestPermission();
+    if (perm !== 'granted') return showToast('❌ Permission denied', 'error');
+    var r = await api('/api/push/test', {method:'POST'});
+    if (r && r.success) showToast('🔔 Test push sent (' + r.sent + ')', 'success');
+    else showToast('❌ Push failed', 'error');
+  } catch(e) { showToast('❌ Push error', 'error'); }
+}
+
+/* ===== LOGOUT ===== */
+async function logout(){
+  if (!confirm('Logout လုပ်မှာသေချာလား?')) return;
+  await api('/api/logout', {method:'POST'});
+  localStorage.clear();
+  location.href = '/';
+}
+
+/* ===== INIT ===== */
+(function init(){
+  updateToggles();
+  setThemeColor(localStorage.getItem('themeColor') || 'Blue');
+  setTimeout(populateThemeColors, 1000);
+  loadSite();
+  loadMe();
+  loadProducts();
+  setInterval(loadMe, 10000);
 })();
 </script>
-
-<script>
-// ===== AUTO REFRESH SYSTEM =====
-(function() {
-  // 1. Site Data (Banners, Pay Number, Game Images) - ၃၀ စက္ကန့်တစ်ခါ
-  setInterval(function() {
-    if (typeof loadSite === 'function') {
-      loadSite();
-      console.log('[AutoRefresh] Site data reloaded');
-    }
-  }, 30000);
-
-  // 2. Products (Game List) - ၃၀ စက္ကန့်တစ်ခါ
-  setInterval(function() {
-    if (typeof loadProducts === 'function') {
-      loadProducts();
-      console.log('[AutoRefresh] Products reloaded');
-    }
-  }, 30000);
-
-  // 3. Orders (မှာတမ်း tab မှာ ရှိနေရင်) - ၁၀ စက္ကန့်တစ်ခါ
-  setInterval(function() {
-    var ordersView = document.getElementById('view-orders');
-    if (ordersView && ordersView.style.display === 'block') {
-      if (typeof loadOrders === 'function') loadOrders();
-    }
-  }, 10000);
-
-  // 4. Deposits (ငွေဖြည့် tab မှာ ရှိနေရင်) - ၁၀ စက္ကန့်တစ်ခါ
-  setInterval(function() {
-    var walletView = document.getElementById('view-wallet');
-    if (walletView && walletView.style.display === 'block') {
-      if (typeof loadDeposits === 'function') loadDeposits();
-    }
-  }, 10000);
-
-  // 5. Notifications Badge - ၅ စက္ကန့်တစ်ခါ
-  setInterval(function() {
-    if (typeof loadMe === 'function') loadMe();
-  }, 5000);
-
-  // 6. Page visibility - User ပြန်ဖွင့်တဲ့အခါ အားလုံး Refresh ဖြစ်စေရန်
-  document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) {
-      console.log('[AutoRefresh] Page visible - reloading all');
-      if (typeof loadSite === 'function') loadSite();
-      if (typeof loadProducts === 'function') loadProducts();
-      if (typeof loadMe === 'function') loadMe();
-      var ordersView = document.getElementById('view-orders');
-      if (ordersView && ordersView.style.display === 'block' && typeof loadOrders === 'function') loadOrders();
-      var walletView = document.getElementById('view-wallet');
-      if (walletView && walletView.style.display === 'block' && typeof loadDeposits === 'function') loadDeposits();
-    }
-  });
-})();
-
-var soundOn = (localStorage.getItem('soundOn') !== 'off');
-var hapticOn = (localStorage.getItem('hapticOn') !== 'off');
-var musicPlaying = false; var _musicAudio = null;
-var THEME_COLORS = [
-  {name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},{name:'Green', primary:'#10b981', secondary:'#3b82f6'},
-  {name:'Red', primary:'#ef4444', secondary:'#f59e0b'},{name:'Pink', primary:'#ec4899', secondary:'#a855f7'},
-  {name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},{name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}
-];
-function updateToggles(){ var s=document.getElementById('soundToggle'),h2=document.getElementById('hapticToggle'); if(s)s.classList.toggle('on',soundOn); if(h2)h2.classList.toggle('on',hapticOn); }
-function toggleSound(){ soundOn=!soundOn; localStorage.setItem('soundOn',soundOn?'on':'off'); updateToggles(); if(navigator.vibrate&&hapticOn)navigator.vibrate(20); if(typeof showToast==='function')showToast(soundOn?'🔊 Sound On':'🔇 Sound Off','info'); }
-function toggleHaptic(){ hapticOn=!hapticOn; localStorage.setItem('hapticOn',hapticOn?'on':'off'); updateToggles(); if(navigator.vibrate&&hapticOn)navigator.vibrate(30); if(typeof showToast==='function')showToast(hapticOn?'📳 Haptic On':'📴 Haptic Off','info'); }
-function setThemeColor(name){ var c=THEME_COLORS.find(function(x){return x.name===name;}); if(!c)return; localStorage.setItem('themeColor',name); var d=document.querySelectorAll('.theme-color-dot'); d.forEach(function(x){x.classList.remove('active');}); var a=document.querySelector('.theme-color-dot[data-name="'+name+'"]'); if(a)a.classList.add('active'); }
-function populateThemeColors(){ var cur=localStorage.getItem('themeColor')||'Blue'; var row=document.getElementById('themeColorRow'); if(!row)return; row.innerHTML=THEME_COLORS.map(function(c){ return '<div class="theme-color-dot '+(cur===c.name?'active':'')+'" data-name="'+c.name+'" style="background:linear-gradient(135deg,'+c.primary+','+c.secondary+')" onclick="setThemeColor(\''+c.name+'\')"></div>'; }).join(''); }
-function toggleMusic(){ var btn=document.getElementById('musicBtn'); if(musicPlaying){ if(_musicAudio){try{_musicAudio.pause();_musicAudio.currentTime=0;}catch(e){}} musicPlaying=false; if(btn)btn.textContent='🔇'; if(typeof showToast==='function')showToast('🔇 Music Off','info'); } else { var url=(typeof siteData!=='undefined'&&siteData&&siteData.musicUrl)?siteData.musicUrl:''; if(url){ try{ if(!_musicAudio){_musicAudio=new Audio(url);_musicAudio.loop=true;_musicAudio.volume=0.3;} _musicAudio.play().then(function(){ musicPlaying=true; if(btn)btn.textContent='🎵'; if(typeof showToast==='function')showToast('🎵 Music On','info'); }).catch(function(){ if(typeof showToast==='function')showToast('❌ Music ဖွင့်လို့မရပါ','error'); }); }catch(e){} } else { if(typeof showToast==='function')showToast('🎵 Music မရှိပါ','info'); } } }
-window.openSettings = function(){ var m=document.getElementById('settingsModal'); if(m){ m.classList.add('show'); updateToggles(); populateThemeColors(); } };
-var _spinCanPlay = true;
-window.doSpin = async function(){ if(!_spinCanPlay)return; var btn=document.getElementById('spinBtn'); if(!btn)return; btn.textContent='⏳ လှည့်နေတယ်...'; _spinCanPlay=false; var r=Math.floor(Math.random()*8); var rot=360*5+(r*45); var w=document.getElementById('spinWheel'); if(w)w.style.transform='rotate('+rot+'deg)'; await new Promise(function(res){setTimeout(res,4200);}); var d=await api('/api/spin',{method:'POST'}); var re=document.getElementById('spinResult'); if(d.success){ if(d.reward>0){ if(typeof playSound==='function')playSound('success'); if(typeof haptic==='function')haptic(100); if(re)re.innerHTML='<b style="color:#22c55e;font-size:18px">🎉 +'+d.reward.toLocaleString()+' Ks!</b>'; } else { if(re)re.innerHTML='<b style="color:#ef4444">😢 မရပါ</b>'; } if(typeof d.balance!=='undefined'){ var b=document.getElementById('bal'); if(b)b.innerHTML=d.balance.toLocaleString()+' <span>Ks</span>'; var pb=document.getElementById('pBal'); if(pb)pb.textContent=d.balance.toLocaleString()+' Ks'; } if(typeof loadMe==='function')loadMe(); } else { if(re)re.innerHTML='<b style="color:#ef4444">'+(d.error||'Error')+'</b>'; } btn.textContent='Close'; btn.onclick=function(){ var mm=document.getElementById('spinModal'); if(mm)mm.classList.remove('show'); _spinCanPlay=true; }; };
-window.openStats = function(){ var n=document.querySelectorAll('.nav-item'); if(typeof switchTab==='function'&&n[4])switchTab('analytics',n[4]); };
-setTimeout(function(){ updateToggles(); setThemeColor(localStorage.getItem('themeColor')||'Blue'); populateThemeColors(); },500);
-
-</script>
-
-<button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
-<div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div></div>
-  
-  
-  
-  
-</div></div>
-
-
-    
-    
-    
-  </div>
-</div>
-
-
-</div></div>
-<div class="modal" id="settingsModal"><div class="modal-box"><h3>⚙️ Settings</h3><div class="settings-toggle"><div><b style="font-size:14px">🔊 Sound</b><div style="font-size:11px;color:#94a3b8">Sound Effect</div></div><div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div></div><div class="settings-toggle"><div><b style="font-size:14px">📳 Haptic</b><div style="font-size:11px;color:#94a3b8">တုန်ခါမှု</div></div><div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div></div><div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px"><b style="font-size:14px">🎨 Theme Color</b><div class="theme-color-row" id="themeColorRow"></div></div><button onclick="shareApp()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">📤 Share App</button><button class="cancel" onclick="closeModal('settingsModal')">Close</button></div></div>
 </body>
 </html>
