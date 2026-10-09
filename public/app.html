@@ -362,6 +362,41 @@ body.theme-neon{background:linear-gradient(135deg,#1a0033,#2d004d,#0a0a2e)}
 @keyframes _splashLoad{0%{width:0}20%{width:25%}50%{width:55%}80%{width:85%}100%{width:100%}}
 @keyframes _splashPulse{0%,100%{opacity:0.4}50%{opacity:1}}
 </style>
+<style>
+/* POINTS_UI_CSS */
+._pCard{background:linear-gradient(135deg,#a855f7,#ec4899);border-radius:18px;padding:20px;margin:15px;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(168,85,247,0.3);display:block}
+._pCard::after{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;background:rgba(255,255,255,0.1);border-radius:50%}
+._pHead{display:flex;align-items:center;gap:10px;margin-bottom:12px;position:relative;z-index:1}
+._pIcon{font-size:32px;animation:_pStar 2s ease-in-out infinite}
+@keyframes _pStar{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.15) rotate(15deg)}}
+._pTitle{font-size:14px;font-weight:bold;color:#fff}
+._pSub{font-size:11px;opacity:0.9;color:#fff;margin-top:2px}
+._pBig{font-size:40px;font-weight:bold;color:#fff;position:relative;z-index:1;margin-bottom:6px}
+._pBigLabel{font-size:11px;color:rgba(255,255,255,0.8);position:relative;z-index:1;margin-bottom:15px}
+._pInfo{background:rgba(0,0,0,0.25);border-radius:12px;padding:12px;position:relative;z-index:1;margin-bottom:12px}
+._pInfoRow{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;color:rgba(255,255,255,0.9)}
+._pInfoRow b{color:#fff}
+._pBtn{width:100%;padding:14px;background:rgba(255,255,255,0.95);color:#7c3aed;border:none;border-radius:14px;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit;position:relative;z-index:1}
+._pBtn:active{transform:scale(0.97)}
+._pBtn:disabled{opacity:0.5;cursor:not-allowed}
+._pHow{background:rgba(56,189,248,0.08);border:1px solid #38bdf8;border-radius:12px;padding:14px;margin:0 15px 15px;font-size:12px;color:#cbd5e1;line-height:1.8}
+._pHow b{color:#fff}
+._pRedeemM{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
+._pRedeemM.show{display:flex}
+._pRedeemBox{background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:24px;width:100%;max-width:380px;border:1px solid rgba(168,85,247,0.3);box-shadow:0 30px 80px rgba(0,0,0,0.8);overflow:hidden;animation:_pSlide 0.35s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes _pSlide{from{transform:scale(0.7);opacity:0}to{transform:scale(1);opacity:1}}
+._pRedeemHead{padding:24px 24px 16px;text-align:center;background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(236,72,153,0.15))}
+._pRedeemHeadIcon{width:70px;height:70px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;background:linear-gradient(135deg,#a855f7,#ec4899);box-shadow:0 10px 30px rgba(168,85,247,0.5)}
+._pRedeemHeadTitle{font-size:18px;font-weight:bold;color:#fff}
+._pRedeemHeadSub{font-size:12px;color:#94a3b8;margin-top:4px}
+._pRedeemBody{padding:16px 24px 20px}
+._pRedeemRow{display:flex;justify-content:space-between;padding:12px 14px;background:rgba(15,23,42,0.7);border-radius:12px;margin-bottom:8px;border:1px solid rgba(51,65,85,0.5);font-size:13px}
+._pRedeemRow span{color:#94a3b8}
+._pRedeemRow b{color:#fff}
+._pRedeemActions{display:flex;gap:10px;padding:0 24px 24px}
+._pRedeemBtn{flex:1;padding:14px;border-radius:14px;border:none;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit}
+._pRedeemBtn.cancel{background:rgba(51,65,85,0.8);color:#cbd5e1;border:1px solid #475569}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -2167,6 +2202,178 @@ window.buyPremiumDirect = async function(productId) {
   setInterval(addPointInfo, 5000);
 })();
 
+<script>
+/* POINTS_UI_V2 */
+(function(){
+  'use strict';
+  var _siteCache = null;
+  
+  function getSite() {
+    if (_siteCache) return Promise.resolve(_siteCache);
+    return fetch('/api/site', {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
+      _siteCache = d;
+      return d;
+    }).catch(function(){ return {}; });
+  }
+  
+  async function renderPointsCard() {
+    try {
+      var pv = document.getElementById('view-profile');
+      if (!pv) return;
+      
+      // Existing card ဖျက်
+      var old = pv.querySelector('._pCard');
+      if (old) old.remove();
+      var oldHow = pv.querySelector('._pHow');
+      if (oldHow) oldHow.remove();
+      
+      var site = await getSite();
+      var rate = parseFloat(site.pointsRedeemRate) || 10;
+      var pm = parseFloat(site.pointsMultiplier) || 1;
+      var pts = (typeof userData !== 'undefined' && userData && userData.points) || 0;
+      
+      var hundredVal = 100 * rate;
+      var canRedeem = pts >= 100;
+      var redeemable = Math.floor(pts * rate);
+      
+      var cardHtml = '<div class="_pCard">' +
+        '<div class="_pHead">' +
+          '<div class="_pIcon">⭐</div>' +
+          '<div>' +
+            '<div class="_pTitle">Points ' + (pm !== 1 ? '×' + pm + ' BOOST' : '') + '</div>' +
+            '<div class="_pSub">100 Points = ' + hundredVal.toLocaleString() + ' Ks</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="_pBig">' + pts.toLocaleString() + '</div>' +
+        '<div class="_pBigLabel">Total Points</div>' +
+        '<div class="_pInfo">' +
+          '<div class="_pInfoRow"><span>💰 လဲလို့ရမယ့် Balance</span><b>' + redeemable.toLocaleString() + ' Ks</b></div>' +
+        '</div>' +
+        '<button class="_pBtn" ' + (canRedeem ? '' : 'disabled') + ' onclick="window._openRedeem()">' +
+          (canRedeem ? '💰 Points လဲမယ်' : '❌ 100 Points မပြည့်သေးပါ') +
+        '</button>' +
+      '</div>';
+      
+      var howHtml = '<div class="_pHow">' +
+        '💡 <b>Point ဘယ်လိုရမလဲ?</b><br>' +
+        '• Order တင်တိုင်း Point ရမယ်<br>' +
+        '• 100 Points = ' + hundredVal.toLocaleString() + ' Ks ပြန်လဲလို့ရ<br>' +
+        '• Point များလေ VIP မြင့်လေ' +
+      '</div>';
+      
+      // Profile view ရဲ့ အပေါ်ဆုံးမှာ ထည့်
+      pv.insertAdjacentHTML('afterbegin', cardHtml + howHtml);
+      console.log('✅ Points card: ' + pts + ' pts');
+    } catch(e) {
+      console.log('renderPointsCard err:', e.message);
+    }
+  }
+  
+  window._openRedeem = async function() {
+    try {
+      var site = await getSite();
+      var rate = parseFloat(site.pointsRedeemRate) || 10;
+      var pts = (typeof userData !== 'undefined' && userData && userData.points) || 0;
+      if (pts < 100) { showToast('❌ 100 Points မပြည့်သေးပါ', 'error'); return; }
+      
+      var maxR = Math.floor(pts / 100) * 100;
+      var options = [];
+      [100, 200, 500, 1000, 5000].forEach(function(v){ if (v <= maxR) options.push(v); });
+      if (options.indexOf(maxR) === -1 && maxR > 0) options.push(maxR);
+      
+      var m = document.getElementById('_pRedeemM');
+      if (!m) {
+        m = document.createElement('div');
+        m.id = '_pRedeemM';
+        m.className = '_pRedeemM';
+        document.body.appendChild(m);
+      }
+      
+      var optsHtml = options.map(function(v){
+        return '<button style="width:100%;padding:12px;background:rgba(168,85,247,0.15);color:#a855f7;border:1px solid #a855f7;border-radius:12px;font-weight:bold;cursor:pointer;font-family:inherit;margin-bottom:8px" onclick="window._doRedeem(' + v + ')">⭐ ' + v + ' Points → ' + (v * rate).toLocaleString() + ' Ks</button>';
+      }).join('');
+      
+      m.innerHTML = '<div class="_pRedeemBox">' +
+        '<div class="_pRedeemHead">' +
+          '<div class="_pRedeemHeadIcon">⭐</div>' +
+          '<div class="_pRedeemHeadTitle">Points လဲမယ်</div>' +
+          '<div class="_pRedeemHeadSub">ဘယ်လောက် Points လဲမလဲ ရွေးပါ</div>' +
+        '</div>' +
+        '<div class="_pRedeemBody">' +
+          '<div class="_pRedeemRow"><span>⭐ လက်ရှိ Points</span><b style="color:#a855f7">' + pts.toLocaleString() + '</b></div>' +
+          '<div class="_pRedeemRow"><span>💰 Rate</span><b>100 Points = ' + (100*rate).toLocaleString() + ' Ks</b></div>' +
+        '</div>' +
+        '<div style="padding:0 24px 20px">' + optsHtml + '</div>' +
+        '<div class="_pRedeemActions">' +
+          '<button class="_pRedeemBtn cancel" onclick="document.getElementById(\'_pRedeemM\').classList.remove(\'show\')">Cancel</button>' +
+        '</div>' +
+      '</div>';
+      m.classList.add('show');
+    } catch(e) {
+      showToast('❌ ' + e.message, 'error');
+    }
+  };
+  
+  window._doRedeem = async function(pointsToRedeem) {
+    try {
+      if (!confirm('⭐ ' + pointsToRedeem + ' Points ကို Balance လဲမလား?')) return;
+      showToast('⏳ လဲနေတယ်...', 'info');
+      var d = await api('/api/redeem-points', { method: 'POST', body: JSON.stringify({ points: pointsToRedeem }) });
+      if (d && d.success) {
+        try { playSound('success'); haptic(100); } catch(e){}
+        if (typeof confetti === 'function') try { confetti(); } catch(e){}
+        showToast('✅ +' + d.amount.toLocaleString() + ' Ks ရပြီ!', 'success');
+        var m = document.getElementById('_pRedeemM');
+        if (m) m.classList.remove('show');
+        if (typeof loadMe === 'function') await loadMe();
+        setTimeout(renderPointsCard, 800);
+      } else {
+        showToast('❌ ' + ((d && d.error) || 'Error'), 'error');
+      }
+    } catch(e) {
+      showToast('❌ ' + e.message, 'error');
+    }
+  };
+  
+  function init() {
+    var pv = document.getElementById('view-profile');
+    if (pv) renderPointsCard();
+  }
+  setTimeout(init, 2000);
+  setTimeout(init, 5000);
+  setInterval(function(){
+    var pv = document.getElementById('view-profile');
+    if (pv && pv.style.display !== 'none') {
+      if (!pv.querySelector('._pCard')) renderPointsCard();
+    }
+  }, 3000);
+  
+  // switchTab hook - သေချာအောင် 2 နည်း
+  var _origSwitch = window.switchTab;
+  if (typeof _origSwitch === 'function') {
+    window.switchTab = function(name, btn) {
+      _origSwitch(name, btn);
+      if (name === 'profile') setTimeout(renderPointsCard, 400);
+    };
+  }
+  
+  // MutationObserver - profile ပေါ်လာတိုင်း render
+  if (window.MutationObserver) {
+    setTimeout(function(){
+      var pv = document.getElementById('view-profile');
+      if (pv) {
+        new MutationObserver(function(){
+          if (pv.style.display !== 'none' && !pv.querySelector('._pCard')) {
+            renderPointsCard();
+          }
+        }).observe(pv, {attributes: true, attributeFilter: ['style']});
+      }
+    }, 3000);
+  }
+  
+  console.log('✅ Points UI V2 loaded');
+})();
+</script>
 </script>
 </body>
 </html>
