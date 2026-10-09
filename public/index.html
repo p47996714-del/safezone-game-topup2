@@ -1,16 +1,155 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
-
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Safe Zone - Login</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI',sans-serif;-webkit-tap-highlight-color:transparent}
+body{background:linear-gradient(135deg,#0b1120,#1e293b);color:#fff;min-height:100vh;display:flex;align-items:center;justify-content:center;padding:20px}
+.login-box{background:rgba(30,41,59,0.9);padding:30px;border-radius:24px;width:100%;max-width:400px;border:1px solid #334155;box-shadow:0 20px 50px rgba(0,0,0,0.5);backdrop-filter:blur(10px)}
+.logo{text-align:center;margin-bottom:25px}
+.logo img{width:80px;height:80px;object-fit:contain;filter:drop-shadow(0 0 20px rgba(56,189,248,0.5))}
+.logo h1{font-size:22px;font-weight:bold;margin-top:10px;background:linear-gradient(135deg,#38bdf8,#a855f7);-webkit-background-clip:text;background-clip:text;color:transparent}
+.logo p{font-size:12px;color:#94a3b8;letter-spacing:2px;margin-top:4px}
+input[type="text"],input[type="password"],input[type="tel"]{width:100%;padding:14px 16px;margin-bottom:12px;border-radius:14px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px;font-family:inherit}
+input:focus{outline:none;border-color:#38bdf8;box-shadow:0 0 0 3px rgba(56,189,248,0.15)}
+button{width:100%;padding:15px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:14px;font-weight:bold;font-size:15px;cursor:pointer;margin-top:5px;transition:transform 0.2s}
+button:active{transform:scale(0.97)}
+.toggle-link{text-align:center;margin-top:15px;font-size:13px;color:#94a3b8}
+.toggle-link a{color:#38bdf8;text-decoration:none;font-weight:bold}
+.error{background:rgba(239,68,68,0.1);border:1px solid #ef4444;color:#fca5a5;padding:10px;border-radius:10px;font-size:13px;margin-bottom:12px;display:none;text-align:center}
+.terms-box{display:flex;align-items:flex-start;gap:10px;margin-bottom:15px;font-size:13px;color:#94a3b8}
+.terms-box input[type="checkbox"]{width:18px;height:18px;margin-top:2px;accent-color:#38bdf8;cursor:pointer}
+.terms-box a{color:#38bdf8;text-decoration:none}
+.register-fields{display:none}
+.login-fields{display:none}
+</style>
+</head>
+<body>
+<div class="login-box">
+  <div class="logo">
+    <img src="https://i.imgur.com/iRwIfqs.png" alt="logo">
+    <h1>SAFE ZONE</h1>
+    <p>GAME TOPUP</p>
+  </div>
+  <div id="errorBox" class="error"></div>
+  <input type="text" id="username" placeholder="Username" autocomplete="username">
+  <div id="registerFields" class="register-fields">
+    <input type="tel" id="phone" placeholder="Phone Number (09xxxxxxxxx)">
+    <input type="password" id="password" placeholder="Password" autocomplete="new-password">
+    <input type="password" id="confirmPassword" placeholder="Confirm Password">
+    <div class="terms-box">
+      <input type="checkbox" id="termsCheck">
+      <label for="termsCheck">ကျွန်ုပ် <a href="/terms.html" target="_blank">Terms & Privacy</a> ကို လက်ခံပါသည်</label>
+    </div>
+  </div>
+  <div id="loginFields" class="login-fields">
+    <input type="password" id="passwordLogin" placeholder="Password" autocomplete="current-password">
+  </div>
+  <button onclick="submitForm()" id="submitBtn">Register</button>
+  <div class="toggle-link">
+    <span id="toggleText">Account ရှိပြီးသားလား?</span> 
+    <a href="#" onclick="toggleMode(event)" id="toggleBtn">Login ပြန်ဝင်ပါ</a>
+  </div>
+</div>
 <script>
-window.addEventListener('error', function(e) {
-  console.log('Global Error Caught:', e.message);
-  var splash = document.getElementById('splash');
-  if (splash) {
-    splash.classList.add('hide');
-    setTimeout(function(){ if (splash.parentNode) splash.parentNode.removeChild(splash); }, 700);
+let isRegister = true;
+
+// Show register fields initially
+document.getElementById('registerFields').style.display = 'block';
+document.getElementById('loginFields').style.display = 'none';
+document.getElementById('submitBtn').textContent = 'Register';
+
+function toggleMode(e) {
+  if (e) e.preventDefault();
+  isRegister = !isRegister;
+  document.getElementById('registerFields').style.display = isRegister ? 'block' : 'none';
+  document.getElementById('loginFields').style.display = isRegister ? 'none' : 'block';
+  document.getElementById('submitBtn').textContent = isRegister ? 'Register' : 'Login';
+  document.getElementById('toggleText').textContent = isRegister ? 'Account ရှိပြီးသားလား?' : 'Account မရှိဘူးလား?';
+  document.getElementById('toggleBtn').textContent = isRegister ? 'Login ပြန်ဝင်ပါ' : 'Register လုပ်ပါ';
+  document.getElementById('errorBox').style.display = 'none';
+}
+
+function showError(msg) {
+  var e = document.getElementById('errorBox');
+  e.textContent = msg;
+  e.style.display = 'block';
+}
+
+async function submitForm() {
+  var username = document.getElementById('username').value.trim();
+  var btn = document.getElementById('submitBtn');
+  btn.textContent = '⏳ စောင့်ပါ...';
+  btn.disabled = true;
+
+  try {
+    if (isRegister) {
+      var phone = document.getElementById('phone').value.trim();
+      var password = document.getElementById('password').value.trim();
+      var confirmPassword = document.getElementById('confirmPassword').value.trim();
+      var termsCheck = document.getElementById('termsCheck').checked;
+
+      if (!username || !phone || !password || !confirmPassword) throw new Error('အကွက်အားလုံး ဖြည့်ပါ');
+      if (password !== confirmPassword) throw new Error('Password နှစ်ခု မတူညီပါ');
+      if (!termsCheck) throw new Error('Terms & Privacy ကို လက်ခံပါ');
+
+      var res = await fetch('/api/register', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, password: password, phone: phone })
+      });
+      var data = await res.json();
+      if (data.success) {
+        var loginRes = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username: username, password: password })
+        });
+        var loginData = await loginRes.json();
+        if (loginData.success) {
+          localStorage.setItem('token', loginData.token);
+          localStorage.setItem('username', loginData.username);
+          window.location.href = '/app.html';
+        } else {
+          showError('Register ပြီးပါပြီ။ Login ပြန်ဝင်ပါ။');
+          isRegister = false;
+          toggleMode(null);
+        }
+      } else {
+        showError(data.error || 'Register မအောင်မြင်ပါ');
+      }
+    } else {
+      var pw = document.getElementById('passwordLogin').value.trim();
+      if (!username || !pw) throw new Error('Username နဲ့ Password ဖြည့်ပါ');
+
+      var res2 = await fetch('/api/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username: username, password: pw })
+      });
+      var data2 = await res2.json();
+      if (data2.success) {
+        localStorage.setItem('token', data2.token);
+        localStorage.setItem('username', data2.username);
+        window.location.href = '/app.html';
+      } else {
+        showError(data2.error || 'Login မအောင်မြင်ပါ');
+      }
+    }
+  } catch (err) {
+    showError(err.message || 'Server နဲ့ ချိတ်ဆက်လို့ မရပါ');
+  } finally {
+    btn.textContent = isRegister ? 'Register' : 'Login';
+    btn.disabled = false;
   }
-});
+}
+
+// If already logged in, redirect to app
+if (localStorage.getItem('token')) {
+  window.location.href = '/app.html';
+}
 </script>
 </body>
 </html>
