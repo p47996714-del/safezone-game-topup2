@@ -364,7 +364,7 @@ body.theme-neon{background:linear-gradient(135deg,#1a0033,#2d004d,#0a0a2e)}
   <div id="paymentList"></div>
   <div class="deposit-box">
     <input id="dAmt" type="number" placeholder="ပမာဏ (Ks)">
-    <label class="deposit-label">📸 ငွေလွှဲ Receipt ပုံ (Optional)</label>
+    <label class="deposit-label" style="color:#ef4444;font-weight:bold">📸 ငွေလွှဲ Receipt ပုံ <span style="color:#fbbf24">(မဖြစ်မနေ ထည့်ပါ)</span></label>
     <input type="file" id="receiptInput" accept="image/*" class="deposit-file" onchange="previewReceipt(this)">
     <div id="receiptPreview" class="receipt-preview"><img id="receiptImg" alt="receipt"></div>
     <button onclick="deposit()" class="deposit-btn">Deposit တင်မယ်</button>
@@ -895,16 +895,19 @@ function openGameProducts(game){
   var gProducts = products.filter(function(p){ return p.game === game; });
   var userVip = userData.vip || 'Bronze';
   var vipDisc = {Bronze:0, Silver:2, Gold:5, Diamond:8}[userVip] || 0;
+  var isPremium = (game === 'App Premium');
   var html = '';
   for (var i = 0; i < gProducts.length; i++) {
     var p = gProducts[i];
     var final = Math.round(p.price * (1 - vipDisc/100));
     var disc = vipDisc > 0 ? '<div style="font-size:11px;color:#22c55e;margin-top:2px">-' + vipDisc + '%</div>' : '';
     var imgHtml = p.imgUrl ? '<img src="' + p.imgUrl + '" style="width:50px;height:50px;object-fit:cover;border-radius:10px">' : '<div style="font-size:26px">' + (p.image||'🎮') + '</div>';
-    html += '<div class="game-card" onclick="openModal(' + p.id + ')" style="cursor:pointer"><div style="padding:15px;text-align:center">' + imgHtml + '<div style="font-weight:bold;margin-top:5px;font-size:13px">' + p.name + '</div><div style="color:#22c55e;margin-top:5px;font-weight:bold">' + p.price.toLocaleString() + ' Ks</div>' + disc + '</div></div>';
+    var onclick = isPremium ? 'buyPremiumDirect(' + p.id + ')' : 'openModal(' + p.id + ')';
+    html += '<div class="game-card" onclick="' + onclick + '" style="cursor:pointer"><div style="padding:15px;text-align:center">' + imgHtml + '<div style="font-weight:bold;margin-top:5px;font-size:13px">' + p.name + '</div><div style="color:#22c55e;margin-top:5px;font-weight:bold">' + p.price.toLocaleString() + ' Ks</div>' + disc + '</div></div>';
   }
   var box = document.getElementById('productModalBox');
-  if (box) box.innerHTML = '<h3>' + game + ' - ရွေးပါ</h3><div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + html + '</div><button class="cancel" style="margin-top:15px" onclick="closeModal(\'productModal\')">Close</button>';
+  var hint = isPremium ? '<div style="background:rgba(168,85,247,0.1);border:1px solid #a855f7;padding:12px;border-radius:12px;margin-bottom:12px;font-size:12px;color:#c4b5fd">📱 App Premium — Player ID မလိုပါ။ Balance ဖြတ်ပြီး Admin ဆီ အလိုအလျောက် ပို့ပါမယ်။</div>' : '';
+  if (box) box.innerHTML = '<h3>' + game + ' - ရွေးပါ</h3>' + hint + '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + html + '</div><button class="cancel" style="margin-top:15px" onclick="closeModal(\'productModal\')">Close</button>';
   var m = document.getElementById('productModal');
   if (m) m.classList.add('show');
 }
@@ -982,31 +985,35 @@ async function deposit(){
   var receipt = null;
   var preview = document.getElementById('receiptPreview');
   var img = document.getElementById('receiptImg');
-  if (preview && preview.style.display !== 'none' && img && img.src && img.src.indexOf('data:') === 0) {
+  if (img && img.src && img.src.indexOf('data:') === 0) {
     receipt = img.src;
   }
   
-  // Receipt မထည့်ရင် သတိပေးခြင်း
+  // Receipt မထည့်ရင် လုံးဝ မတင်ခိုင်းပါ
   if (!receipt) {
-    if (!confirm('📸 Receipt ပုံ မထည့်ထားဘူး။ ဆက်တင်မလား?\n\n(Admin က စစ်ဆေးဖို့ ခက်နိုင်ပါတယ်)')) return;
+    try { playSound('error'); } catch(e){}
+    showToast('📸 ငွေလွှဲ Receipt ပုံ မဖြစ်မနေ ထည့်ပါ', 'error');
+    var ri = document.getElementById('receiptInput');
+    if (ri) { try { ri.focus(); ri.click(); } catch(e){} }
+    return;
   }
   
   showToast('⏳ တင်နေတယ်...', 'info');
   
   var d = await api('/api/deposit', {method:'POST', body: JSON.stringify({amount: amount, method: selectedPay, receipt: receipt})});
-  if (d.success) {
-    playSound('success'); haptic(60);
-    if (typeof confetti === 'function') confetti();
+  if (d && d.success) {
+    try { playSound('success'); haptic(60); } catch(e){}
+    if (typeof confetti === 'function') try { confetti(); } catch(e){}
     showToast('✅ ' + d.message, 'success');
     if (amtEl) amtEl.value = '';
-    var ri = document.getElementById('receiptInput');
-    if (ri) ri.value = '';
+    var ri2 = document.getElementById('receiptInput');
+    if (ri2) ri2.value = '';
     if (preview) preview.style.display = 'none';
     if (img) img.src = '';
-    loadDeposits();
+    if (typeof loadDeposits === 'function') loadDeposits();
   } else {
-    playSound('error');
-    showToast('❌ ' + d.error, 'error');
+    try { playSound('error'); } catch(e){}
+    showToast('❌ ' + ((d && d.error) || 'Error'), 'error');
   }
 }
 
@@ -1880,6 +1887,60 @@ setTimeout(function() { if (Notification.permission === 'granted') subscribeToPu
   }
 })();
 </script>
+
+async function buyPremiumDirect(productId) {
+  try {
+    var p = products.find(function(x){ return x.id === productId; });
+    if (!p) { showToast('❌ Product မတွေ့', 'error'); return; }
+    
+    var bal = (userData && userData.balance) || 0;
+    if (bal < p.price) {
+      try { playSound('error'); } catch(e){}
+      showToast('❌ Balance မလုံလောက်ပါ (' + p.price.toLocaleString() + ' Ks လိုတယ်)', 'error');
+      return;
+    }
+    
+    var ok = confirm('📱 App Premium ဝယ်မယ်\n\n🎁 ' + p.name + '\n💵 ' + p.price.toLocaleString() + ' Ks\n\nBalance ဖြတ်ပြီး Admin ဆီ ပို့မယ်\n\nOK နှိပ်ရင် အတည်ပြုမယ်');
+    if (!ok) return;
+    
+    showToast('⏳ Order တင်နေတယ်...', 'info');
+    
+    var d = await api('/api/order', { method: 'POST', body: JSON.stringify({ productId: p.id, playerId: 'App Premium Buy' }) });
+    if (!d || !d.success) {
+      try { playSound('error'); } catch(e){}
+      showToast('❌ ' + ((d && d.error) || 'Error'), 'error');
+      return;
+    }
+    
+    try { playSound('success'); haptic(100); } catch(e){}
+    if (typeof confetti === 'function') try { confetti(); } catch(e){}
+    showToast('✅ Balance ဖြတ်ပြီး — Admin ဆီ ပို့မယ်', 'success');
+    closeModal('productModal');
+    if (typeof loadMe === 'function') loadMe();
+    if (typeof loadOrders === 'function') loadOrders();
+    
+    // Chat ကို ဖွင့်ပြီး order info ထည့်
+    setTimeout(function(){
+      try {
+        var navBtns = document.querySelectorAll('.nav-item');
+        if (typeof switchTab === 'function' && navBtns[3]) switchTab('chat', navBtns[3]);
+        setTimeout(function(){
+          var inp = document.getElementById('chatInput');
+          if (inp) {
+            inp.value = '📱 App Premium ဝယ်ပြီးပါပြီ\n\n🎁 ' + p.name + '\n💵 ' + p.price.toLocaleString() + ' Ks\n🔖 Order: ' + d.orderId + '\n\nAdmin ရေ — ဆောင်ရွက်ပေးပါ 🙏';
+            inp.focus();
+          }
+          showToast('📩 ➤ နှိပ်ပြီး Admin ဆီ ပို့ပါ', 'info');
+        }, 600);
+      } catch(e){}
+    }, 400);
+  } catch(err) {
+    console.log('buyPremiumDirect err:', err.message);
+    showToast('❌ ' + err.message, 'error');
+  }
+}
+window.buyPremiumDirect = buyPremiumDirect;
+
 </script>
 <!-- EPIC_FEATURES_HTML -->
 <button class="_fab" id="_fabBtn" onclick="toggleFab()">⚡</button>
