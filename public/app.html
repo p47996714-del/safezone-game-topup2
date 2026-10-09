@@ -1015,6 +1015,60 @@ body._f20_rtl .bottom-nav { flex-direction: row-reverse; }
 }
 .inm-tip b { color: #fff; }
 </style>
+<style>
+/* FAB_CLEAN_FINAL */
+#safeFabBtn {
+  position: fixed !important;
+  bottom: 90px !important;
+  left: 15px !important;
+  width: 52px !important;
+  height: 52px !important;
+  border-radius: 50% !important;
+  background: linear-gradient(135deg, #38bdf8, #a855f7) !important;
+  border: none !important;
+  color: #fff !important;
+  font-size: 22px !important;
+  cursor: pointer !important;
+  z-index: 99998 !important;
+  box-shadow: 0 8px 25px rgba(168,85,247,0.5) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 0 !important;
+  font-family: inherit !important;
+  touch-action: none !important;
+}
+#safeFabBtn:active { transform: scale(0.9) !important; }
+
+#safeFabMenu {
+  position: fixed !important;
+  bottom: 155px !important;
+  left: 15px !important;
+  display: none !important;
+  flex-direction: column !important;
+  gap: 10px !important;
+  z-index: 99997 !important;
+}
+#safeFabMenu.safeShow { display: flex !important; }
+
+.safeFabItem {
+  width: 46px !important;
+  height: 46px !important;
+  border-radius: 50% !important;
+  background: rgba(30,41,59,0.98) !important;
+  border: 1px solid #38bdf8 !important;
+  color: #fff !important;
+  font-size: 18px !important;
+  cursor: pointer !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.5) !important;
+  padding: 0 !important;
+  font-family: inherit !important;
+}
+.safeFabItem:active { transform: scale(0.9) !important; }
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -4568,253 +4622,192 @@ window.buyPremiumDirect = async function(productId) {
   setTimeout(init, 4000);
 })();
 </script>
+
+
+<!-- SAFE_FAB_START -->
+<button id="safeFabBtn" type="button">⚡</button>
+<div id="safeFabMenu">
+  <button type="button" class="safeFabItem" data-tab="wallet">💰</button>
+  <button type="button" class="safeFabItem" data-tab="orders">📦</button>
+  <button type="button" class="safeFabItem" data-tab="chat">💬</button>
+  <button type="button" class="safeFabItem" data-tab="profile">👤</button>
+</div>
+<!-- SAFE_FAB_END -->
 <script>
-/* FIX_3_THINGS */
+/* SAFE_FAB_JS */
 (function(){
   'use strict';
   
-  // ============================================
-  // 1. Stickers + Voice Msg Cards ဖျောက်ခြင်း
-  // ============================================
-  function hideUnwantedCards() {
-    try {
-      var pv = document.getElementById('view-profile');
-      if (!pv) return;
-      
-      var grid = pv.querySelector('._f20_btnGrid');
-      if (!grid) return;
-      
-      var cards = grid.querySelectorAll('button');
-      for (var i = 0; i < cards.length; i++) {
-        var card = cards[i];
-        var text = (card.textContent || '').toLowerCase();
-        if (text.indexOf('sticker') > -1 || text.indexOf('voice') > -1) {
-          card.style.display = 'none';
-          card.setAttribute('data-hidden-fix', '1');
-        }
-      }
-    } catch(e) { console.log('hideUnwantedCards err:', e.message); }
-  }
+  var initialized = false;
   
-  // ============================================
-  // 2. FAB Draggable လုပ်ခြင်း
-  // ============================================
-  function makeDraggable() {
-    try {
-      var fab = document.getElementById('czFabBtn');
-      var menu = document.getElementById('czFabMenu');
-      if (!fab) return;
-      
-      // ရှိပြီးသား Setup ဆိုရင် ကျော်
-      if (fab.dataset.dragReady === '1') return;
-      fab.dataset.dragReady = '1';
-      
-      // Saved position ပြန်ယူ
-      var saved = localStorage.getItem('fabPosV2');
-      var pos = saved ? JSON.parse(saved) : { side: 'left', y: 90 };
-      
-      // CSS Apply
-      fab.style.position = 'fixed';
-      fab.style.bottom = 'auto';
-      fab.style.top = (window.innerHeight - pos.y - 52) + 'px';
-      if (pos.side === 'left') {
-        fab.style.left = '15px';
-        fab.style.right = 'auto';
-      } else {
-        fab.style.left = 'auto';
-        fab.style.right = '15px';
-      }
-      fab.style.transition = 'none';
-      fab.style.touchAction = 'none';
-      fab.style.cursor = 'grab';
-      
-      if (menu) {
-        menu.style.transition = 'none';
-        menu.style.touchAction = 'none';
-        updateMenuPosition(fab, menu);
-      }
-      
-      // Draggable Setup
-      var isDragging = false;
-      var startX = 0, startY = 0;
-      var fabStartX = 0, fabStartY = 0;
-      var moved = false;
-      
-      function getCoords(e) {
-        if (e.touches && e.touches.length) {
-          return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-        }
-        return { x: e.clientX, y: e.clientY };
-      }
-      
-      function onStart(e) {
-        var c = getCoords(e);
-        startX = c.x;
-        startY = c.y;
-        var rect = fab.getBoundingClientRect();
-        fabStartX = rect.left;
-        fabStartY = rect.top;
-        isDragging = true;
-        moved = false;
-        fab.style.transition = 'none';
-        fab.style.cursor = 'grabbing';
-        // Menu ပိတ်
-        if (menu) menu.style.display = 'none';
-      }
-      
-      function onMove(e) {
-        if (!isDragging) return;
-        e.preventDefault();
-        var c = getCoords(e);
-        var dx = c.x - startX;
-        var dy = c.y - startY;
-        
-        if (Math.abs(dx) > 5 || Math.abs(dy) > 5) moved = true;
-        
-        var newX = fabStartX + dx;
-        var newY = fabStartY + dy;
-        
-        // Screen bounds
-        var maxX = window.innerWidth - 52 - 10;
-        var maxY = window.innerHeight - 52 - 10;
-        var minX = 10;
-        var minY = 10;
-        
-        if (newX < minX) newX = minX;
-        if (newX > maxX) newX = maxX;
-        if (newY < minY) newY = minY;
-        if (newY > maxY) newY = maxY;
-        
-        fab.style.left = newX + 'px';
-        fab.style.top = newY + 'px';
-        fab.style.right = 'auto';
-        fab.style.bottom = 'auto';
-      }
-      
-      function onEnd(e) {
-        if (!isDragging) return;
-        isDragging = false;
-        fab.style.cursor = 'grab';
-        
-        if (!moved) {
-          // Tap - Menu ဖွင့်/ပိတ်
-          if (menu) {
-            var isOpen = menu.style.display === 'flex';
-            menu.style.display = isOpen ? 'none' : 'flex';
-            updateMenuPosition(fab, menu);
-          }
-          return;
-        }
-        
-        // Snap to nearest side
-        var rect = fab.getBoundingClientRect();
-        var centerX = rect.left + rect.width / 2;
-        var side = centerX < window.innerWidth / 2 ? 'left' : 'right';
-        
-        var newX = side === 'left' ? 15 : (window.innerWidth - 52 - 15);
-        var newY = rect.top;
-        
-        // Bounds re-check
-        if (newY < 10) newY = 10;
-        if (newY > window.innerHeight - 52 - 10) newY = window.innerHeight - 52 - 10;
-        
-        fab.style.transition = 'left 0.3s ease, top 0.3s ease';
-        fab.style.left = newX + 'px';
-        fab.style.top = newY + 'px';
-        fab.style.right = 'auto';
-        fab.style.bottom = 'auto';
-        
-        // Save position
-        var yFromBottom = window.innerHeight - newY - 52;
-        localStorage.setItem('fabPosV2', JSON.stringify({ side: side, y: yFromBottom }));
-        
-        updateMenuPosition(fab, menu);
-      }
-      
-      // Events
-      fab.addEventListener('touchstart', onStart, { passive: true });
-      fab.addEventListener('touchmove', onMove, { passive: false });
-      fab.addEventListener('touchend', onEnd);
-      fab.addEventListener('touchcancel', onEnd);
-      
-      fab.addEventListener('mousedown', onStart);
-      document.addEventListener('mousemove', onMove);
-      document.addEventListener('mouseup', onEnd);
-      
-      console.log('✅ FAB draggable ready');
-    } catch(e) { console.log('makeDraggable err:', e.message); }
-  }
-  
-  // ============================================
-  // Menu Position Update (FAB နဲ့ လိုက်လျောညီထွေ)
-  // ============================================
-  function updateMenuPosition(fab, menu) {
-    if (!fab || !menu) return;
-    var rect = fab.getBoundingClientRect();
-    var isRight = rect.left > window.innerWidth / 2;
+  function initFab() {
+    if (initialized) return;
+    var btn = document.getElementById('safeFabBtn');
+    var menu = document.getElementById('safeFabMenu');
+    if (!btn || !menu) return;
+    initialized = true;
     
-    menu.style.bottom = 'auto';
-    menu.style.top = 'auto';
-    
-    // Menu က FAB ရဲ့ အပေါ်မှာ
-    var menuHeight = 4 * 46 + 3 * 10; // 4 buttons + gaps
-    var menuTop = rect.top - menuHeight - 15;
-    
-    if (menuTop < 10) {
-      // အောက်မှာ ထား
-      menu.style.top = (rect.bottom + 15) + 'px';
-    } else {
-      menu.style.top = menuTop + 'px';
+    // === Saved position ===
+    var saved = localStorage.getItem('safeFabPos');
+    if (saved) {
+      try {
+        var p = JSON.parse(saved);
+        btn.style.bottom = 'auto';
+        btn.style.left = 'auto';
+        btn.style.top = p.top + 'px';
+        btn.style.right = p.right + 'px';
+      } catch(e){}
     }
     
-    if (isRight) {
+    // === Drag logic ===
+    var startX = 0, startY = 0;
+    var startTop = 0, startRight = 0;
+    var isDragging = false;
+    var moved = false;
+    
+    function getXY(e) {
+      if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
+      return { x: e.clientX, y: e.clientY };
+    }
+    
+    function onDown(e) {
+      var c = getXY(e);
+      var rect = btn.getBoundingClientRect();
+      startX = c.x;
+      startY = c.y;
+      startTop = rect.top;
+      startRight = window.innerWidth - rect.right;
+      isDragging = true;
+      moved = false;
+      btn.style.transition = 'none';
+    }
+    
+    function onMove(e) {
+      if (!isDragging) return;
+      var c = getXY(e);
+      var dx = c.x - startX;
+      var dy = c.y - startY;
+      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
+        moved = true;
+        if (e.cancelable) e.preventDefault();
+      }
+      
+      var newTop = startTop + dy;
+      var newRight = startRight - dx;
+      
+      // Bounds
+      if (newTop < 10) newTop = 10;
+      if (newTop > window.innerHeight - 62) newTop = window.innerHeight - 62;
+      if (newRight < 10) newRight = 10;
+      if (newRight > window.innerWidth - 62) newRight = window.innerWidth - 62;
+      
+      btn.style.bottom = 'auto';
+      btn.style.left = 'auto';
+      btn.style.top = newTop + 'px';
+      btn.style.right = newRight + 'px';
+      
+      // Menu ကို FAB အနီး ထား
+      menu.style.top = (newTop - 4*46 - 3*10 - 15) + 'px';
       menu.style.left = 'auto';
-      menu.style.right = '15px';
-    } else {
-      menu.style.left = '15px';
-      menu.style.right = 'auto';
+      menu.style.bottom = 'auto';
+      menu.style.right = (newRight + 3) + 'px';
     }
-  }
-  
-  // ============================================
-  // INIT
-  // ============================================
-  function init() {
-    hideUnwantedCards();
-    makeDraggable();
+    
+    function onUp() {
+      if (!isDragging) return;
+      isDragging = false;
+      btn.style.transition = '';
+      
+      if (!moved) {
+        // Tap - Menu toggle
+        var isOpen = menu.classList.contains('safeShow');
+        if (isOpen) {
+          menu.classList.remove('safeShow');
+        } else {
+          // Position menu near FAB
+          var rect = btn.getBoundingClientRect();
+          var menuTop = rect.top - 4*46 - 3*10 - 15;
+          if (menuTop < 10) menuTop = rect.bottom + 15;
+          menu.style.top = menuTop + 'px';
+          menu.style.left = 'auto';
+          menu.style.bottom = 'auto';
+          menu.style.right = (window.innerWidth - rect.right + 3) + 'px';
+          menu.classList.add('safeShow');
+        }
+        return;
+      }
+      
+      // Snap save
+      var rect = btn.getBoundingClientRect();
+      var newTop = rect.top;
+      var newRight = window.innerWidth - rect.right;
+      localStorage.setItem('safeFabPos', JSON.stringify({ top: newTop, right: newRight }));
+    }
+    
+    btn.addEventListener('touchstart', onDown, { passive: true });
+    btn.addEventListener('touchmove', onMove, { passive: false });
+    btn.addEventListener('touchend', onUp);
+    btn.addEventListener('touchcancel', onUp);
+    btn.addEventListener('mousedown', onDown);
+    document.addEventListener('mousemove', onMove);
+    document.addEventListener('mouseup', onUp);
+    
+    // Menu items
+    var items = menu.querySelectorAll('.safeFabItem');
+    for (var i = 0; i < items.length; i++) {
+      items[i].addEventListener('click', function(e) {
+        e.stopPropagation();
+        var tab = this.getAttribute('data-tab');
+        menu.classList.remove('safeShow');
+        try {
+          var idxMap = { home: 0, wallet: 1, orders: 2, chat: 3, profile: 4 };
+          var navBtns = document.querySelectorAll('.nav-item');
+          if (typeof switchTab === 'function' && navBtns[idxMap[tab]]) {
+            switchTab(tab, navBtns[idxMap[tab]]);
+          }
+        } catch(err) {}
+      });
+    }
+    
+    // Click outside - close menu
+    document.addEventListener('click', function(e) {
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.remove('safeShow');
+      }
+    });
+    
+    console.log('✅ Safe FAB ready');
   }
   
   if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', init);
+    document.addEventListener('DOMContentLoaded', initFab);
   } else {
-    setTimeout(init, 100);
+    setTimeout(initFab, 100);
   }
-  setTimeout(init, 1500);
-  setTimeout(init, 3500);
-  setTimeout(init, 6000);
-  
-  // Profile Tab ပြောင်းတိုင်း ပြန် run
-  var _origTab = window.switchTab;
-  if (typeof _origTab === 'function') {
-    window.switchTab = function(n, b) {
-      _origTab(n, b);
-      if (n === 'profile') setTimeout(init, 300);
-    };
-  }
-  
-  // Window resize ဖြစ်ရင် FAB နေရာ ပြန် set
-  window.addEventListener('resize', function() {
-    var fab = document.getElementById('czFabBtn');
-    var menu = document.getElementById('czFabMenu');
-    if (fab) {
-      var rect = fab.getBoundingClientRect();
-      if (rect.left < 0 || rect.left > window.innerWidth) {
-        fab.style.left = '15px';
-        fab.style.top = '70px';
+  setTimeout(initFab, 1000);
+  setTimeout(initFab, 2500);
+})();
+</script>
+<script>
+/* HIDE_STICKERS_VOICE */
+(function(){
+  function hideCards() {
+    try {
+      var pv = document.getElementById('view-profile');
+      if (!pv) return;
+      var cards = pv.querySelectorAll('button');
+      for (var i = 0; i < cards.length; i++) {
+        var t = (cards[i].textContent || '').toLowerCase();
+        if (t.indexOf('sticker') > -1 || t.indexOf('voice') > -1) {
+          cards[i].style.display = 'none';
+        }
       }
-      updateMenuPosition(fab, menu);
-    }
-  });
+    } catch(e){}
+  }
+  setTimeout(hideCards, 1500);
+  setTimeout(hideCards, 3000);
+  setTimeout(hideCards, 5000);
+  setInterval(hideCards, 3000);
 })();
 </script>
 </body>
