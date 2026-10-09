@@ -62,35 +62,11 @@ function applyTheme() {
   var name = localStorage.getItem('themeColor') || 'Blue';
   setThemeColor(name);
 }
-function setThemeColor(name) {
-  var c = THEME_COLORS.find(x => x.name === name);
-  if (!c) return;
-  document.documentElement.style.setProperty('--accent1', c.primary);
-  document.documentElement.style.setProperty('--accent2', c.secondary);
-  localStorage.setItem('themeColor', name);
-  var dots = document.querySelectorAll('.theme-color-dot');
-  dots.forEach(dot => dot.classList.remove('active'));
-  var activeDot = document.querySelector('.theme-color-dot[title="' + name + '"]');
-  if (activeDot) activeDot.classList.add('active');
-  showToast('✅ ' + name + ' Theme', 'success');
-  haptic(30);
-}
-function populateThemeColors() {
-  var cur = localStorage.getItem('themeColor') || 'Blue';
-  var row = document.getElementById('themeColorRow');
-  if (!row) return;
-  row.innerHTML = THEME_COLORS.map(c => 
-    '<div class="theme-color-dot ' + (cur===c.name?'active':'') + '" style="background:linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')" onclick="setThemeColor(\'' + c.name + '\')" title="' + c.name + '"></div>'
-  ).join('');
-}
+
+
 // Patch openSettings to populate colors
 var _origOpenSettings = window.openSettings;
-window.openSettings = function() {
-  if (_origOpenSettings) _origOpenSettings();
-  populateThemeColors();
-  var m = document.getElementById('settingsModal');
-  if (m) m.classList.add('show');
-};
+
 applyTheme();
 
 
@@ -105,46 +81,14 @@ var _origDoSpin = window.doSpin;
 };
 
 
-var THEME_COLORS = [
-  {name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},
-  {name:'Green', primary:'#10b981', secondary:'#3b82f6'},
-  {name:'Red', primary:'#ef4444', secondary:'#f59e0b'},
-  {name:'Pink', primary:'#ec4899', secondary:'#a855f7'},
-  {name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},
-  {name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}
-];
+
 function applyTheme() {
   var name = localStorage.getItem('themeColor') || 'Blue';
   setThemeColor(name);
 }
-function setThemeColor(name) {
-  var c = THEME_COLORS.find(function(x){ return x.name === name; });
-  if (!c) return;
-  localStorage.setItem('themeColor', name);
-  document.documentElement.style.setProperty('--accent1', c.primary);
-  document.documentElement.style.setProperty('--accent2', c.secondary);
-  var dots = document.querySelectorAll('.theme-color-dot');
-  dots.forEach(function(dot){ dot.classList.remove('active'); });
-  var activeDot = document.querySelector('.theme-color-dot[data-name="' + name + '"]');
-  if (activeDot) activeDot.classList.add('active');
-}
-function populateThemeColors() {
-  var cur = localStorage.getItem('themeColor') || 'Blue';
-  var row = document.getElementById('themeColorRow');
-  if (!row) { console.log('themeColorRow not found'); return; }
-  row.innerHTML = THEME_COLORS.map(function(c){
-    return '<div class="theme-color-dot ' + (cur===c.name?'active':'') + '" data-name="' + c.name + '" style="background:linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')" onclick="setThemeColor(\'' + c.name + '\')" title="' + c.name + '"></div>';
-  }).join('');
-  console.log('Theme colors populated: ' + THEME_COLORS.length);
-}
-window.openSettings = function() {
-  var m = document.getElementById('settingsModal');
-  if (m) {
-    m.classList.add('show');
-    populateThemeColors();
-    updateToggles();
-  }
-};
+
+
+
 applyTheme();
 
 
@@ -190,44 +134,12 @@ var _spinCanPlay = true;
 
 
 // 1. Settings ဖွင့်တဲ့ Function ကို ပြန်ရေးခြင်း
-window.openSettings = function() {
-  var m = document.getElementById('settingsModal');
-  if (m) {
-    m.classList.add('show');
-    if (typeof populateThemeColors === 'function') populateThemeColors();
-    if (typeof updateToggles === 'function') updateToggles();
-  }
-};
+
 
 // 2. Theme Color ခလုတ်တွေ ဖန်တီးခြင်း
-var THEME_COLORS = [
-  {name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},
-  {name:'Green', primary:'#10b981', secondary:'#3b82f6'},
-  {name:'Red', primary:'#ef4444', secondary:'#f59e0b'},
-  {name:'Pink', primary:'#ec4899', secondary:'#a855f7'},
-  {name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},
-  {name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}
-];
-function setThemeColor(name) {
-  var c = THEME_COLORS.find(function(x){ return x.name === name; });
-  if (!c) return;
-  localStorage.setItem('themeColor', name);
-  document.documentElement.style.setProperty('--accent1', c.primary);
-  document.documentElement.style.setProperty('--accent2', c.secondary);
-  var dots = document.querySelectorAll('.theme-color-dot');
-  dots.forEach(function(dot){ dot.classList.remove('active'); });
-  var activeDot = document.querySelector('.theme-color-dot[data-name="' + name + '"]');
-  if (activeDot) activeDot.classList.add('active');
-  if (typeof showToast === 'function') showToast('✅ ' + name + ' Theme', 'success');
-}
-function populateThemeColors() {
-  var cur = localStorage.getItem('themeColor') || 'Blue';
-  var row = document.getElementById('themeColorRow');
-  if (!row) return;
-  row.innerHTML = THEME_COLORS.map(function(c){
-    return '<div class="theme-color-dot ' + (cur===c.name?'active':'') + '" data-name="' + c.name + '" style="background:linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')" onclick="setThemeColor(\'' + c.name + '\')" title="' + c.name + '"></div>';
-  }).join('');
-}
+
+
+
 // စတင်ဖွင့်တာနဲ့ Theme Color ကို Apply လုပ်ခြင်း
 (function(){ 
   var name = localStorage.getItem('themeColor') || 'Blue'; 
@@ -285,6 +197,105 @@ window.doSpin = async function() {
   btn.onclick = function(){ closeModal('spinModal'); _spinCanPlay = true; };
 };
 var _spinCanPlay = true;
+
+
+// === SETTINGS & THEME COLOR FIX ===
+var THEME_COLORS = [
+  {name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},
+  {name:'Green', primary:'#10b981', secondary:'#3b82f6'},
+  {name:'Red', primary:'#ef4444', secondary:'#f59e0b'},
+  {name:'Pink', primary:'#ec4899', secondary:'#a855f7'},
+  {name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},
+  {name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}
+];
+function setThemeColor(name) {
+  var c = THEME_COLORS.find(function(x){ return x.name === name; });
+  if (!c) return;
+  localStorage.setItem('themeColor', name);
+  var dots = document.querySelectorAll('.theme-color-dot');
+  dots.forEach(function(dot){ dot.classList.remove('active'); });
+  var activeDot = document.querySelector('.theme-color-dot[data-name="' + name + '"]');
+  if (activeDot) activeDot.classList.add('active');
+  if (typeof showToast === 'function') showToast('✅ ' + name + ' Theme', 'success');
+}
+function populateThemeColors() {
+  var cur = localStorage.getItem('themeColor') || 'Blue';
+  var row = document.getElementById('themeColorRow');
+  if (!row) { console.log('themeColorRow NOT FOUND'); return; }
+  row.innerHTML = THEME_COLORS.map(function(c){
+    return '<div class="theme-color-dot ' + (cur===c.name?'active':'') + '" data-name="' + c.name + '" style="background:linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')" onclick="setThemeColor(\'' + c.name + '\')" title="' + c.name + '"></div>';
+  }).join('');
+  console.log('Theme colors populated: ' + THEME_COLORS.length);
+}
+window.openSettings = function() {
+  var m = document.getElementById('settingsModal');
+  if (m) {
+    m.classList.add('show');
+    populateThemeColors();
+    if (typeof updateToggles === 'function') updateToggles();
+  }
+};
+
+// === TAB SWITCH - CLOSE MODALS ===
+var _origSwitchTab2 = window.switchTab;
+window.switchTab = function(name, btn) {
+  document.querySelectorAll('.modal').forEach(function(m){ m.classList.remove('show'); });
+  if (_origSwitchTab2) _origSwitchTab2(name, btn);
+};
+
+// === MY STATS - GO TO ANALYTICS ===
+window.openStats = function() { 
+  window.switchTab('analytics', document.querySelector('.nav-item')); 
+};
+
+// === SPIN BALANCE UPDATE ===
+window.doSpin = async function() {
+  if (typeof _spinCanPlay !== 'undefined' && !_spinCanPlay) return;
+  var btn = document.getElementById('spinBtn');
+  if (!btn) return;
+  btn.textContent = '⏳ လှည့်နေတယ်...';
+  _spinCanPlay = false;
+  var r = Math.floor(Math.random() * 8);
+  var rotations = 360 * 5 + (r * 45);
+  var wheel = document.getElementById('spinWheel');
+  if (wheel) wheel.style.transform = 'rotate(' + rotations + 'deg)';
+  await new Promise(function(res){ setTimeout(res, 4200); });
+  
+  var d = await api('/api/spin', {method:'POST'});
+  var resEl = document.getElementById('spinResult');
+  
+  if (d.success) {
+    if (d.reward > 0) {
+      if (typeof playSound === 'function') playSound('success');
+      if (typeof haptic === 'function') haptic(100);
+      if (resEl) resEl.innerHTML = '<b style="color:#22c55e;font-size:18px">🎉 +' + d.reward.toLocaleString() + ' Ks!</b>';
+    } else {
+      if (resEl) resEl.innerHTML = '<b style="color:#ef4444">😢 မရပါ</b>';
+    }
+    // Force balance update
+    if (typeof d.balance !== 'undefined') {
+      var balEl = document.getElementById('bal');
+      if (balEl) balEl.innerHTML = d.balance.toLocaleString() + ' <span>Ks</span>';
+      var pBalEl = document.getElementById('pBal');
+      if (pBalEl) pBalEl.textContent = d.balance.toLocaleString() + ' Ks';
+    }
+    if (typeof loadMe === 'function') loadMe();
+  } else {
+    if (resEl) resEl.innerHTML = '<b style="color:#ef4444">' + (d.error || 'Error') + '</b>';
+  }
+  btn.textContent = 'Close';
+  btn.onclick = function(){ 
+    var m = document.getElementById('spinModal'); if (m) m.classList.remove('show'); 
+    _spinCanPlay = true; 
+  };
+};
+var _spinCanPlay = true;
+
+// === INIT THEME ===
+(function(){ 
+  var name = localStorage.getItem('themeColor') || 'Blue'; 
+  setThemeColor(name); 
+})();
 
 </script>
 <meta charset="UTF-8">
@@ -354,10 +365,10 @@ body.light .bottom-nav{background:rgba(255,255,255,0.95);border-color:#e2e8f0}
 .nav-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;color:#64748b;cursor:pointer;font-size:10px;background:none;border:none;padding:5px;font-family:inherit}
 .nav-item.active{color:#38bdf8}
 .nav-item .nav-icon{font-size:22px}
-.modal{position:fixed;inset:0;background:rgba(0,0,0,0.85);display:none;align-items:flex-end;justify-content:center;z-index:200}
-.modal.show{display:flex}
-.modal-box{background:#1e293b;padding:25px;border-radius:24px 24px 0 0;width:100%;max-width:500px;animation:slideUpModal 0.3s;max-height:85vh;overflow-y:auto;border-top:1px solid #334155}
-body.light .modal-box{background:#fff;color:#0f172a}
+
+
+
+body.light 
 @keyframes slideUpModal{from{transform:translateY(100%)}to{transform:translateY(0)}}
 .modal-box h3{margin-bottom:15px;color:#38bdf8;font-size:16px}
 .modal-box input{width:100%;padding:12px;margin-bottom:10px;border-radius:12px;border:1px solid #334155;background:#0f172a;color:#fff;font-size:14px;font-family:inherit}
@@ -442,9 +453,9 @@ body.light .faq-item{background:#fff}
 .splash-sub{margin-top:8px;font-size:12px;color:#94a3b8;letter-spacing:3px}
 
 
-.theme-color-row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
-.theme-color-dot{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:0.2s}
-.theme-color-dot.active{border-color:#fff;transform:scale(1.1)}
+
+
+
 
 
 .spin-wheel-container{position:relative;width:240px;height:240px;margin:20px auto}
@@ -456,20 +467,43 @@ body.light .faq-item{background:#fff}
 .spin-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;background:#0f172a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;z-index:2;border:3px solid #38bdf8}
 
 
-.theme-color-row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;min-height:36px}
-.theme-color-dot{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:0.2s}
-.theme-color-dot.active{border-color:#fff;transform:scale(1.1)}
+
+
+
 
 
 /* Modal တွေကို ပုံမှန်အတိုင်း ပြန်ထားခြင်း */
-.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: flex-end; justify-content: center; z-index: 9999; }
-.modal.show { display: flex !important; }
-.modal-box { background: #1e293b; padding: 25px; border-radius: 24px 24px 0 0; width: 100%; max-width: 500px; animation: slideUpModal 0.3s; max-height: 85vh; overflow-y: auto; border-top: 1px solid #334155; }
+
+
+
 @keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
 /* Theme Color dots */
-.theme-color-row { display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; min-height: 36px; }
+
+
+
+
+
+/* === MODAL FIX === */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none !important; align-items: flex-end; justify-content: center; z-index: 9999; }
+.modal.show { display: flex !important; }
+.modal-box { background: #1e293b; padding: 25px; border-radius: 24px 24px 0 0; width: 100%; max-width: 500px; animation: slideUpModal 0.3s; max-height: 85vh; overflow-y: auto; border-top: 1px solid #334155; }
+body.light .modal-box { background: #fff; color: #0f172a; }
+@keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
+.modal-box h3 { margin-bottom: 15px; color: #38bdf8; font-size: 16px; }
+.modal-box button { width: 100%; padding: 13px; background: linear-gradient(135deg,#38bdf8,#a855f7); color: #fff; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 14px; margin-bottom: 8px; }
+.modal-box button.cancel { background: #334155; }
+
+/* === THEME COLOR FIX === */
+.theme-color-row { display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; min-height: 40px; }
 .theme-color-dot { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: 0.2s; }
 .theme-color-dot.active { border-color: #fff; transform: scale(1.1); }
+
+/* === SETTINGS TOGGLE FIX === */
+.settings-toggle { display: flex; justify-content: space-between; align-items: center; padding: 12px; background: rgba(15,23,42,0.6); border-radius: 12px; margin-bottom: 8px; }
+.toggle-switch { position: relative; width: 46px; height: 26px; background: #334155; border-radius: 13px; cursor: pointer; transition: 0.3s; }
+.toggle-switch.on { background: #22c55e; }
+.toggle-switch::after { content: ''; position: absolute; width: 20px; height: 20px; background: #fff; border-radius: 50%; top: 3px; left: 3px; transition: 0.3s; }
+.toggle-switch.on::after { left: 23px; }
 
 </style>
 <link rel="manifest" href="/manifest.json">
@@ -578,19 +612,13 @@ body.light .faq-item{background:#fff}
 <div class="modal" id="leaderModal"><div class="modal-box"><h3>🏆 Top Spenders</h3><div id="leaderBox"></div><button class="cancel" onclick="closeModal('leaderModal')">Close</button></div></div>
 <div class="modal" id="couponModal"><div class="modal-box"><h3>🎟️ Coupon Redeem</h3><input id="couponCode" placeholder="Coupon Code" style="text-transform:uppercase;text-align:center;font-size:18px;letter-spacing:2px"><button onclick="redeemCoupon()">✅ Redeem</button><button class="cancel" onclick="closeModal('couponModal')">Close</button></div></div>
 <div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div></div>
-  <div class="settings-toggle"><div><b style="font-size:14px">📳 Haptic</b><div style="font-size:11px;color:#94a3b8">တုန်ခါမှု</div></div><div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div></div>
-  <div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px">
-    <b style="font-size:14px">🎨 Theme Color</b>
-    <div class="theme-color-row" id="themeColorRow"></div>
-  </div>
-  <button onclick="shareApp()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">📤 Share App</button>
+  
+  
+  
   <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
 </div></div>
   <div class="settings-toggle"><div><b style="font-size:14px">📳 Haptic</b></div><div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div></div>
-<div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px">
-  <b style="font-size:14px">🎨 Theme Color</b>
-  <div class="theme-color-row" id="themeColorRow"></div>
-</div>
+
 
   <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
 </div></div>
@@ -876,14 +904,18 @@ async function logout(){ if (!confirm('Logout လုပ်မှာသေချ�
 
 <button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
 <div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div></div>
-  <div class="settings-toggle"><div><b style="font-size:14px">📳 Haptic</b><div style="font-size:11px;color:#94a3b8">တုန်ခါမှု</div></div><div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div></div>
-  <div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px">
-    <b style="font-size:14px">🎨 Theme Color</b>
-    <div class="theme-color-row" id="themeColorRow"></div>
-  </div>
-  <button onclick="shareApp()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">📤 Share App</button>
+  
+  
+  
   <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
 </div></div>
+
+
+    
+    
+    <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
+  </div>
+</div>
 
 <div class="modal" id="settingsModal">
   <div class="modal-box">
