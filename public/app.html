@@ -433,6 +433,244 @@ body.theme-neon{background:linear-gradient(135deg,#1a0033,#2d004d,#0a0a2e)}
 ._socialHandle{font-size:10px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 ._socialCopyBtn{background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:bold;cursor:pointer;font-family:inherit}
 </style>
+<style>
+/* EPIC_FEATURES_15_CSS */
+
+/* 5. Logo Zoom Animation */
+@keyframes _epicLogoZoom {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
+}
+.splash-logo img { animation: _epicLogoZoom 1s cubic-bezier(0.34,1.56,0.64,1) !important; }
+
+/* 1. Welcome Animation */
+._epicWelcome {
+  position: fixed; inset: 0; z-index: 9999998;
+  background: radial-gradient(circle at 50% 50%, #1e293b, #0b1120);
+  display: none; align-items: center; justify-content: center;
+  flex-direction: column; padding: 30px;
+}
+._epicWelcome.show { display: flex; animation: _epicFadeIn 0.5s ease; }
+@keyframes _epicFadeIn { from { opacity: 0; } to { opacity: 1; } }
+._epicWelcomeIcon {
+  font-size: 90px; margin-bottom: 20px;
+  animation: _epicBounce 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 30px rgba(56,189,248,0.6));
+}
+@keyframes _epicBounce {
+  0%,100% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-15px) scale(1.1); }
+}
+._epicWelcomeTitle {
+  font-size: 26px; font-weight: bold;
+  background: linear-gradient(135deg,#38bdf8,#a855f7,#ec4899);
+  background-size: 200% 200%;
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent; margin-bottom: 10px;
+  animation: _epicGrad 2s ease infinite;
+  text-align: center;
+}
+._epicWelcomeSub {
+  font-size: 14px; color: #94a3b8; margin-bottom: 30px; text-align: center;
+  line-height: 1.7; max-width: 320px;
+}
+._epicWelcomeBtn {
+  padding: 14px 40px;
+  background: linear-gradient(135deg,#38bdf8,#a855f7);
+  color: #fff; border: none; border-radius: 30px;
+  font-weight: bold; font-size: 15px; cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 10px 30px rgba(56,189,248,0.4);
+  animation: _epicBtnPulse 2s ease-in-out infinite;
+}
+@keyframes _epicBtnPulse {
+  0%,100% { box-shadow: 0 10px 30px rgba(56,189,248,0.4); }
+  50% { box-shadow: 0 10px 40px rgba(168,85,247,0.7); }
+}
+
+/* 2. Onboarding Tour */
+._epicTour {
+  position: fixed; inset: 0; z-index: 9999997;
+  background: rgba(0,0,0,0.9); display: none;
+  align-items: center; justify-content: center; padding: 20px;
+}
+._epicTour.show { display: flex; animation: _epicFadeIn 0.4s; }
+._epicTourBox {
+  background: linear-gradient(135deg,#1e293b,#0f172a);
+  border-radius: 24px; padding: 28px; max-width: 360px;
+  width: 100%; text-align: center;
+  border: 1px solid rgba(56,189,248,0.3);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.8);
+}
+._epicTourIcon { font-size: 60px; margin-bottom: 15px; }
+._epicTourTitle {
+  font-size: 18px; font-weight: bold; color: #38bdf8;
+  margin-bottom: 10px;
+}
+._epicTourText {
+  color: #cbd5e1; font-size: 14px; line-height: 1.7;
+  margin-bottom: 20px;
+}
+._epicTourDots {
+  display: flex; justify-content: center; gap: 6px;
+  margin-bottom: 20px;
+}
+._epicTourDot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: #334155; transition: 0.3s;
+}
+._epicTourDot.active {
+  background: #38bdf8; width: 24px; border-radius: 4px;
+}
+._epicTourBtns { display: flex; gap: 10px; }
+._epicTourBtn {
+  flex: 1; padding: 12px; border-radius: 12px;
+  border: none; font-weight: bold; cursor: pointer;
+  font-family: inherit; font-size: 14px;
+}
+._epicTourBtn.skip { background: #334155; color: #fff; }
+._epicTourBtn.next {
+  background: linear-gradient(135deg,#38bdf8,#a855f7); color: #fff;
+}
+
+/* 15. Confetti */
+@keyframes _epicConfFall {
+  to { transform: translateY(100vh) rotate(720deg); opacity: 0; }
+}
+._epicConf {
+  position: fixed; width: 10px; height: 10px;
+  z-index: 10001; pointer-events: none;
+  animation: _epicConfFall 3s linear forwards;
+}
+
+/* 16. Particle Background */
+#_epicParticles {
+  position: fixed; inset: 0; pointer-events: none;
+  z-index: 0; overflow: hidden; display: none;
+}
+#_epicParticles.show { display: block; }
+._epicParticle {
+  position: absolute; border-radius: 50%;
+  animation: _epicFloat linear infinite;
+}
+@keyframes _epicFloat {
+  0% { transform: translateY(100vh) scale(0); opacity: 0; }
+  10% { opacity: 0.5; }
+  100% { transform: translateY(-100px) scale(1.2); opacity: 0; }
+}
+
+/* 17. Neon Glow */
+._epicNeon {
+  box-shadow: 0 0 10px rgba(56,189,248,0.4), 0 0 20px rgba(56,189,248,0.2) !important;
+  transition: box-shadow 0.3s;
+}
+._epicNeon:active {
+  box-shadow: 0 0 20px rgba(56,189,248,0.8), 0 0 40px rgba(56,189,248,0.4) !important;
+}
+.quick-card, .game-card, .balance-card {
+  transition: box-shadow 0.3s, transform 0.3s;
+}
+.quick-card:hover, .game-card:hover {
+  box-shadow: 0 0 25px rgba(56,189,248,0.3);
+}
+
+/* 18. Glassmorphism */
+._epicGlass {
+  background: rgba(30,41,59,0.5) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(148,163,184,0.2) !important;
+}
+.quick-card, .game-card, .section, .modal-box {
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+/* 19. Animated Gradient */
+@keyframes _epicGrad {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+.balance-card {
+  background: linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899,#3b82f6) !important;
+  background-size: 300% 300% !important;
+  animation: _epicGrad 8s ease infinite;
+}
+
+/* 21. Typing Animation */
+._epicTyping {
+  display: inline-flex; gap: 4px;
+  padding: 10px 16px; background: #1e293b;
+  border-radius: 16px; margin: 5px 0;
+}
+._epicTyping span {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: #94a3b8;
+  animation: _epicTypeBounce 1.4s infinite;
+}
+._epicTyping span:nth-child(2) { animation-delay: 0.2s; }
+._epicTyping span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes _epicTypeBounce {
+  0%,60%,100% { transform: translateY(0); opacity: 0.4; }
+  30% { transform: translateY(-8px); opacity: 1; }
+}
+
+/* 22. Smooth Page Slide */
+@keyframes _epicPageIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+[id^="view-"] { animation: _epicPageIn 0.35s ease; }
+
+/* 27. Trust Score */
+._epicTrust {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px; background: rgba(15,23,42,0.6);
+  border-radius: 14px; border: 1px solid #334155;
+  margin: 10px 0;
+}
+._epicTrustCircle {
+  width: 60px; height: 60px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; font-weight: bold; color: #fff;
+  box-shadow: 0 0 20px rgba(34,197,94,0.5);
+  flex-shrink: 0;
+}
+
+/* 28. Trust Badges */
+._epicTrustBadges {
+  display: flex; flex-wrap: wrap; gap: 8px;
+  margin: 10px 0;
+}
+._epicTrustBadge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 6px 12px; background: rgba(56,189,248,0.1);
+  border: 1px solid rgba(56,189,248,0.3);
+  border-radius: 20px; font-size: 11px; font-weight: bold;
+  color: #38bdf8;
+}
+
+/* 29. Total Stats */
+._epicStats {
+  display: grid; grid-template-columns: 1fr 1fr 1fr;
+  gap: 10px; margin: 15px;
+}
+._epicStatCard {
+  background: linear-gradient(135deg, rgba(56,189,248,0.1), rgba(168,85,247,0.1));
+  border: 1px solid rgba(56,189,248,0.2);
+  border-radius: 14px; padding: 14px 8px; text-align: center;
+}
+._epicStatNum {
+  font-size: 20px; font-weight: bold;
+  background: linear-gradient(135deg,#38bdf8,#a855f7);
+  -webkit-background-clip: text; background-clip: text;
+  color: transparent;
+}
+._epicStatLabel {
+  font-size: 10px; color: #94a3b8; margin-top: 4px;
+}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -2621,6 +2859,313 @@ window.buyPremiumDirect = async function(productId) {
   }
   
   console.log('✅ Points + Social loaded');
+})();
+</script>
+<script>
+/* EPIC_FEATURES_15_JS */
+(function(){
+  'use strict';
+  
+  // ============================================
+  // 15. Confetti Function
+  // ============================================
+  function confetti() {
+    try {
+      var colors = ['#38bdf8','#a855f7','#f59e0b','#22c55e','#ec4899'];
+      for (var i = 0; i < 40; i++) {
+        (function(){
+          var c = document.createElement('div');
+          c.className = '_epicConf';
+          c.style.left = (Math.random()*100)+'%';
+          c.style.top = '-10px';
+          c.style.background = colors[i%5];
+          c.style.animationDelay = (Math.random()*0.5)+'s';
+          document.body.appendChild(c);
+          setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); }, 4000);
+        })();
+      }
+    } catch(e) {}
+  }
+  window._epicConfetti = confetti;
+  
+  // Hook ရှိပြီးသား confetti/confetti function ရှိရင် သူ့ကို override
+  if (typeof window.confetti !== 'function') {
+    window.confetti = confetti;
+  }
+  
+  // ============================================
+  // 16. Particle Background
+  // ============================================
+  function startParticles() {
+    try {
+      if (document.getElementById('_epicParticles')) {
+        document.getElementById('_epicParticles').classList.add('show');
+        return;
+      }
+      var bg = document.createElement('div');
+      bg.id = '_epicParticles';
+      bg.className = 'show';
+      document.body.appendChild(bg);
+      var colors = ['#38bdf8','#a855f7','#ec4899','#22c55e','#f59e0b'];
+      for (var i = 0; i < 20; i++) {
+        var p = document.createElement('div');
+        var size = 2 + Math.random() * 3;
+        p.className = '_epicParticle';
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.background = colors[i % 5];
+        p.style.left = (Math.random() * 100) + '%';
+        p.style.top = '100%';
+        p.style.animation = '_epicFloat ' + (10 + Math.random() * 8) + 's linear infinite';
+        p.style.animationDelay = (Math.random() * 8) + 's';
+        bg.appendChild(p);
+      }
+    } catch(e) {}
+  }
+  window._epicStartParticles = startParticles;
+  
+  // ============================================
+  // 21. Typing Indicator
+  // ============================================
+  function typingIndicator() {
+    return '<div class="_epicTyping"><span></span><span></span><span></span></div>';
+  }
+  window._epicTyping = typingIndicator;
+  
+  // ============================================
+  // 27, 28, 29. Trust Score + Badges + Stats
+  // ============================================
+  function renderTrustSection() {
+    try {
+      var pv = document.getElementById('view-profile');
+      if (!pv || pv.dataset.trustRendered) return;
+      
+      // Trust Score + Stats ကို ရှာပြီး ထည့်
+      var existingTrust = pv.querySelector('._epicTrust');
+      if (existingTrust) return;
+      
+      var userData = window.userData || {};
+      var pts = userData.points || 0;
+      var orders = (userData.orders || []).length;
+      var spent = userData.totalSpent || 0;
+      var trust = Math.min(100, 50 + orders * 5 + pts / 10);
+      var trustColor = trust >= 80 ? '#22c55e' : trust >= 50 ? '#f59e0b' : '#ef4444';
+      var trustText = trust >= 80 ? 'အလွန်ကောင်း' : trust >= 50 ? 'ကောင်း' : 'ပုံမှန်';
+      
+      // Stats HTML
+      var statsHtml = '<div class="_epicStats">' +
+        '<div class="_epicStatCard"><div class="_epicStatNum">1,000+</div><div class="_epicStatLabel">👥 Users</div></div>' +
+        '<div class="_epicStatCard"><div class="_epicStatNum">5,000+</div><div class="_epicStatLabel">📦 Orders</div></div>' +
+        '<div class="_epicStatCard"><div class="_epicStatNum">99%</div><div class="_epicStatLabel">✅ Success</div></div>' +
+      '</div>';
+      
+      // Trust Badges HTML
+      var badgesHtml = '<div class="_epicTrustBadges">' +
+        '<div class="_epicTrustBadge">✅ Verified Shop</div>' +
+        '<div class="_epicTrustBadge">⚡ Fast Delivery</div>' +
+        '<div class="_epicTrustBadge">🛡️ Safe Payment</div>' +
+        '<div class="_epicTrustBadge">🔒 SSL Secured</div>' +
+      '</div>';
+      
+      // Trust Score HTML
+      var trustHtml = '<div class="_epicTrust">' +
+        '<div class="_epicTrustCircle" style="background:' + trustColor + '">' + Math.round(trust) + '</div>' +
+        '<div><div style="font-weight:bold;font-size:14px">🛡️ Trust Score</div>' +
+        '<div style="font-size:11px;color:#94a3b8;margin-top:3px">' + trustText + '</div></div>' +
+      '</div>';
+      
+      // Insert (Profile ရဲ့ အောက်ဆုံးမှာ)
+      var lastChild = pv.lastElementChild;
+      if (lastChild) {
+        lastChild.insertAdjacentHTML('afterend', statsHtml + badgesHtml + trustHtml);
+      } else {
+        pv.insertAdjacentHTML('beforeend', statsHtml + badgesHtml + trustHtml);
+      }
+      
+      pv.dataset.trustRendered = '1';
+      console.log('✅ Trust section rendered');
+    } catch(e) {
+      console.log('renderTrustSection err:', e.message);
+    }
+  }
+  
+  // ============================================
+  // 1. Welcome Animation (First time only)
+  // ============================================
+  function showWelcome() {
+    try {
+      if (localStorage.getItem('_epicWelcomeSeen') === '1') return;
+      
+      var w = document.createElement('div');
+      w.className = '_epicWelcome show';
+      w.id = '_epicWelcome';
+      w.innerHTML = '<div class="_epicWelcomeIcon">👋</div>' +
+        '<div class="_epicWelcomeTitle">Safe Zone မှ<br>ကြိုဆိုပါတယ်!</div>' +
+        '<div class="_epicWelcomeSub">' +
+          'ဂိမ်း Top-up လုပ်ရန် အဆင်သင့် ဖြစ်ပြီ!<br>' +
+          'ငွေဖြည့် → ဂိမ်းရွေး → Order တင်ပါ' +
+        '</div>' +
+        '<button class="_epicWelcomeBtn" onclick="window._epicCloseWelcome()">🚀 စတင်မယ်</button>';
+      document.body.appendChild(w);
+      
+      // Auto-show tour after welcome
+      window._epicCloseWelcome = function() {
+        var el = document.getElementById('_epicWelcome');
+        if (el) el.remove();
+        localStorage.setItem('_epicWelcomeSeen', '1');
+        setTimeout(function() { showTour(); }, 500);
+      };
+    } catch(e) {
+      console.log('showWelcome err:', e.message);
+    }
+  }
+  
+  // ============================================
+  // 2. Onboarding Tour
+  // ============================================
+  var _tourSteps = [
+    { icon: '💰', title: 'Step 1: Wallet ဖြည့်', text: 'ငွေဖြည့် tab မှာ Deposit တင်ပါ။ Admin က အတည်ပြုပေးမယ်။' },
+    { icon: '🎮', title: 'Step 2: ဂိမ်း ရွေး', text: 'MLBB, PUBG, Magic Chess စတဲ့ ဂိမ်းတွေ ရွေးပြီး Order တင်ပါ။' },
+    { icon: '⚡', title: 'Step 3: ချက်ချင်း ရ', text: 'Admin Approve ပြီးရင် ချက်ချင်း ရပါပြီ။ ၁၀-၃၀ မိနစ်အတွင်း။' },
+    { icon: '⭐', title: 'Step 4: Point စုဆောင်း', text: 'Order တင်တိုင်း Point ရမယ်။ 100 Points = 1,000 Ks ပြန်လဲနိုင်တယ်။' }
+  ];
+  var _tourIdx = 0;
+  
+  function showTour() {
+    try {
+      if (localStorage.getItem('_epicTourSeen') === '1') return;
+      
+      _tourIdx = 0;
+      var t = document.createElement('div');
+      t.className = '_epicTour show';
+      t.id = '_epicTour';
+      t.innerHTML = '<div class="_epicTourBox" id="_epicTourBox"></div>';
+      document.body.appendChild(t);
+      renderTourStep();
+    } catch(e) {
+      console.log('showTour err:', e.message);
+    }
+  }
+  
+  function renderTourStep() {
+    var s = _tourSteps[_tourIdx];
+    var box = document.getElementById('_epicTourBox');
+    if (!box) return;
+    var dots = '';
+    for (var i = 0; i < _tourSteps.length; i++) {
+      dots += '<div class="_epicTourDot' + (i === _tourIdx ? ' active' : '') + '"></div>';
+    }
+    var isLast = _tourIdx === _tourSteps.length - 1;
+    box.innerHTML = '<div class="_epicTourIcon">' + s.icon + '</div>' +
+      '<div class="_epicTourTitle">' + s.title + '</div>' +
+      '<div class="_epicTourText">' + s.text + '</div>' +
+      '<div class="_epicTourDots">' + dots + '</div>' +
+      '<div class="_epicTourBtns">' +
+        '<button class="_epicTourBtn skip" onclick="window._epicEndTour()">Skip</button>' +
+        '<button class="_epicTourBtn next" onclick="window._epicNextTour()">' + (isLast ? 'ပြီးပါပြီ' : 'Next →') + '</button>' +
+      '</div>';
+  }
+  
+  window._epicNextTour = function() {
+    _tourIdx++;
+    if (_tourIdx >= _tourSteps.length) {
+      window._epicEndTour();
+      return;
+    }
+    renderTourStep();
+  };
+  
+  window._epicEndTour = function() {
+    var t = document.getElementById('_epicTour');
+    if (t) t.remove();
+    localStorage.setItem('_epicTourSeen', '1');
+    // ပြီးရင် particles စတင်
+    startParticles();
+  };
+  
+  // ============================================
+  // 4. Splash Music (Auto-play on splash)
+  // ============================================
+  function playSplashMusic() {
+    try {
+      var audio = new Audio();
+      audio.volume = 0.15;
+      // Default melody (short)
+      audio.src = 'https://cdn.pixabay.com/audio/2022/05/27/audio_1808fbf07a.mp3';
+      audio.play().catch(function(){});
+      setTimeout(function(){ try { audio.pause(); } catch(e){} }, 3000);
+    } catch(e) {}
+  }
+  
+  // ============================================
+  // 30. Push Notification (Auto subscribe)
+  // ============================================
+  async function autoSubscribePush() {
+    try {
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'granted' && typeof window.subscribeToPush === 'function') {
+        await window.subscribeToPush();
+      }
+    } catch(e) {}
+  }
+  
+  // ============================================
+  // Hook showToast → confetti on success
+  // ============================================
+  setTimeout(function() {
+    if (typeof window.showToast === 'function' && !window._toastConfettiHooked) {
+      window._toastConfettiHooked = true;
+      var _origToast = window.showToast;
+      window.showToast = function(text, type) {
+        try { _origToast.apply(this, arguments); } catch(e) {}
+        try {
+          if (text && typeof text === 'string' && (text.indexOf('Order တင်') > -1 || text.indexOf('ရပြီ') > -1 || text.indexOf('အောင်မြင်') > -1)) {
+            confetti();
+          }
+        } catch(e) {}
+      };
+    }
+  }, 500);
+  
+  // ============================================
+  // INIT
+  // ============================================
+  function init() {
+    // Splash ပေါ်ချိန် - Music
+    setTimeout(playSplashMusic, 300);
+    
+    // Splash ပျောက်ပြီး - Welcome + Tour
+    setTimeout(showWelcome, 3200);
+    
+    // Particles
+    setTimeout(startParticles, 5000);
+    
+    // Trust Section
+    setTimeout(renderTrustSection, 4000);
+    setTimeout(renderTrustSection, 8000);
+    
+    // Push
+    setTimeout(autoSubscribePush, 6000);
+    
+    // Profile Tab ဖွင့်ရင် Trust ပြန် render
+    if (typeof window.switchTab === 'function') {
+      var _origSwitch = window.switchTab;
+      window.switchTab = function(name, btn) {
+        _origSwitch(name, btn);
+        if (name === 'profile') {
+          setTimeout(renderTrustSection, 500);
+        }
+      };
+    }
+    
+    console.log('✅ Epic Features 15 loaded');
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    setTimeout(init, 100);
+  }
 })();
 </script>
 </script>
