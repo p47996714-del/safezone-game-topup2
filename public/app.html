@@ -485,5 +485,62 @@ async function logout(){ if (!confirm('Logout လုပ်မှာသေချ�
   }
 })();
 </script>
+
+<script>
+// ===== AUTO REFRESH SYSTEM =====
+(function() {
+  // 1. Site Data (Banners, Pay Number, Game Images) - ၃၀ စက္ကန့်တစ်ခါ
+  setInterval(function() {
+    if (typeof loadSite === 'function') {
+      loadSite();
+      console.log('[AutoRefresh] Site data reloaded');
+    }
+  }, 30000);
+
+  // 2. Products (Game List) - ၃၀ စက္ကန့်တစ်ခါ
+  setInterval(function() {
+    if (typeof loadProducts === 'function') {
+      loadProducts();
+      console.log('[AutoRefresh] Products reloaded');
+    }
+  }, 30000);
+
+  // 3. Orders (မှာတမ်း tab မှာ ရှိနေရင်) - ၁၀ စက္ကန့်တစ်ခါ
+  setInterval(function() {
+    var ordersView = document.getElementById('view-orders');
+    if (ordersView && ordersView.style.display === 'block') {
+      if (typeof loadOrders === 'function') loadOrders();
+    }
+  }, 10000);
+
+  // 4. Deposits (ငွေဖြည့် tab မှာ ရှိနေရင်) - ၁၀ စက္ကန့်တစ်ခါ
+  setInterval(function() {
+    var walletView = document.getElementById('view-wallet');
+    if (walletView && walletView.style.display === 'block') {
+      if (typeof loadDeposits === 'function') loadDeposits();
+    }
+  }, 10000);
+
+  // 5. Notifications Badge - ၅ စက္ကန့်တစ်ခါ
+  setInterval(function() {
+    if (typeof loadMe === 'function') loadMe();
+  }, 5000);
+
+  // 6. Page visibility - User ပြန်ဖွင့်တဲ့အခါ အားလုံး Refresh ဖြစ်စေရန်
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) {
+      console.log('[AutoRefresh] Page visible - reloading all');
+      if (typeof loadSite === 'function') loadSite();
+      if (typeof loadProducts === 'function') loadProducts();
+      if (typeof loadMe === 'function') loadMe();
+      var ordersView = document.getElementById('view-orders');
+      if (ordersView && ordersView.style.display === 'block' && typeof loadOrders === 'function') loadOrders();
+      var walletView = document.getElementById('view-wallet');
+      if (walletView && walletView.style.display === 'block' && typeof loadDeposits === 'function') loadDeposits();
+    }
+  });
+})();
+</script>
+
 </body>
 </html>
