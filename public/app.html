@@ -2025,7 +2025,7 @@ window.showNiceConfirm = function(opts) {
 };
 
 // ===== Maintenance Overlay =====
-window._showMaintenance = function(msg) {
+window._showMaintenance = function(msgText) {
   var ov = document.getElementById('_maintOverlay');
   if (!ov) {
     ov = document.createElement('div');
@@ -2035,12 +2035,13 @@ window._showMaintenance = function(msg) {
       '<div class="_maintTitle">ခဏပိတ်ထားပါသည်</div>' +
       '<div class="_maintSub">TEMPORARILY CLOSED</div>' +
       '<div class="_maintDots"><div class="_maintDot"></div><div class="_maintDot"></div><div class="_maintDot"></div></div>' +
-      '<div class="_maintMsg" id="_maintMsg">မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။</div>' +
+      '<div class="_maintMsg" id="_maintMsgBox">မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။</div>' +
       '<button class="_maintBtn" onclick="location.reload()">🔄 Refresh</button>';
     document.body.appendChild(ov);
   }
-  var msg = document.getElementById('_maintMsg');
-  if (msg && msg) msg.textContent = msg || 'မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။';
+  var msgBox = document.getElementById('_maintMsgBox');
+  var finalMsg = (msgText && typeof msgText === 'string' && msgText.length > 0) ? msgText : 'မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။';
+  if (msgBox) msgBox.textContent = finalMsg;
   ov.classList.add('show');
 };
 
