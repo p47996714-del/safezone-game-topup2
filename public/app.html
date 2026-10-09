@@ -273,6 +273,12 @@ button.main:active{transform:scale(0.97)}
 #splash { pointer-events: none !important; }
 </style>
 
+
+<style>
+/* FORCE REMOVE SPLASH AND MAKE CLICKABLE */
+#splash { display: none !important; visibility: hidden !important; pointer-events: none !important; opacity: 0 !important; z-index: -9999 !important; }
+</style>
+
 </head>
 <body>
 
@@ -1753,6 +1759,19 @@ setTimeout(function() {
     if (splash.parentNode) splash.parentNode.removeChild(splash);
   }
 }, 2500);
+</script>
+
+
+<script>
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    var splash = document.getElementById('splash');
+    if (splash) {
+      splash.remove();
+      console.log('Splash removed completely.');
+    }
+  }, 2000);
+});
 </script>
 
 </body>
