@@ -267,6 +267,12 @@ button.main:active{transform:scale(0.97)}
 @keyframes forceHideSplash { to { opacity: 0; visibility: hidden; pointer-events: none; display: none !important; z-index: -9999; } }
 </style>
 
+
+<style>
+/* CLICK BLOCK FIX */
+#splash { pointer-events: none !important; }
+</style>
+
 </head>
 <body>
 
@@ -1736,5 +1742,18 @@ setInterval(quickCheck, 3000);
   }, 3000);
 })();
 </script>
+
+<script>
+// FORCE REMOVE SPLASH AFTER 2.5 SECONDS
+setTimeout(function() {
+  var splash = document.getElementById('splash');
+  if (splash) {
+    splash.style.display = 'none';
+    splash.style.pointerEvents = 'none';
+    if (splash.parentNode) splash.parentNode.removeChild(splash);
+  }
+}, 2500);
+</script>
+
 </body>
 </html>
