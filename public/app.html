@@ -1308,6 +1308,158 @@ body._f20_rtl .bottom-nav { flex-direction: row-reverse; }
   box-shadow: 0 8px 25px rgba(239,68,68,0.4);
 }
 </style>
+<style>
+/* TWO_FA_LOGOUT_CSS */
+#tfLogoutModal {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0,0,0,0.9) !important;
+  z-index: 9999999 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px !important;
+  backdrop-filter: blur(10px) !important;
+}
+#tfLogoutModal.show { display: flex !important; animation: _tfFade 0.3s ease; }
+@keyframes _tfFade { from { opacity: 0; } to { opacity: 1; } }
+
+._tfBox {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 380px;
+  border: 1px solid rgba(239,68,68,0.3);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 60px rgba(239,68,68,0.2);
+  overflow: hidden;
+  animation: _tfSlide 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes _tfSlide {
+  from { transform: scale(0.85) translateY(30px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+._tfHead {
+  padding: 26px 24px 18px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(239,68,68,0.12), rgba(245,158,11,0.12));
+}
+._tfIcon {
+  width: 76px; height: 76px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 36px;
+  background: linear-gradient(135deg, #ef4444, #f59e0b);
+  box-shadow: 0 10px 30px rgba(239,68,68,0.5);
+  animation: _tfPulse 2s ease-in-out infinite;
+}
+@keyframes _tfPulse {
+  0%,100% { box-shadow: 0 10px 30px rgba(239,68,68,0.5); }
+  50% { box-shadow: 0 10px 40px rgba(245,158,11,0.7); }
+}
+._tfTitle {
+  font-size: 19px; font-weight: bold; color: #fff; margin-bottom: 6px;
+}
+._tfSub {
+  font-size: 12px; color: #94a3b8; line-height: 1.6;
+}
+
+._tfBody {
+  padding: 20px 24px;
+}
+._tfInfo {
+  background: rgba(56,189,248,0.08);
+  border: 1px solid #38bdf8;
+  border-radius: 12px;
+  padding: 12px 14px;
+  font-size: 12px;
+  color: #cbd5e1;
+  line-height: 1.7;
+  margin-bottom: 15px;
+}
+._tfInfo b { color: #fff; }
+
+._tfOtpInput {
+  width: 100%;
+  padding: 16px;
+  border-radius: 14px;
+  border: 2px solid #334155;
+  background: #0f172a;
+  color: #fff;
+  font-size: 28px;
+  font-weight: bold;
+  letter-spacing: 12px;
+  text-align: center;
+  font-family: 'Courier New', monospace;
+  transition: border-color 0.3s;
+  box-sizing: border-box;
+}
+._tfOtpInput:focus {
+  outline: none;
+  border-color: #38bdf8;
+  box-shadow: 0 0 0 4px rgba(56,189,248,0.15);
+}
+._tfOtpInput::placeholder {
+  letter-spacing: 4px;
+  font-size: 16px;
+  color: #475569;
+}
+
+._tfError {
+  background: rgba(239,68,68,0.1);
+  border: 1px solid #ef4444;
+  color: #fca5a5;
+  padding: 10px 14px;
+  border-radius: 12px;
+  font-size: 12px;
+  margin-top: 10px;
+  display: none;
+  text-align: center;
+}
+._tfError.show { display: block; }
+
+._tfActions {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 0 24px 24px;
+}
+._tfBtn {
+  width: 100%;
+  padding: 14px;
+  border-radius: 14px;
+  border: none;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  transition: transform 0.2s;
+}
+._tfBtn:active { transform: scale(0.97); }
+._tfBtn.confirm {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  color: #fff;
+  box-shadow: 0 8px 25px rgba(239,68,68,0.4);
+}
+._tfBtn.resend {
+  background: rgba(56,189,248,0.15);
+  color: #38bdf8;
+  border: 1px solid #38bdf8;
+  font-size: 12px;
+}
+._tfBtn.cancel {
+  background: rgba(51,65,85,0.8);
+  color: #cbd5e1;
+  border: 1px solid #475569;
+}
+._tfCountdown {
+  text-align: center;
+  font-size: 11px;
+  color: #94a3b8;
+  margin-top: 4px;
+}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -5207,6 +5359,192 @@ window.buyPremiumDirect = async function(productId) {
       window.showNiceLogout();
     };
   }, 6000);
+})();
+</script>
+<script>
+/* TWO_FA_LOGOUT_JS */
+(function(){
+  'use strict';
+  
+  var resendTimer = null;
+  
+  function showOtpModal() {
+    var m = document.getElementById('tfLogoutModal');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = 'tfLogoutModal';
+      m.innerHTML = 
+        '<div class="_tfBox">' +
+          '<div class="_tfHead">' +
+            '<div class="_tfIcon">🔐</div>' +
+            '<div class="_tfTitle">2FA Verification</div>' +
+            '<div class="_tfSub">Logout လုပ်ဖို့ OTP လိုအပ်ပါတယ်</div>' +
+          '</div>' +
+          '<div class="_tfBody">' +
+            '<div class="_tfInfo">' +
+              '📱 <b>Telegram</b> ကို OTP ပို့ပေးလိုက်ပါပြီ<br>' +
+              '6 လုံး Code ကို ဒီနေရာမှာ ထည့်ပါ' +
+            '</div>' +
+            '<input type="tel" id="_tfOtpInput" class="_tfOtpInput" maxlength="6" placeholder="000000" inputmode="numeric" autocomplete="off">' +
+            '<div class="_tfError" id="_tfOtpError"></div>' +
+          '</div>' +
+          '<div class="_tfActions">' +
+            '<button class="_tfBtn confirm" id="_tfVerifyBtn">✅ Verify & Logout</button>' +
+            '<button class="_tfBtn resend" id="_tfResendBtn">📩 OTP ပြန်တောင်းမယ်</button>' +
+            '<div class="_tfCountdown" id="_tfCountdown"></div>' +
+            '<button class="_tfBtn cancel" id="_tfCancelBtn">❌ Cancel</button>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(m);
+      
+      // Event handlers
+      document.getElementById('_tfCancelBtn').onclick = closeOtpModal;
+      
+      document.getElementById('_tfVerifyBtn').onclick = async function() {
+        var otp = document.getElementById('_tfOtpInput').value.trim();
+        if (!otp || otp.length !== 6) return showOtpError('6 လုံး ဖြည့်ပါ');
+        
+        this.textContent = '⏳ Verify လုပ်နေတယ်...';
+        this.disabled = true;
+        
+        try {
+          var r = await fetch('/api/2fa/verify-logout', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token') },
+            body: JSON.stringify({ otp: otp })
+          });
+          var d = await r.json();
+          
+          if (d && d.success) {
+            closeOtpModal();
+            localStorage.clear();
+            location.href = '/';
+          } else {
+            showOtpError((d && d.error) || 'OTP မှားပါ');
+            this.textContent = '✅ Verify & Logout';
+            this.disabled = false;
+            document.getElementById('_tfOtpInput').value = '';
+            document.getElementById('_tfOtpInput').focus();
+          }
+        } catch(e) {
+          showOtpError('Network Error — ပြန်စမ်းပါ');
+          this.textContent = '✅ Verify & Logout';
+          this.disabled = false;
+        }
+      };
+      
+      document.getElementById('_tfResendBtn').onclick = function() {
+        sendOtp(true);
+      };
+      
+      m.addEventListener('click', function(e) {
+        if (e.target === m) closeOtpModal();
+      });
+      
+      // Auto-submit on 6 digits
+      document.getElementById('_tfOtpInput').addEventListener('input', function() {
+        this.value = this.value.replace(/[^0-9]/g, '');
+        if (this.value.length === 6) {
+          document.getElementById('_tfVerifyBtn').click();
+        }
+      });
+    }
+    
+    // Reset
+    var inp = document.getElementById('_tfOtpInput');
+    if (inp) { inp.value = ''; setTimeout(function(){ inp.focus(); }, 300); }
+    var err = document.getElementById('_tfOtpError');
+    if (err) err.classList.remove('show');
+    var btn = document.getElementById('_tfVerifyBtn');
+    if (btn) { btn.textContent = '✅ Verify & Logout'; btn.disabled = false; }
+    
+    m.classList.add('show');
+  }
+  
+  function closeOtpModal() {
+    var m = document.getElementById('tfLogoutModal');
+    if (m) m.classList.remove('show');
+    if (resendTimer) { clearInterval(resendTimer); resendTimer = null; }
+  }
+  
+  function showOtpError(msg) {
+    var e = document.getElementById('_tfOtpError');
+    if (e) { e.textContent = '⚠️ ' + msg; e.classList.add('show'); }
+  }
+  
+  var _countdown = 0;
+  async function sendOtp(isResend) {
+    try {
+      if (isResend && _countdown > 0) {
+        showOtpError(_countdown + ' စက္ကန့် စောင့်ပါ');
+        return;
+      }
+      
+      var r = await fetch('/api/2fa/send-logout-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Authorization': localStorage.getItem('token') },
+        body: JSON.stringify({})
+      });
+      var d = await r.json();
+      
+      if (d && d.success) {
+        if (d.no2fa) {
+          // 2FA မရှိရင် တိုက်ရိုက် logout
+          localStorage.clear();
+          location.href = '/';
+          return;
+        }
+        // Countdown စတင်
+        _countdown = 30;
+        var cd = document.getElementById('_tfCountdown');
+        if (resendTimer) clearInterval(resendTimer);
+        resendTimer = setInterval(function() {
+          _countdown--;
+          if (cd) cd.textContent = _countdown > 0 ? '📩 ပြန်တောင်း: ' + _countdown + 's' : '';
+          if (_countdown <= 0) { clearInterval(resendTimer); resendTimer = null; }
+        }, 1000);
+        if (cd) cd.textContent = '📩 ပြန်တောင်း: ' + _countdown + 's';
+      } else {
+        showOtpError((d && d.error) || 'OTP ပို့မရပါ');
+      }
+    } catch(e) {
+      showOtpError('Network Error');
+    }
+  }
+  
+  // ============================================
+  // Logout Function Override
+  // ============================================
+  function setupLogout() {
+    window.logout = async function() {
+      try {
+        var me = await fetch('/api/me', { headers: { 'Authorization': localStorage.getItem('token') } }).then(function(r){ return r.json(); });
+        if (me && me.twoFA && me.telegramId) {
+          showOtpModal();
+          sendOtp(false);
+        } else {
+          // 2FA မရှိရင် ရိုးရိုး logout
+          if (confirm('Logout လုပ်မလား?')) {
+            try { await api('/api/logout', {method:'POST'}); } catch(e) {}
+            localStorage.clear();
+            location.href = '/';
+          }
+        }
+      } catch(e) {
+        // Error ဖြစ်ရင် ရိုးရိုး logout
+        localStorage.clear();
+        location.href = '/';
+      }
+    };
+  }
+  
+  // အကြိမ်ကြိမ် override (မတူညီတဲ့ script tag တွေ ဖျက်ပြီးမှ)
+  setTimeout(setupLogout, 500);
+  setTimeout(setupLogout, 1500);
+  setTimeout(setupLogout, 3000);
+  setTimeout(setupLogout, 6000);
+  
+  console.log('✅ 2FA logout ready');
 })();
 </script>
 </body>

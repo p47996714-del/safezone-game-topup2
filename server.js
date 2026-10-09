@@ -356,6 +356,76 @@ app.post('/api/toggle-2fa', auth, (req, res) => {
   res.json({success:true, twoFA: req.user.twoFA});
 });
 app.post('/api/logout', auth, (req, res) => { delete db.sessions[req.token]; saveDB(); res.json({success:true}); });
+
+// ===== 2FA LOGOUT OTP =====
+app.post('/api/2fa/send-logout-otp', auth, (req, res) => {
+  if (!req.user.twoFA) {
+    return res.json({ success: true, no2fa: true });
+  }
+  if (!req.user.telegramId) {
+    return res.status(400).json({ error: 'Telegram ချိတ်မထားပါ' });
+  }
+  
+  // OTP generate
+  var code = Math.floor(100000 + Math.random() * 900000).toString();
+  if (!db.otps) db.otps = {};
+  db.otps['logout_' + req.user.username] = {
+    code: code,
+    expires: Date.now() + 300000,
+    attempts: 0
+  };
+  saveDB();
+  
+  // Telegram ဆီ ပို့
+  try {
+    if (typeof bot !== 'undefined' && bot.sendOTP) {
+      bot.sendOTP(req.user.telegramId, code);
+      console.log('2FA logout OTP sent to ' + req.user.username);
+    } else if (typeof bot !== 'undefined' && bot.sendMessage) {
+      bot.sendMessage(req.user.telegramId, '🔐 Logout OTP: ' + code + '\n\n5 မိနစ်အတွင်း ထည့်ပါ');
+    }
+  } catch(e) {
+    console.log('OTP send error:', e.message);
+  }
+  
+  res.json({ success: true, sent: true });
+});
+
+app.post('/api/2fa/verify-logout', auth, (req, res) => {
+  var otp = (req.body.otp || '').trim();
+  if (!otp || otp.length !== 6) {
+    return res.status(400).json({ error: 'OTP 6 လုံး ဖြည့်ပါ' });
+  }
+  
+  var key = 'logout_' + req.user.username;
+  var stored = db.otps ? db.otps[key] : null;
+  
+  if (!stored) {
+    return res.status(400).json({ error: 'OTP မရှိပါ — ပြန်တောင်းပါ' });
+  }
+  if (Date.now() > stored.expires) {
+    delete db.otps[key];
+    saveDB();
+    return res.status(400).json({ error: 'OTP သက်တမ်းကုန်သွားပါ' });
+  }
+  if (stored.attempts >= 3) {
+    delete db.otps[key];
+    saveDB();
+    return res.status(400).json({ error: 'အကြိမ်ရေ ကျော်သွားပါ — ပြန်တောင်းပါ' });
+  }
+  if (stored.code !== otp) {
+    stored.attempts = (stored.attempts || 0) + 1;
+    saveDB();
+    return res.status(400).json({ error: 'OTP မှားနေပါ (' + (3 - stored.attempts) + ' ကြိမ် ကျန်)' });
+  }
+  
+  // အောင်မြင်
+  delete db.otps[key];
+  delete db.sessions[req.token];
+  saveDB();
+  res.json({ success: true });
+});
+
 app.get('/api/me', auth, (req, res) => {
   const unread = db.chats.filter(c => c.userId === req.user.id && c.from === 'admin' && !c.read).length;
   res.json({
