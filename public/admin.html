@@ -670,7 +670,7 @@ function toggleOrderSelect(id, checked){
 }
 async function bulkOrderAction(status){
   if (selectedOrders.size === 0) return alert('Order မရွေးထားဘူး');
-  if (status === 'rejected' && !confirm(selectedOrders.size + ' order ပယ်ဖျက်မယ်။ သေချာလား?')) return;
+  if (status === 'rejected' && !await _prettyConfirm(selectedOrders.size + ' order ပယ်ဖျက်မယ်။ သေချာလား?')) return;
   const d = await api('/api/admin/bulk-order-status', {method:'POST', body: JSON.stringify({orderIds: [...selectedOrders], status})});
   if (d.success) { alert('✅ '+d.count+' order update ပြီး'); loadOrds(); loadDash(); }
   else alert('❌ ' + d.error);
@@ -750,7 +750,7 @@ function filterUsers(){
   }).join('') : '<p class="empty">မတွေ့ပါ</p>';
 }
 async function toggleBan(username, ban){
-  if (!confirm((ban?'Ban ':'Unban ')+username+'?')) return;
+  if (!await _prettyConfirm((ban?'Ban ':'Unban ')+username+'?')) return;
   const d = await api('/api/admin/ban', {method:'POST', body: JSON.stringify({username, ban})});
   if (d.success) loadUsers(); else alert('❌ ' + d.error);
 }
@@ -845,7 +845,7 @@ async function updateProd(id, field, value){
   await api('/api/admin/products/' + id, {method:'PUT', body: JSON.stringify(body)});
 }
 async function delProduct(id){
-  if (!confirm('ဖျက်မှာလား?')) return;
+  if (!await _prettyConfirm('ဖျက်မှာလား?')) return;
   await api('/api/admin/products/' + id, {method:'DELETE'});
   loadProductsAdmin();
 }
@@ -858,7 +858,7 @@ async function saveGameImg(){
   else alert('❌ ' + d.error);
 }
 async function delGameImg(game){
-  if (!confirm(game + ' ဖျက်မှာလား?')) return;
+  if (!await _prettyConfirm(game + ' ဖျက်မှာလား?')) return;
   await api('/api/admin/gameImages', {method:'POST', body: JSON.stringify({game})});
   loadProductsAdmin();
 }
@@ -880,7 +880,7 @@ async function addCoupon(){
   else alert('❌ ' + d.error);
 }
 async function delCoupon(code){
-  if (!confirm('ဖျက်မှာလား?')) return;
+  if (!await _prettyConfirm('ဖျက်မှာလား?')) return;
   await api('/api/admin/coupons/' + code, {method:'DELETE'});
   loadCoupons();
 }
@@ -905,7 +905,7 @@ async function loadAdmins(){
   } catch(e){ document.getElementById('adminList').innerHTML = '<p class="empty">Super admin သာ</p>'; }
 }
 async function delAdmin(u){
-  if (!confirm(u + ' ဖျက်မှာလား?')) return;
+  if (!await _prettyConfirm(u + ' ဖျက်မှာလား?')) return;
   const d = await api('/api/admin/admins/' + u, {method:'DELETE'});
   if (d.success) loadAdmins(); else alert('❌ ' + d.error);
 }
@@ -969,7 +969,7 @@ async function saveMaintMsg(){
 async function sendBroadcast(){
   const text = document.getElementById('bcText').value.trim();
   if (!text) return alert('စာ ရေးပါ');
-  if (!confirm('User အားလုံးဆီ ပို့မယ်။ သေချာလား?')) return;
+  if (!await _prettyConfirm('User အားလုံးဆီ ပို့မယ်။ သေချာလား?')) return;
   const d = await api('/api/admin/broadcast', {method:'POST', body: JSON.stringify({text})});
   if (d.success){ alert('✅ '+d.sent+' ယောက်ဆီ ပို့ပြီး'); document.getElementById('bcText').value=''; }
   else alert('❌ ' + d.error);
@@ -991,9 +991,9 @@ async function saveBanners(){
 }
 
 async function approveDep(id){ await api('/api/admin/approve-deposit',{method:'POST',body:JSON.stringify({depositId:id})}); loadDeps(); loadDash(); loadUsers(); }
-async function rejectDep(id){ if(!confirm('Reject?')) return; await api('/api/admin/reject-deposit',{method:'POST',body:JSON.stringify({depositId:id})}); loadDeps(); loadDash(); }
+async function rejectDep(id){ if(!await _prettyConfirm('Reject?')) return; await api('/api/admin/reject-deposit',{method:'POST',body:JSON.stringify({depositId:id})}); loadDeps(); loadDash(); }
 async function updateOrd(id, status){
-  if (status === 'rejected' && !confirm('User ဆီ ငွေပြန်အမ်းမယ်။ သေချာလား?')) return;
+  if (status === 'rejected' && !await _prettyConfirm('User ဆီ ငွေပြန်အမ်းမယ်။ သေချာလား?')) return;
   await api('/api/admin/update-order-status',{method:'POST',body:JSON.stringify({orderId:id,status})});
   loadOrds(); loadDash();
 }
@@ -1037,13 +1037,13 @@ async function saveBackupConfig(){
   else alert('❌ Failed');
 }
 async function backupNow(){
-  if (!confirm('Backup now?')) return;
+  if (!await _prettyConfirm('Backup now?')) return;
   const d = await api('/api/admin/backup-now', {method:'POST'});
   if (d.success) { alert('✅ ' + d.sha.substring(0,7)); loadBackupConfig(); }
   else alert('❌ ' + (d.error || 'Failed'));
 }
 async function restoreNow(){
-  if (!confirm('⚠️ Overwrite current data?')) return;
+  if (!await _prettyConfirm('⚠️ Overwrite current data?')) return;
   const d = await api('/api/admin/restore', {method:'POST'});
   if (d.success) { alert('✅ Restored'); location.reload(); }
   else alert('❌ Failed');
@@ -1141,7 +1141,7 @@ function renderPayments() {
 }
 
 // Pick image for specific payment
-function pickPayImg(index) {
+async function pickPayImg(index) {
   _uploadContext = 'payment';
   window._payIndex = index;
   const inp = ensureFileInput();
@@ -1172,7 +1172,7 @@ async function addPayment() {
   }
 }
 async function delPayment(i) {
-  if (!confirm('ဖျက်မှာလား?')) return;
+  if (!await _prettyConfirm('ဖျက်မှာလား?')) return;
   wsConfig.payments.splice(i, 1);
   const d = await api('/api/admin/config/section', {method:'POST', body: JSON.stringify({section:'payments', value: wsConfig.payments})});
   if (d.success) renderPayments();
@@ -1201,7 +1201,7 @@ async function addBadge() {
   if (d.success) { document.getElementById('ws_badgeText').value = ''; renderBadges(); }
 }
 async function delBadge(i) {
-  if (!confirm('ဖျက်မှာလား?')) return;
+  if (!await _prettyConfirm('ဖျက်မှာလား?')) return;
   wsConfig.trustBadges.splice(i, 1);
   const d = await api('/api/admin/config/section', {method:'POST', body: JSON.stringify({section:'trustBadges', value: wsConfig.trustBadges})});
   if (d.success) renderBadges();
@@ -1236,7 +1236,7 @@ async function addFaq() {
   }
 }
 async function delFaq(i) {
-  if (!confirm('ဖျက်မှာလား?')) return;
+  if (!await _prettyConfirm('ဖျက်မှာလား?')) return;
   wsConfig.faq.splice(i, 1);
   const d = await api('/api/admin/config/section', {method:'POST', body: JSON.stringify({section:'faq', value: wsConfig.faq})});
   if (d.success) renderFaq();
@@ -1434,7 +1434,7 @@ function copyUploadUrl(url) {
 }
 
 async function delUpload(id) {
-  if (!confirm('ပုံ ဖျက်မှာလား?')) return;
+  if (!await _prettyConfirm('ပုံ ဖျက်မှာလား?')) return;
   const r = await api('/api/admin/uploads/' + id, { method: 'DELETE' });
   if (r.success) loadUploads(); else alert('❌ Failed');
 }
@@ -1646,6 +1646,72 @@ setTimeout(function(){ try { loadBackupConfig(); } catch(e){} }, 1200);
   
   console.log('✅ Pretty alert loaded');
 })();
+
+/* PRETTY_CONFIRM_FN */
+window._prettyConfirm = function(msg) {
+  return new Promise(function(resolve) {
+    try {
+      var text = String(msg || '');
+      var cleanText = text.replace(/^[✅❌⚠️ℹ️🔴🟢🔧🔔📸💰🎯💵]\s*/g, '').trim();
+      var lower = text.toLowerCase();
+      var isDanger = lower.indexOf('delete') > -1 || lower.indexOf('ဖျက်') > -1 || lower.indexOf('reject') > -1 || lower.indexOf('ban') > -1 || lower.indexOf('restore') > -1 || lower.indexOf('overwrite') > -1 || lower.indexOf('reject') > -1;
+      
+      var icon, title, confirmText, confirmCls;
+      if (isDanger) {
+        icon = '⚠️';
+        title = 'သေချာပါသလား?';
+        confirmText = 'အတည်ပြု';
+        confirmCls = 'danger';
+      } else {
+        icon = '❓';
+        title = 'အတည်ပြုပါ';
+        confirmText = 'OK';
+        confirmCls = 'confirm';
+      }
+      
+      var ov = document.getElementById('_pConfirmOv');
+      if (!ov) {
+        ov = document.createElement('div');
+        ov.id = '_pConfirmOv';
+        ov.className = '_pAlertOv';
+        document.body.appendChild(ov);
+      }
+      
+      function esc(s) {
+        return String(s).replace(/[&<>"']/g, function(c){
+          return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+        }).replace(/\n/g, '<br>');
+      }
+      
+      ov.innerHTML = '<div class="_pAlertBox">' +
+        '<div class="_pAlertHead">' +
+          '<div class="_pAlertIcon ' + (isDanger ? 'error' : '') + '">' + icon + '</div>' +
+          '<div class="_pAlertTitle">' + title + '</div>' +
+        '</div>' +
+        '<div class="_pAlertMsg">' + esc(cleanText) + '</div>' +
+        '<div class="_pAlertActions">' +
+          '<button class="_pAlertBtn cancel" id="_pConfirmNo">မလုပ်တော့ဘူး</button>' +
+          '<button class="_pAlertBtn ' + confirmCls + '" id="_pConfirmYes">' + confirmText + '</button>' +
+        '</div>' +
+      '</div>';
+      
+      setTimeout(function(){ ov.classList.add('show'); }, 30);
+      
+      document.getElementById('_pConfirmYes').onclick = function() {
+        ov.classList.remove('show');
+        resolve(true);
+      };
+      document.getElementById('_pConfirmNo').onclick = function() {
+        ov.classList.remove('show');
+        resolve(false);
+      };
+    } catch(e) {
+      console.log('_prettyConfirm err:', e.message);
+      resolve(false);
+    }
+  });
+};
+
 </script>
 </body>
 </html>
