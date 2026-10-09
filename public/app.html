@@ -1460,6 +1460,106 @@ body._f20_rtl .bottom-nav { flex-direction: row-reverse; }
   margin-top: 4px;
 }
 </style>
+<style>
+/* PERF_FIX_CSS */
+
+/* ===== 1. Backdrop Filter ကို Game Cards မှာ ဖျက် ===== */
+.game-card,
+.quick-card,
+.section,
+.product-card,
+[id="productModalBox"] .game-card {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ===== 2. Particle Background ကို ပိတ် (Performance) ===== */
+#_epicParticles,
+#_particlesBg,
+.particle-bg {
+  display: none !important;
+}
+
+/* ===== 3. Gradient Animation ကို ရပ် ===== */
+.balance-card,
+[class*="balance-card"] {
+  animation: none !important;
+}
+
+/* ===== 4. Box Shadow လျှော့ ===== */
+.game-card {
+  box-shadow: none !important;
+}
+.game-card:hover {
+  box-shadow: 0 4px 12px rgba(56,189,248,0.15) !important;
+}
+.quick-card {
+  box-shadow: 0 2px 6px rgba(0,0,0,0.2) !important;
+}
+
+/* ===== 5. GPU Acceleration ===== */
+.game-card,
+.quick-card,
+.games-grid,
+.products-grid {
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  will-change: auto;
+}
+
+/* ===== 6. Product Modal ထဲက Card တွေ Optimize ===== */
+#productModalBox .game-card {
+  transition: transform 0.1s ease !important;
+}
+#productModalBox .game-card:active {
+  transform: scale(0.97);
+}
+
+/* ===== 7. Image Rendering Optimize ===== */
+.game-img {
+  image-rendering: -webkit-optimize-contrast;
+  content-visibility: auto;
+}
+
+/* ===== 8. Scroll Smoothing ===== */
+.games-grid,
+.products-grid,
+[id^="view-"] {
+  -webkit-overflow-scrolling: touch;
+  scroll-behavior: auto;
+}
+
+/* ===== 9. 3D Tilt ကို Mobile မှာ ပိတ် ===== */
+@media (max-width: 768px) {
+  ._sfTilt,
+  .game-card._sfTilt,
+  .quick-card._sfTilt {
+    transform: none !important;
+    transition: transform 0.15s ease !important;
+  }
+}
+
+/* ===== 10. Modal Backdrop ကို Blur မထည့် ===== */
+.modal,
+._sfModal {
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
+}
+
+/* ===== 11. Text Rendering ===== */
+body {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeSpeed;
+}
+
+/* ===== 12. Content Visibility (Off-screen ကို Skip) ===== */
+.quick-card,
+.game-card {
+  content-visibility: auto;
+  contain-intrinsic-size: 200px;
+}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -5545,6 +5645,131 @@ window.buyPremiumDirect = async function(productId) {
   setTimeout(setupLogout, 6000);
   
   console.log('✅ 2FA logout ready');
+})();
+</script>
+<script>
+/* PERF_FIX_JS */
+(function(){
+  'use strict';
+  
+  // ===== 1. Particle Background ဖျက် =====
+  function killParticles() {
+    var ids = ['_epicParticles', '_particlesBg', 'particleBg'];
+    ids.forEach(function(id) {
+      var p = document.getElementById(id);
+      if (p) p.remove();
+    });
+  }
+  
+  // ===== 2. Gradient Animation ရပ် =====
+  function stopGradientAnim() {
+    var cards = document.querySelectorAll('.balance-card, [class*="balance-card"]');
+    cards.forEach(function(c) {
+      c.style.animation = 'none';
+    });
+  }
+  
+  // ===== 3. 3D Tilt ကို Mobile မှာ ပိတ် =====
+  function disableTilt() {
+    var isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (!isMobile) return;
+    var tilted = document.querySelectorAll('._sfTilt');
+    tilted.forEach(function(el) {
+      el.classList.remove('_sfTilt');
+      el.removeAttribute('data-sf-tilt');
+      el.style.transform = '';
+      el.style.boxShadow = '';
+    });
+  }
+  
+  // ===== 4. Ripple Effect ကို Mobile မှာ ပိတ် =====
+  function disableRippleMobile() {
+    var isMobile = window.innerWidth < 768 || /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    if (!isMobile) return;
+    // Event listener တွေ ဖျက်လို့မရလို့ CSS နဲ့ block
+    var style = document.createElement('style');
+    style.textContent = '._sfRipple ._sfRippleWave { display: none !important; }';
+    document.head.appendChild(style);
+  }
+  
+  // ===== 5. Off-screen Animation ရပ် =====
+  function pauseOffscreen() {
+    try {
+      var all = document.querySelectorAll('.balance-card, ._pCard, ._pCardBig, ._pCardF');
+      all.forEach(function(el) {
+        var rect = el.getBoundingClientRect();
+        var visible = rect.top < window.innerHeight && rect.bottom > 0;
+        if (!visible) {
+          el.style.animationPlayState = 'paused';
+        } else {
+          el.style.animationPlayState = 'running';
+        }
+      });
+    } catch(e) {}
+  }
+  
+  // ===== 6. Scroll Performance =====
+  // Passive scroll listener
+  var ticking = false;
+  window.addEventListener('scroll', function() {
+    if (!ticking) {
+      window.requestAnimationFrame(function() {
+        pauseOffscreen();
+        ticking = false;
+      });
+      ticking = true;
+    }
+  }, { passive: true });
+  
+  // ===== 7. Product Modal ဖွင့်ရင် Animation ရပ် =====
+  function optimizeProductModal() {
+    var modal = document.getElementById('productModal');
+    if (!modal) return;
+    var observer = new MutationObserver(function() {
+      if (modal.classList.contains('show')) {
+        // Modal ပွင့်ရင် ကျန်တာ ရပ်
+        document.body.style.overflow = 'hidden';
+        // Particles ရပ်
+        var p = document.getElementById('_epicParticles');
+        if (p) p.style.display = 'none';
+      } else {
+        document.body.style.overflow = '';
+      }
+    });
+    observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
+  }
+  
+  // ===== 8. Interval တွေ လျှော့ (Performance) =====
+  // များလွန်းတဲ့ setInterval တွေကို နှေးစေ
+  var _origSetInterval = window.setInterval;
+  var intervalsCalled = 0;
+  window.setInterval = function(fn, ms) {
+    intervalsCalled++;
+    // 2000ms အောက် တွေကို 5000ms ဖြစ်စေ
+    if (typeof ms === 'number' && ms < 2000 && ms > 0) {
+      ms = 5000;
+    }
+    return _origSetInterval(fn, ms);
+  };
+  
+  // ===== 9. INIT =====
+  function init() {
+    killParticles();
+    stopGradientAnim();
+    disableTilt();
+    disableRippleMobile();
+    optimizeProductModal();
+    console.log('✅ Performance optimized');
+  }
+  
+  setTimeout(init, 500);
+  setTimeout(init, 2000);
+  setTimeout(init, 5000);
+  
+  // Particle တွေ ပြန်မပေါ်အောင် စစ်နေ
+  setInterval(function() {
+    killParticles();
+  }, 10000);
 })();
 </script>
 </body>
