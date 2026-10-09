@@ -6055,5 +6055,138 @@ window.buyPremiumDirect = async function(productId) {
   console.log('✅ Image fix ready');
 })();
 </script>
+<script>
+/* FORCE_IMAGES */
+(function(){
+  'use strict';
+  
+  // Game အလိုက် Default Image URL တွေ
+  var GAME_IMAGES = {
+    'Mobile Legends': 'https://i.imgur.com/II8UVaO.jpeg',
+    'PUBG Mobile': 'https://upload.wikimedia.org/wikipedia/en/thumb/9/9f/PUBG_Mobile_Logo.png/220px-PUBG_Mobile_Logo.png',
+    'Magic Chess': 'https://play-lh.googleusercontent.com/GTGkZ0zXnG0cRhC8DC7jNS5r1t8-jR2C8g5g4C4_3tWc7vY6_5h8I9YQ',
+    'App Premium': 'https://i.imgur.com/jnz2vQg.jpeg',
+    'ChatGPT': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/04/ChatGPT_logo.svg/240px-ChatGPT_logo.svg.png',
+    'Canva': 'https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Canva_icon_2021.svg/240px-Canva_icon_2021.svg.png'
+  };
+  
+  // ============================================
+  // Game Card တွေရဲ့ ပုံတွေ အတင်းပြ
+  // ============================================
+  function fixGameImages() {
+    try {
+      var cards = document.querySelectorAll('.game-card');
+      
+      cards.forEach(function(card) {
+        try {
+          // Game Title ကို ဖတ်
+          var titleEl = card.querySelector('.game-title');
+          var gameName = titleEl ? titleEl.textContent.trim() : '';
+          
+          if (!gameName) return;
+          
+          // Image Element
+          var img = card.querySelector('.game-img');
+          if (!img) return;
+          
+          // URL က ဗလာ/Placeholder ဖြစ်နေလား စစ်
+          var currentSrc = img.getAttribute('src') || '';
+          var isPlaceholder = !currentSrc || 
+                             currentSrc.indexOf('placeholder.com') > -1 ||
+                             currentSrc.indexOf('via.placeholder') > -1;
+          
+          // Image Load ဖြစ်/မဖြစ် စစ်
+          var isBroken = img.naturalWidth === 0 && img.complete && currentSrc !== '';
+          
+          if (isPlaceholder || isBroken) {
+            // Fallback URL ထည့်
+            var fallback = GAME_IMAGES[gameName];
+            if (fallback && img.src !== fallback) {
+              img.src = fallback;
+              img.onerror = function() {
+                // Fallback URL လည်း မရရင် SVG သုံး
+                this.onerror = null;
+                this.src = 'data:image/svg+xml;base64,' + btoa(
+                  '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 120">' +
+                  '<rect width="200" height="120" fill="#1e293b"/>' +
+                  '<text x="100" y="70" text-anchor="middle" fill="#38bdf8" font-size="20" font-family="sans-serif" font-weight="bold">' + gameName.substring(0, 15) + '</text>' +
+                  '</svg>'
+                );
+              };
+            }
+          }
+        } catch(e) {}
+      });
+    } catch(e) { console.log('fixGameImages err:', e.message); }
+  }
+  
+  // ============================================
+  // Product Modal ထဲက ပုံတွေ ပြ
+  // ============================================
+  function fixProductImages() {
+    try {
+      var cards = document.querySelectorAll('#productModalBox .game-card');
+      cards.forEach(function(card) {
+        var img = card.querySelector('img');
+        if (img) {
+          var currentSrc = img.getAttribute('src') || '';
+          if (!currentSrc || currentSrc.indexOf('placeholder.com') > -1 || (img.naturalWidth === 0 && img.complete)) {
+            // Product Name ဖတ်
+            var nameEl = card.querySelector('div[style*="font-weight"]');
+            var pName = nameEl ? nameEl.textContent.trim() : '';
+            
+            // Emoji ရှိလား
+            var emojiEl = card.querySelector('div[style*="font-size:26px"]');
+            if (emojiEl) {
+              // Emoji ရှိရင် ပုံမလိုဘူး
+              img.style.display = 'none';
+            }
+          }
+        }
+      });
+    } catch(e) {}
+  }
+  
+  // ============================================
+  // MutationObserver - Card အသစ်ပေါ်တိုင်း ပြ
+  // ============================================
+  function setupObserver() {
+    if (!window.MutationObserver) return;
+    
+    var grid = document.getElementById('gamesGrid');
+    if (grid && !grid.dataset.imgObserver) {
+      grid.dataset.imgObserver = '1';
+      new MutationObserver(function() {
+        setTimeout(fixGameImages, 100);
+      }).observe(grid, { childList: true, subtree: true });
+    }
+    
+    var prodBox = document.getElementById('productModalBox');
+    if (prodBox && !prodBox.dataset.imgObserver) {
+      prodBox.dataset.imgObserver = '1';
+      new MutationObserver(function() {
+        setTimeout(fixProductImages, 100);
+      }).observe(prodBox, { childList: true, subtree: true });
+    }
+  }
+  
+  // ============================================
+  // INIT
+  // ============================================
+  function init() {
+    fixGameImages();
+    fixProductImages();
+    setupObserver();
+  }
+  
+  setTimeout(init, 500);
+  setTimeout(init, 1500);
+  setTimeout(init, 3000);
+  setTimeout(init, 6000);
+  setInterval(init, 5000);
+  
+  console.log('✅ Force Images ready');
+})();
+</script>
 </body>
 </html>
