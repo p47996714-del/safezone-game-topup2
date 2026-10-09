@@ -1069,6 +1069,136 @@ body._f20_rtl .bottom-nav { flex-direction: row-reverse; }
 }
 .safeFabItem:active { transform: scale(0.9) !important; }
 </style>
+<style>
+/* MAINT_FINAL_CSS */
+#maintFinalOv {
+  position: fixed !important;
+  inset: 0 !important;
+  background: radial-gradient(circle at 50% 30%, #1e293b 0%, #0b1120 70%) !important;
+  z-index: 9999999 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 30px !important;
+  text-align: center !important;
+  flex-direction: column !important;
+  overflow: hidden !important;
+}
+#maintFinalOv.mfShow { display: flex !important; }
+
+.mfIconWrap {
+  position: relative;
+  width: 130px;
+  height: 130px;
+  margin-bottom: 22px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.mfRing1 {
+  position: absolute;
+  inset: 0;
+  border-radius: 50%;
+  border: 3px dashed #f59e0b;
+  animation: mfSpin 12s linear infinite;
+}
+.mfRing2 {
+  position: absolute;
+  inset: 15px;
+  border-radius: 50%;
+  border: 2px dotted #38bdf8;
+  animation: mfSpin 8s linear infinite reverse;
+}
+@keyframes mfSpin { to { transform: rotate(360deg); } }
+
+.mfIcon {
+  font-size: 55px;
+  animation: mfPulse 2s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px rgba(245,158,11,0.6));
+}
+@keyframes mfPulse {
+  0%,100% { transform: scale(1); }
+  50% { transform: scale(1.15); }
+}
+
+.mfTitle {
+  font-size: 25px;
+  font-weight: bold;
+  background: linear-gradient(135deg, #f59e0b, #ef4444, #ec4899);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: mfGrad 3s ease infinite;
+  margin-bottom: 10px;
+}
+@keyframes mfGrad {
+  0%,100% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+}
+
+.mfSub {
+  font-size: 12px;
+  color: #94a3b8;
+  letter-spacing: 3px;
+  margin-bottom: 22px;
+}
+
+.mfDots {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 22px;
+}
+.mfDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #334155;
+  animation: mfDot 1.5s ease-in-out infinite;
+}
+.mfDot:nth-child(2) { animation-delay: 0.2s; }
+.mfDot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes mfDot {
+  0%,100% { background: #334155; transform: scale(1); }
+  50% { background: #f59e0b; transform: scale(1.3); }
+}
+
+.mfMsg {
+  color: #cbd5e1;
+  font-size: 14px;
+  line-height: 1.7;
+  max-width: 400px;
+  padding: 16px 22px;
+  background: rgba(30,41,59,0.6);
+  border-radius: 16px;
+  border: 1px solid rgba(245,158,11,0.3);
+  margin-bottom: 22px;
+}
+
+.mfInfo {
+  padding: 10px 18px;
+  background: rgba(15,23,42,0.7);
+  border-radius: 12px;
+  font-size: 12px;
+  color: #94a3b8;
+  border: 1px solid #334155;
+  margin-bottom: 18px;
+}
+
+.mfBtn {
+  background: linear-gradient(135deg, #f59e0b, #ef4444);
+  color: #fff;
+  padding: 12px 28px;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 14px;
+  border: none;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 8px 20px rgba(245,158,11,0.3);
+}
+.mfBtn:active { transform: scale(0.95); }
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -4808,6 +4938,87 @@ window.buyPremiumDirect = async function(productId) {
   setTimeout(hideCards, 3000);
   setTimeout(hideCards, 5000);
   setInterval(hideCards, 3000);
+})();
+</script>
+
+<!-- MAINT_FINAL_START -->
+<div id="maintFinalOv">
+  <div class="mfIconWrap">
+    <div class="mfRing1"></div>
+    <div class="mfRing2"></div>
+    <div class="mfIcon">🚧</div>
+  </div>
+  <div class="mfTitle">ခဏပိတ်ထားပါသည်</div>
+  <div class="mfSub">TEMPORARILY CLOSED</div>
+  <div class="mfDots">
+    <div class="mfDot"></div>
+    <div class="mfDot"></div>
+    <div class="mfDot"></div>
+  </div>
+  <div class="mfMsg" id="mfMsgBox">မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။ ကျေးဇူးပြု၍ စောင့်ဆိုင်းပေးပါ။</div>
+  <div class="mfInfo">⏳ Auto-refresh — ၃၀ စက္ကန့် တစ်ခါ</div>
+  <button class="mfBtn" onclick="location.reload()">🔄 Refresh Now</button>
+</div>
+<!-- MAINT_FINAL_END -->
+<script>
+/* MAINT_FINAL_JS */
+(function(){
+  'use strict';
+  var lastState = null;
+  var checkCount = 0;
+  
+  function showMaint(msg) {
+    try {
+      var ov = document.getElementById('maintFinalOv');
+      if (!ov) return;
+      var box = document.getElementById('mfMsgBox');
+      if (box) {
+        box.textContent = (msg && msg.length > 0) ? msg : 'မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။ ကျေးဇူးပြု၍ စောင့်ဆိုင်းပေးပါ။';
+      }
+      ov.classList.add('mfShow');
+      document.body.style.overflow = 'hidden';
+    } catch(e) {}
+  }
+  
+  function hideMaint() {
+    try {
+      var ov = document.getElementById('maintFinalOv');
+      if (!ov) return;
+      ov.classList.remove('mfShow');
+      document.body.style.overflow = '';
+    } catch(e) {}
+  }
+  
+  function checkMaint() {
+    checkCount++;
+    try {
+      fetch('/api/maintenance', { cache: 'no-store' })
+        .then(function(r) { return r.json(); })
+        .then(function(d) {
+          if (!d || typeof d.enabled === 'undefined') return;
+          if (d.enabled !== lastState) {
+            lastState = d.enabled;
+            if (d.enabled) showMaint(d.message);
+            else hideMaint();
+          }
+        })
+        .catch(function() {});
+    } catch(e) {}
+  }
+  
+  // Initial check
+  setTimeout(checkMaint, 800);
+  setTimeout(checkMaint, 2000);
+  
+  // Regular check
+  setInterval(checkMaint, 5000);
+  
+  // Visibility change
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) setTimeout(checkMaint, 300);
+  });
+  
+  console.log('✅ Maintenance ready');
 })();
 </script>
 </body>
