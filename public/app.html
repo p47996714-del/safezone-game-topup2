@@ -1560,37 +1560,44 @@ body {
   contain-intrinsic-size: 200px;
 }
 </style>
+
 <style>
-/* APP_PREMIUM_SPLIT_CSS */
-._apSubTabs {
+/* AP_GROUP_CSS */
+._apGroup {
+  margin-bottom: 18px;
+}
+._apGroupHead {
   display: flex;
-  gap: 8px;
-  margin-bottom: 15px;
-  overflow-x: auto;
-  padding-bottom: 5px;
-  scrollbar-width: none;
+  align-items: center;
+  gap: 10px;
+  padding: 11px 14px;
+  background: linear-gradient(135deg, rgba(56,189,248,0.12), rgba(168,85,247,0.12));
+  border-radius: 12px;
+  margin-bottom: 12px;
+  border-left: 4px solid #38bdf8;
 }
-._apSubTabs::-webkit-scrollbar { display: none; }
-._apSubTab {
-  padding: 10px 18px;
-  background: rgba(30,41,59,0.8);
-  color: #94a3b8;
-  border: 1px solid #334155;
-  border-radius: 20px;
-  cursor: pointer;
+._apGroupIcon {
+  font-size: 22px;
+}
+._apGroupTitle {
+  font-size: 14px;
   font-weight: bold;
-  font-size: 13px;
-  white-space: nowrap;
-  font-family: inherit;
-  transition: all 0.2s;
-}
-._apSubTab.active {
-  background: linear-gradient(135deg, #a855f7, #ec4899);
   color: #fff;
-  border-color: transparent;
-  box-shadow: 0 4px 15px rgba(168,85,247,0.4);
 }
-._apSubTab:active { transform: scale(0.96); }
+._apGroupCount {
+  font-size: 11px;
+  color: #94a3b8;
+  margin-left: auto;
+  background: rgba(30,41,59,0.8);
+  padding: 3px 10px;
+  border-radius: 10px;
+  border: 1px solid #334155;
+}
+._apGroupGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
 </style>
 </head>
 <body>
@@ -5804,114 +5811,148 @@ window.buyPremiumDirect = async function(productId) {
   }, 10000);
 })();
 </script>
+
 <script>
-/* APP_PREMIUM_SPLIT_JS */
+/* AP_GROUP_JS */
 (function(){
   'use strict';
   
-  var _origOpenGameProducts = window.openGameProducts;
+  var _origOpenGP = window.openGameProducts;
+  
+  // Icon Map — Subcategory နာမည်အလိုက်
+  function getIcon(name) {
+    var n = String(name).toLowerCase();
+    // Gaming
+    if (n.indexOf('diamond') > -1) return '💎';
+    if (n.indexOf('uc') > -1) return '🎮';
+    if (n.indexOf('pubg') > -1) return '🔫';
+    if (n.indexOf('mlbb') > -1 || n.indexOf('mobile legend') > -1) return '⚔️';
+    if (n.indexOf('magic chess') > -1) return '♟️';
+    if (n.indexOf('skin') > -1) return '👕';
+    if (n.indexOf('pass') > -1) return '🎫';
+    if (n.indexOf('weekly') > -1) return '📅';
+    if (n.indexOf('monthly') > -1) return '📆';
+    // Apps
+    if (n.indexOf('chatgpt') > -1 || n.indexOf('chat') > -1) return '🤖';
+    if (n.indexOf('canva') > -1) return '🎨';
+    if (n.indexOf('netflix') > -1) return '🎬';
+    if (n.indexOf('spotify') > -1) return '🎵';
+    if (n.indexOf('youtube') > -1 || n.indexOf('yt') > -1) return '📺';
+    if (n.indexOf('adobe') > -1) return '🎨';
+    if (n.indexOf('office') > -1 || n.indexOf('microsoft') > -1) return '📊';
+    if (n.indexOf('capcut') > -1) return '🎬';
+    if (n.indexOf('vpn') > -1) return '🔒';
+    if (n.indexOf('premium') > -1) return '⭐';
+    if (n.indexOf('netflix') > -1) return '🎬';
+    // Package sizes
+    if (n.indexOf('small') > -1) return '🔹';
+    if (n.indexOf('medium') > -1) return '🔷';
+    if (n.indexOf('large') > -1) return '🔶';
+    if (n.indexOf('mega') > -1) return '💠';
+    // Fallback
+    return '📦';
+  }
   
   window.openGameProducts = function(game) {
-    // App Premium မဟုတ်ရင် original ကို သုံး
-    if (game !== 'App Premium') {
-      if (typeof _origOpenGameProducts === 'function') {
-        return _origOpenGameProducts(game);
-      }
-      return;
-    }
-    
-    // App Premium — Subcategory Tabs ပြ
     try {
-      var gProducts = (typeof products !== 'undefined' && products || []).filter(function(p) {
-        return p.game === 'App Premium';
-      });
+      var allProducts = (typeof products !== 'undefined' && products) || [];
+      var gProducts = allProducts.filter(function(p) { return p.game === game; });
       
       if (!gProducts.length) {
         if (typeof showToast === 'function') showToast('Package မရှိပါ', 'info');
         return;
       }
       
-      // Subcategories စုစည်း
-      var subs = [];
-      gProducts.forEach(function(p) {
-        var sc = p.subCategory || 'Other';
-        if (subs.indexOf(sc) === -1) subs.push(sc);
+      // Subcategory ရှိမရှိ စစ်
+      var hasSub = gProducts.some(function(p) {
+        return p.subCategory && p.subCategory.trim();
       });
       
-      // Subcategory မရှိရင် original ကို သုံး
-      if (subs.length === 0 || (subs.length === 1 && subs[0] === 'Other')) {
-        if (typeof _origOpenGameProducts === 'function') {
-          return _origOpenGameProducts(game);
-        }
+      // Subcategory မရှိရင် Original Function ပဲ သုံး
+      if (!hasSub) {
+        if (typeof _origOpenGP === 'function') return _origOpenGP(game);
+        return;
       }
-      
-      // Tabs HTML
-      var tabsHtml = '<div class="_apSubTabs">';
-      subs.forEach(function(sc, i) {
-        tabsHtml += '<button class="_apSubTab' + (i === 0 ? ' active' : '') + '" onclick="window._apShowSub(\'' + sc.replace(/'/g, "\\'") + '\', this)">' + sc + '</button>';
-      });
-      tabsHtml += '</div>';
-      tabsHtml += '<div id="_apSubContent"></div>';
-      
-      var box = document.getElementById('productModalBox');
-      if (box) {
-        box.innerHTML = '<h3>App Premium - ရွေးပါ</h3>' + tabsHtml + '<button class="cancel" style="margin-top:15px" onclick="closeModal(\'productModal\')">Close</button>';
-      }
-      
-      // First subcategory ပြ
-      window._apShowSub(subs[0], document.querySelector('._apSubTab'));
-      
-      var m = document.getElementById('productModal');
-      if (m) m.classList.add('show');
-    } catch(e) {
-      console.log('App Premium split err:', e.message);
-      // Error ရင် original
-      if (typeof _origOpenGameProducts === 'function') {
-        return _origOpenGameProducts(game);
-      }
-    }
-  };
-  
-  window._apShowSub = function(subCategory, btn) {
-    try {
-      // Tabs Active ပြောင်း
-      document.querySelectorAll('._apSubTab').forEach(function(b) { b.classList.remove('active'); });
-      if (btn) btn.classList.add('active');
-      
-      // Products Filter
-      var gProducts = (typeof products !== 'undefined' && products || []).filter(function(p) {
-        return p.game === 'App Premium' && (p.subCategory || 'Other') === subCategory;
-      });
       
       var userVip = (typeof userData !== 'undefined' && userData && userData.vip) || 'Bronze';
       var vipDisc = {Bronze:0, Silver:2, Gold:5, Diamond:8}[userVip] || 0;
       
-      var html = '';
+      // ============================================
+      // Subcategory အလိုက် စုစည်း
+      // ============================================
+      var groups = {};
+      var groupOrder = [];
+      
       gProducts.forEach(function(p) {
-        var finalPrice = Math.round(p.price * (1 - vipDisc/100));
-        var disc = vipDisc > 0 ? '<div style="font-size:11px;color:#22c55e;margin-top:2px">-' + vipDisc + '%</div>' : '';
-        var imgHtml = p.imgUrl
-          ? '<img src="' + p.imgUrl + '" style="width:50px;height:50px;object-fit:cover;border-radius:10px;border:1px solid #334155">'
-          : '<div style="font-size:26px">' + (p.image || '⭐') + '</div>';
-        html += '<div class="game-card" onclick="openModal(' + p.id + ')" style="cursor:pointer">' +
-          '<div style="padding:15px;text-align:center">' +
-            imgHtml +
-            '<div style="font-weight:bold;margin-top:5px;font-size:13px">' + p.name + '</div>' +
-            '<div style="color:#22c55e;margin-top:5px;font-weight:bold">' + p.price.toLocaleString() + ' Ks</div>' +
-            disc +
-          '</div></div>';
+        var key = (p.subCategory && p.subCategory.trim()) ? p.subCategory.trim() : 'Other';
+        if (!groups[key]) {
+          groups[key] = [];
+          groupOrder.push(key);
+        }
+        groups[key].push(p);
       });
       
-      var content = document.getElementById('_apSubContent');
-      if (content) {
-        content.innerHTML = '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">' + (html || '<div style="grid-column:1/-1;text-align:center;color:#64748b;padding:20px">Package မရှိပါ</div>') + '</div>';
+      // ============================================
+      // HTML
+      // ============================================
+      var html = '';
+      var totalGroups = groupOrder.length;
+      
+      // Group တစ်ခုတည်း + Other ပဲရှိရင် ခေါင်းစဉ် မပြ (Original ပုံစံပဲ)
+      if (totalGroups === 1 && groupOrder[0] === 'Other') {
+        if (typeof _origOpenGP === 'function') return _origOpenGP(game);
+        return;
       }
+      
+      groupOrder.forEach(function(groupName) {
+        var items = groups[groupName];
+        var icon = getIcon(groupName);
+        var displayName = groupName === 'Other' ? '📦 အခြား' : groupName;
+        
+        var itemsHtml = items.map(function(p) {
+          var finalPrice = Math.round(p.price * (1 - vipDisc/100));
+          var disc = vipDisc > 0 ? '<div style="font-size:11px;color:#22c55e;margin-top:2px">-' + vipDisc + '%</div>' : '';
+          var imgHtml = p.imgUrl
+            ? '<img src="' + p.imgUrl + '" style="width:50px;height:50px;object-fit:cover;border-radius:10px;border:1px solid #334155">'
+            : '<div style="font-size:26px">' + (p.image || '🎮') + '</div>';
+          
+          return '<div class="game-card" onclick="openModal(' + p.id + ')" style="cursor:pointer">' +
+            '<div style="padding:15px;text-align:center">' +
+              imgHtml +
+              '<div style="font-weight:bold;margin-top:5px;font-size:13px">' + p.name + '</div>' +
+              '<div style="color:#22c55e;margin-top:5px;font-weight:bold">' + p.price.toLocaleString() + ' Ks</div>' +
+              disc +
+            '</div>' +
+          '</div>';
+        }).join('');
+        
+        html += '<div class="_apGroup">' +
+          '<div class="_apGroupHead">' +
+            '<span class="_apGroupIcon">' + icon + '</span>' +
+            '<span class="_apGroupTitle">' + displayName + '</span>' +
+            '<span class="_apGroupCount">' + items.length + '</span>' +
+          '</div>' +
+          '<div class="_apGroupGrid">' + itemsHtml + '</div>' +
+        '</div>';
+      });
+      
+      var box = document.getElementById('productModalBox');
+      if (box) {
+        box.innerHTML = '<h3>' + game + ' - ရွေးပါ</h3>' + html +
+          '<button class="cancel" style="margin-top:15px" onclick="closeModal(\'productModal\')">Close</button>';
+      }
+      
+      var m = document.getElementById('productModal');
+      if (m) m.classList.add('show');
+      
+      console.log('✅ ' + game + ' groups: ' + groupOrder.length);
     } catch(e) {
-      console.log('_apShowSub err:', e.message);
+      console.log('Group err:', e.message);
+      if (typeof _origOpenGP === 'function') return _origOpenGP(game);
     }
   };
   
-  console.log('✅ App Premium split ready');
+  console.log('✅ Universal grouping ready');
 })();
 </script>
 </body>
