@@ -463,37 +463,76 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 
   <!-- Point Multiplier Section -->
   <div class="section" style="border:2px solid #a855f7">
-    <h3 style="color:#a855f7">⭐ Point Multiplier</h3>
-    <p style="font-size:12px;color:#94a3b8;margin-bottom:12px">User တွေ Order တင်တိုင်း ရမယ့် Point ကို မြှောက်ပေးမယ်။ ၁၀၀ Ks = ၁ Point (မြှောက်ကိန်း × )</p>
-    <div style="background:rgba(15,23,42,0.6);padding:15px;border-radius:12px;margin-bottom:12px">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="color:#94a3b8;font-size:13px">Base Rate</span>
-        <b style="color:#38bdf8">100 Ks = 1 Point</b>
+    <h3 style="color:#a855f7">⭐ Point System Settings</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:14px">User တွေ Order တင်တိုင်း ရမယ့် Point ကို အသေးစိတ် ပြင်နိုင်ပါတယ်</p>
+    
+    <!-- BASE RATE -->
+    <div style="background:rgba(15,23,42,0.6);padding:15px;border-radius:12px;margin-bottom:12px;border-left:3px solid #38bdf8">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="color:#38bdf8;font-size:13px">📊 Base Rate</b>
+        <span style="font-size:11px;color:#94a3b8">အခြေခံ နှုန်း</span>
       </div>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
-        <span style="color:#94a3b8;font-size:13px">Multiplier</span>
-        <b style="color:#a855f7;font-size:18px" id="pmDisplay">×1</b>
-      </div>
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span style="color:#94a3b8;font-size:13px">Effective Rate</span>
-        <b style="color:#22c55e" id="pmEffective">100 Ks = 1 Point</b>
+      <div style="font-size:12px;color:#cbd5e1;margin-bottom:8px">ဘယ်နှစ် Ks မှာ 1 Point ရမလဲ သတ်မှတ်ပါ</div>
+      <div class="row">
+        <input id="pmBaseRate" type="number" min="1" step="1" placeholder="100" style="flex:1">
+        <span style="padding:10px;color:#94a3b8">Ks = 1 Point</span>
+        <button onclick="saveBaseRate()">💾 Save</button>
       </div>
     </div>
     
-    <div class="row" style="flex-wrap:wrap;gap:6px;margin-bottom:10px">
-      <button onclick="setPointsMultiplier(0.5)" class="btn gray" style="margin:0;flex:1;min-width:60px">×0.5</button>
-      <button onclick="setPointsMultiplier(1)" class="btn blue" style="margin:0;flex:1;min-width:60px">×1</button>
-      <button onclick="setPointsMultiplier(2)" class="btn" style="margin:0;flex:1;min-width:60px">×2</button>
-      <button onclick="setPointsMultiplier(3)" class="btn orange" style="margin:0;flex:1;min-width:60px">×3</button>
-      <button onclick="setPointsMultiplier(5)" class="btn red" style="margin:0;flex:1;min-width:60px">×5</button>
+    <!-- MULTIPLIER -->
+    <div style="background:rgba(15,23,42,0.6);padding:15px;border-radius:12px;margin-bottom:12px;border-left:3px solid #a855f7">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <b style="color:#a855f7;font-size:13px">✖️ Multiplier</b>
+        <span style="font-size:11px;color:#94a3b8">မြှောက်ကိန်း</span>
+      </div>
+      <div style="font-size:12px;color:#cbd5e1;margin-bottom:8px">အထက်က Base Rate ကို မြှောက်ပေးမယ်</div>
+      
+      <div class="row" style="flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        <button onclick="quickSetPM(0.25)" class="btn gray" style="margin:0;flex:1;min-width:55px;font-size:11px;padding:8px">×0.25</button>
+        <button onclick="quickSetPM(0.5)" class="btn gray" style="margin:0;flex:1;min-width:55px;font-size:11px;padding:8px">×0.5</button>
+        <button onclick="quickSetPM(1)" class="btn blue" style="margin:0;flex:1;min-width:55px;font-size:11px;padding:8px">×1</button>
+        <button onclick="quickSetPM(1.5)" class="btn blue" style="margin:0;flex:1;min-width:55px;font-size:11px;padding:8px">×1.5</button>
+      </div>
+      <div class="row" style="flex-wrap:wrap;gap:6px;margin-bottom:10px">
+        <button onclick="quickSetPM(2)" class="btn" style="margin:0;flex:1;min-width:55px;font-size:11px;padding:8px">×2</button>
+        <button onclick="quickSetPM(3)" class="btn orange" style="margin:0;flex:1;min-width:55px;font-size:11px;padding:8px">×3</button>
+        <button onclick="quickSetPM(5)" class="btn red" style="margin:0;flex:1;min-width:55px;font-size:11px;padding:8px">×5</button>
+        <button onclick="quickSetPM(10)" class="btn red" style="margin:0;flex:1;min-width:55px;font-size:11px;padding:8px">×10</button>
+      </div>
+      
+      <div class="row">
+        <input id="pmMultiplier" type="number" step="0.1" min="0" placeholder="Custom (ဥပမာ 1.5, 7, 20)" style="flex:1">
+        <button onclick="savePM()">💾 Save</button>
+      </div>
     </div>
     
-    <div class="row">
-      <input id="pmCustomInput" type="number" step="0.1" min="0" placeholder="Custom multiplier (ဥပမာ 1.5)" style="flex:1">
-      <button onclick="setPointsMultiplier(document.getElementById('pmCustomInput').value)">💾 Set</button>
+    <!-- PREVIEW -->
+    <div style="background:linear-gradient(135deg,rgba(34,197,94,0.1),rgba(56,189,248,0.1));padding:15px;border-radius:12px;margin-bottom:12px;border:1px solid #22c55e">
+      <b style="color:#22c55e;font-size:13px;display:block;margin-bottom:10px">📊 Live Preview</b>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px">
+        <span style="color:#94a3b8">Base Rate</span>
+        <b id="pvBaseRate" style="color:#38bdf8">100 Ks = 1 Point</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px">
+        <span style="color:#94a3b8">Multiplier</span>
+        <b id="pvMultiplier" style="color:#a855f7">×1</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px;border-top:1px solid rgba(51,65,85,0.5);margin-top:6px;padding-top:8px">
+        <span style="color:#94a3b8">Effective Rate</span>
+        <b id="pvEffective" style="color:#22c55e">100 Ks = 1 Point</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px">
+        <span style="color:#94a3b8">1,000 Ks Order ရင်</span>
+        <b id="pvExample" style="color:#f59e0b">10 Points</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:6px 0;font-size:12px">
+        <span style="color:#94a3b8">10,000 Ks Order ရင်</span>
+        <b id="pvExample2" style="color:#f59e0b">100 Points</b>
+      </div>
     </div>
     
-    <p style="font-size:11px;color:#64748b;margin-top:10px">💡 ဥပမာ — ×2 ဆိုရင် ၁၀၀၀ Ks order = ၂၀ points ရမယ်</p>
+    <p style="font-size:11px;color:#64748b;margin-top:10px">💡 ဥပမာ — Base 100, Mult ×2 ဆိုရင် 1,000 Ks = 20 Points ရမယ်</p>
   </div>
 
 
@@ -1793,6 +1832,89 @@ tab = function(name, btn) {
   }
 };
 setTimeout(loadPointsMultiplier, 1500);
+
+
+/* POINTS_DETAIL_ADMIN */
+var _pmState = { baseRate: 100, multiplier: 1 };
+
+async function loadPointsSettings() {
+  try {
+    var c = await api('/api/admin/config');
+    _pmState.baseRate = parseFloat(c.pointsBaseRate) || 100;
+    _pmState.multiplier = parseFloat(c.pointsMultiplier) || 1;
+    var b = document.getElementById('pmBaseRate');
+    var m = document.getElementById('pmMultiplier');
+    if (b) b.value = _pmState.baseRate;
+    if (m) m.value = _pmState.multiplier;
+    updatePreview();
+  } catch(e) { console.log('loadPointsSettings err:', e.message); }
+}
+
+function updatePreview() {
+  var b = parseFloat(document.getElementById('pmBaseRate').value) || 100;
+  var m = parseFloat(document.getElementById('pmMultiplier').value) || 1;
+  if (b < 1) b = 1;
+  if (m < 0) m = 0;
+  var effective = b / m;
+  var rate1k = Math.floor((1000 / b) * m);
+  var rate10k = Math.floor((10000 / b) * m);
+  
+  var set = function(id, val) { var el = document.getElementById(id); if (el) el.textContent = val; };
+  set('pvBaseRate', b + ' Ks = 1 Point');
+  set('pvMultiplier', '×' + m);
+  set('pvEffective', Math.round(effective) + ' Ks = 1 Point');
+  set('pvExample', rate1k + ' Points');
+  set('pvExample2', rate10k + ' Points');
+}
+
+async function saveBaseRate() {
+  var b = parseFloat(document.getElementById('pmBaseRate').value);
+  if (isNaN(b) || b < 1) { alert('❌ Base Rate 1 အထက် ဖြစ်ရမယ်'); return; }
+  var d = await api('/api/admin/points-base-rate', { method: 'POST', body: JSON.stringify({ rate: b }) });
+  if (d && d.success) {
+    _pmState.baseRate = b;
+    alert('✅ Base Rate သိမ်းပြီး: ' + b + ' Ks = 1 Point');
+    updatePreview();
+  } else {
+    alert('❌ ' + ((d && d.error) || 'Failed'));
+  }
+}
+
+async function savePM() {
+  var m = parseFloat(document.getElementById('pmMultiplier').value);
+  if (isNaN(m) || m < 0) { alert('❌ Multiplier မှန်ကန်စွာ ထည့်ပါ'); return; }
+  if (m > 100) { alert('❌ Multiplier 100 အောက် ထားပါ'); return; }
+  var d = await api('/api/admin/config/section', { method: 'POST', body: JSON.stringify({ section: 'pointsMultiplier', value: m }) });
+  if (d && d.success) {
+    _pmState.multiplier = m;
+    alert('✅ Multiplier ×' + m + ' သိမ်းပြီး');
+    updatePreview();
+  } else {
+    alert('❌ ' + ((d && d.error) || 'Failed'));
+  }
+}
+
+function quickSetPM(v) {
+  var m = document.getElementById('pmMultiplier');
+  if (m) m.value = v;
+  updatePreview();
+}
+
+// Auto-update preview
+['pmBaseRate', 'pmMultiplier'].forEach(function(id){
+  setTimeout(function(){
+    var el = document.getElementById(id);
+    if (el) el.addEventListener('input', updatePreview);
+  }, 1000);
+});
+
+// Tab hook
+var _origTabPM2 = tab;
+tab = function(name, btn) {
+  _origTabPM2(name, btn);
+  if (name === 'settings' || name === 'site') setTimeout(loadPointsSettings, 400);
+};
+setTimeout(loadPointsSettings, 2000);
 
 </script>
 </body>

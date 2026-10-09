@@ -127,6 +127,7 @@ function defaultDB() {
         ]
       },
       pointsMultiplier: 1,
+      pointsBaseRate: 100,
       coupons: { 'WELCOME100': { amount: 100, uses: 1000, usesLeft: 1000, expires: 0 } }
     },
     banners: [
@@ -271,6 +272,7 @@ app.get('/api/site', (req, res) => res.json({
   musicUrl: db.config.musicUrl || '',
   spinConfig: db.config.spinConfig || { enabled: true, prizes: [] },
   pointsMultiplier: db.config.pointsMultiplier || 1,
+  pointsBaseRate: db.config.pointsBaseRate || 100,
   hero: db.config.hero || {title:'Safe Zone Topup', subtitle:'⚡ Instant Delivery', videoUrl:''},
   theme: db.config.theme || {primary:'#38bdf8', secondary:'#a855f7'},
   payments: db.config.payments || [
@@ -430,7 +432,9 @@ app.post('/api/order', auth, (req, res) => {
   req.user.balance -= finalPrice;
   var _pm = parseFloat((db.config && db.config.pointsMultiplier) || 1);
   if (isNaN(_pm) || _pm < 0) _pm = 1;
-  req.user.points = (req.user.points || 0) + Math.floor((finalPrice/100) * _pm);
+  var _base = parseFloat((db.config && db.config.pointsBaseRate) || 100);
+  if (isNaN(_base) || _base < 1) _base = 100;
+  req.user.points = (req.user.points || 0) + Math.floor((finalPrice / _base) * _pm);
   // cashback 2%
   const cashback = Math.floor(finalPrice * 0.02);
   req.user.cashback = (req.user.cashback || 0) + cashback;
