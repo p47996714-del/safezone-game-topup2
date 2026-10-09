@@ -1599,6 +1599,57 @@ body {
   gap: 10px;
 }
 </style>
+<style>
+/* IMG_FIX_CSS */
+
+/* Content Visibility ဖျက် (Image အားလုံး ပြဖို့) */
+.game-card,
+.quick-card,
+.game-img {
+  content-visibility: visible !important;
+  contain-intrinsic-size: auto !important;
+}
+
+/* Image ပြည့်စုံအောင် */
+.game-img {
+  width: 100% !important;
+  height: 120px !important;
+  object-fit: cover !important;
+  display: block !important;
+  background: #1e293b !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  image-rendering: auto !important;
+}
+
+/* Card အားလုံး ပြည့်စုံအောင် */
+.game-card {
+  display: block !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+  min-height: 180px;
+}
+
+/* Grid အားလုံး ပြည့်စုံအောင် */
+.games-grid,
+#gamesGrid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 12px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+
+/* Game Title ကို အတင်းပြ */
+.game-title {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-height: 50px !important;
+  opacity: 1 !important;
+  visibility: visible !important;
+}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -5953,6 +6004,55 @@ window.buyPremiumDirect = async function(productId) {
   };
   
   console.log('✅ Universal grouping ready');
+})();
+</script>
+<script>
+/* IMG_FIX_JS */
+(function(){
+  'use strict';
+  
+  function forceShowImages() {
+    try {
+      // Game Cards အားလုံး
+      var cards = document.querySelectorAll('.game-card');
+      cards.forEach(function(c) {
+        c.style.display = 'block';
+        c.style.opacity = '1';
+        c.style.visibility = 'visible';
+        c.style.contentVisibility = 'visible';
+        
+        // Image
+        var img = c.querySelector('.game-img');
+        if (img) {
+          img.style.display = 'block';
+          img.style.opacity = '1';
+          img.style.visibility = 'visible';
+          // src မရှိရင် default
+          if (!img.src || img.src.indexOf('data:') === 0) {
+            // ဘာမှ မလုပ်
+          }
+        }
+      });
+      
+      // Grid
+      var grid = document.getElementById('gamesGrid');
+      if (grid) {
+        grid.style.opacity = '1';
+        grid.style.visibility = 'visible';
+        grid.style.display = 'grid';
+      }
+    } catch(e) { console.log('forceShowImages err:', e.message); }
+  }
+  
+  // Init
+  setTimeout(forceShowImages, 500);
+  setTimeout(forceShowImages, 1500);
+  setTimeout(forceShowImages, 3000);
+  setTimeout(forceShowImages, 6000);
+  
+  setInterval(forceShowImages, 5000);
+  
+  console.log('✅ Image fix ready');
 })();
 </script>
 </body>
