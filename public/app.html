@@ -194,7 +194,18 @@ body.light .faq-item{background:#fff}
 .spin-wheel::after{content:'';position:absolute;top:-10px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:15px solid transparent;border-right:15px solid transparent;border-top:25px solid #38bdf8}
 .spin-center{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:70px;height:70px;background:#0f172a;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:30px;z-index:2;border:3px solid #38bdf8}
 .music-btn{position:fixed;bottom:90px;right:15px;width:46px;height:46px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#a855f7);border:none;color:#fff;font-size:20px;cursor:pointer;z-index:99;box-shadow:0 8px 20px rgba(56,189,248,0.4);display:flex;align-items:center;justify-content:center;transition:transform 0.2s}.music-btn:active{transform:scale(0.9)}
+
+/* Splash Screen Style */
+.splash{position:fixed;inset:0;background:radial-gradient(circle at 50% 50%,#1e293b,#0b1120);z-index:99999;display:flex;flex-direction:column;align-items:center;justify-content:center;transition:opacity 0.6s,visibility 0.6s}
+.splash.hide{opacity:0;visibility:hidden}
+.splash-logo img{width:130px;height:130px;object-fit:contain;animation:pulseLogo 1.5s ease-in-out infinite}
+@keyframes pulseLogo{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+.splash-title{margin-top:30px;font-size:24px;font-weight:bold;background:linear-gradient(135deg,#38bdf8,#a855f7,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;animation:gradShift 2s ease infinite}
+@keyframes gradShift{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+.splash-sub{margin-top:8px;font-size:12px;color:#94a3b8;letter-spacing:3px}
+
 </style>
+<link rel="manifest" href="/manifest.json">
 </head>
 <body>
 <div id="toast" class="toast"></div>
