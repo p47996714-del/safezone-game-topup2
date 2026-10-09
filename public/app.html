@@ -158,7 +158,17 @@ body.light .faq-item p{color:#334155}
 .profile-box{background:rgba(30,41,59,0.8);padding:24px;border-radius:18px;text-align:center;border:1px solid #334155}
 body.light .profile-box{background:#fff}
 </style>
-<style>/* HIDE_SPIN_SAFE */ .quick-card[data-spin-hidden="true"]{display:none !important}</style>
+
+<style>
+/* SPIN_HIDDEN_CSS */
+.quick-card:has(.icon:contains("🎰")),
+[id*="spin"],
+.spin-card,
+button[onclick*="openSpinWheel"],
+div[onclick*="openSpinWheel"],
+div[onclick*="SpinWheel"],
+div[onclick*="openSpin"] { display: none !important; }
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -1108,6 +1118,39 @@ window.testPush = async function() {
 // App load ရင် အလိုအလျောက် Subscribe
 setTimeout(function() { if (Notification.permission === 'granted') subscribeToPush(); }, 3000);
 </script>
+</script>
+<script>
+/* SPIN_HIDDEN_JS */
+(function(){
+  function hideSpinCards() {
+    // 1. .quick-card တွေထဲမှာ 🎰 သို့ Spin သို့ Lucky ပါတဲ့ card ကို ဖျောက်
+    var cards = document.querySelectorAll('.quick-card');
+    for (var i = 0; i < cards.length; i++) {
+      var c = cards[i];
+      var t = c.textContent || '';
+      if (c.innerHTML.indexOf('🎰') > -1 || t.indexOf('Spin') > -1 || t.indexOf('Lucky') > -1) {
+        c.style.setProperty('display', 'none', 'important');
+        c.setAttribute('hidden-spin', '1');
+      }
+    }
+    // 2. onclick မှာ Spin ပါတဲ့ element တွေ
+    var all = document.querySelectorAll('[onclick*="Spin"], [onclick*="spin"]');
+    for (var j = 0; j < all.length; j++) {
+      all[j].style.setProperty('display', 'none', 'important');
+    }
+    // 3. Modal ကိုပါ ဖျောက်
+    var sm = document.getElementById('spinModal');
+    if (sm) sm.style.setProperty('display', 'none', 'important');
+  }
+  // ချက်ချင်း + အဆက်မပြတ်
+  setTimeout(hideSpinCards, 200);
+  setTimeout(hideSpinCards, 800);
+  setTimeout(hideSpinCards, 2000);
+  setInterval(hideSpinCards, 1500);
+  if (window.MutationObserver) {
+    try { new MutationObserver(hideSpinCards).observe(document.body, {childList:true, subtree:true}); } catch(e){}
+  }
+})();
 </script>
 </body>
 </html>
