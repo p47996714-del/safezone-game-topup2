@@ -350,6 +350,14 @@ body.theme-neon{background:linear-gradient(135deg,#1a0033,#2d004d,#0a0a2e)}
 @keyframes _maintDot{0%,100%{background:#334155;transform:scale(1)}50%{background:#f59e0b;transform:scale(1.3)}}
 ._maintBtn{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;padding:14px 30px;border-radius:14px;font-weight:bold;font-size:14px;border:none;cursor:pointer;font-family:inherit;box-shadow:0 10px 30px rgba(245,158,11,0.4)}
 </style>
+<style>
+/* SPLASH_LOADING_CSS */
+.splash-loading{margin-top:35px;width:200px;height:4px;background:rgba(30,41,59,0.8);border-radius:4px;overflow:hidden;position:relative;box-shadow:0 0 15px rgba(56,189,248,0.2)}
+.splash-loading-bar{height:100%;width:0;background:linear-gradient(90deg,#38bdf8,#a855f7,#ec4899);border-radius:4px;animation:_loadFill 2.2s ease-in-out forwards;box-shadow:0 0 15px rgba(56,189,248,0.6)}
+@keyframes _loadFill{0%{width:0}30%{width:35%}60%{width:65%}100%{width:100%}}
+.splash-loading-text{margin-top:14px;font-size:10px;color:#64748b;letter-spacing:3px;text-transform:uppercase;animation:_loadPulse 1.5s ease-in-out infinite}
+@keyframes _loadPulse{0%,100%{opacity:0.4}50%{opacity:1}}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
