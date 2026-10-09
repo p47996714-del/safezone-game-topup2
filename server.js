@@ -875,16 +875,16 @@ app.post('/api/admin/chat', adminAuth, async (req, res) => {
 // PRODUCTS
 app.get('/api/admin/products', adminAuth, (req, res) => res.json(db.products));
 app.post('/api/admin/products', adminAuth, superAdmin, (req, res) => {
-  const { game, name, price, image, category, imgUrl } = req.body;
+  const { game, name, price, image, category, imgUrl, subCategory } = req.body;
   if (!game || !name || !price) return res.status(400).json({error:'ဖြည့်ပါ'});
   const id = (Math.max(0, ...db.products.map(p=>p.id)) + 1);
-  db.products.push({ id, game, name, price: Number(price), image: image || '🎮', imgUrl: imgUrl || null, category: category || 'Other' });
+  db.products.push({ id, game, name, price: Number(price), image: image || '🎮', imgUrl: imgUrl || null, category: category || 'Other', subCategory: subCategory || null });
   saveDB(); res.json({success:true});
 });
 app.put('/api/admin/products/:id', adminAuth, superAdmin, (req, res) => {
   const p = db.products.find(x => x.id === Number(req.params.id));
   if (!p) return res.status(404).json({error:'Product မတွေ့'});
-  ['game','name','price','image','category','imgUrl'].forEach(k => { if (req.body[k] !== undefined) p[k] = k==='price'?Number(req.body[k]):req.body[k]; });
+  ['game','name','price','image','category','imgUrl','subCategory'].forEach(k => { if (req.body[k] !== undefined) p[k] = k==='price'?Number(req.body[k]):req.body[k]; });
   saveDB(); res.json({success:true});
 });
 app.delete('/api/admin/products/:id', adminAuth, superAdmin, (req, res) => {

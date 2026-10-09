@@ -241,6 +241,7 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
         <input id="npPrice" type="number" placeholder="ဈေး (Ks)">
         <input id="npImg" placeholder="Emoji (💎)" style="max-width:90px">
         <select id="npCat"><option value="MOBA">⚔️ MOBA</option><option value="Battle Royale">🔫 Battle Royale</option><option value="Casual">♟️ Casual</option><option value="Premium">⭐ Premium</option><option value="Other">📦 အခြား</option></select>
+        <input id="npSubCat" placeholder="Sub (Canva/ChatGPT)" style="max-width:150px">
         <button onclick="addProduct()">ထည့်</button>
       </div>
     </div>
@@ -2280,6 +2281,95 @@ tab = function(name, btn) {
   if (name === 'site' || name === 'settings') setTimeout(loadVideosAdmin, 500);
 };
 setTimeout(loadVideosAdmin, 2000);
+
+
+/* ADMIN_SUBCAT */
+(function(){
+  'use strict';
+  
+  // addProduct override
+  setTimeout(function() {
+    if (typeof window.addProduct === 'function' && !window._subcatAddProduct) {
+      window._subcatAddProduct = true;
+      var _origAdd = window.addProduct;
+      window.addProduct = async function() {
+        var subCatEl = document.getElementById('npSubCat');
+        var subCat = subCatEl ? subCatEl.value.trim() : '';
+        
+        var game = document.getElementById('npGame').value.trim();
+        var name = document.getElementById('npName').value.trim();
+        var price = document.getElementById('npPrice').value;
+        var image = document.getElementById('npImg').value.trim() || '🎮';
+        var category = document.getElementById('npCat').value;
+        
+        if (!game || !name || !price) return alert('ဖြည့်ပါ');
+        
+        var d = await api('/api/admin/products', {
+          method: 'POST',
+          body: JSON.stringify({
+            game: game,
+            name: name,
+            price: price,
+            image: image,
+            category: category,
+            subCategory: subCat || null
+          })
+        });
+        
+        if (d.success) {
+          alert('✅ ထည့်ပြီး' + (subCat ? ' (' + subCat + ')' : ''));
+          ['npGame','npName','npPrice','npImg','npSubCat'].forEach(function(id) {
+            var el = document.getElementById(id);
+            if (el) el.value = '';
+          });
+          if (typeof loadProductsAdmin === 'function') loadProductsAdmin();
+        } else {
+          alert('❌ ' + d.error);
+        }
+      };
+      console.log('✅ Admin: addProduct with subCategory');
+    }
+  }, 1500);
+  
+  // Product List မှာ Subcategory ပြ + ပြင်
+  setTimeout(function() {
+    if (typeof window.loadProductsAdmin === 'function' && !window._subcatLoadProducts) {
+      window._subcatLoadProducts = true;
+      var _origLoad = window.loadProductsAdmin;
+      window.loadProductsAdmin = async function() {
+        var d = await api('/api/admin/products');
+        var cats = ['MOBA','Battle Royale','Casual','Premium','Other'];
+        var catLabels = {MOBA:'⚔️ MOBA', 'Battle Royale':'🔫 BR', 'Casual':'♟️ Casual', 'Premium':'⭐ Premium', 'Other':'📦 Other'};
+        
+        var listEl = document.getElementById('prodList');
+        if (!listEl) return;
+        
+        listEl.innerHTML = d.map(function(p) {
+          var imgHtml = p.imgUrl
+            ? '<div class="prod-img has-img" onclick="pickProdImg(' + p.id + ')"><img src="' + p.imgUrl + '"></div>'
+            : '<div class="prod-img" onclick="pickProdImg(' + p.id + ')">' + (p.image||'🎮') + '</div>';
+          
+          return '<div class="prod-row">' +
+            imgHtml +
+            '<input value="' + p.game + '" onchange="updateProd(' + p.id + ',\'game\',this.value)" placeholder="ဂိမ်း">' +
+            '<input value="' + p.name + '" onchange="updateProd(' + p.id + ',\'name\',this.value)" placeholder="Package">' +
+            '<input type="number" value="' + p.price + '" onchange="updateProd(' + p.id + ',\'price\',this.value)" placeholder="ဈေး">' +
+            '<input value="' + (p.subCategory || '') + '" onchange="updateProd(' + p.id + ',\'subCategory\',this.value)" placeholder="Sub (Canva)" style="max-width:100px;font-size:11px">' +
+            '<select onchange="updateProd(' + p.id + ',\'category\',this.value)">' +
+              cats.map(function(c) {
+                return '<option value="' + c + '" ' + (p.category===c?'selected':'') + '>' + (catLabels[c]||c) + '</option>';
+              }).join('') +
+            '</select>' +
+            '<button class="del" onclick="delProduct(' + p.id + ')">✕</button>' +
+          '</div>';
+        }).join('') || '<p class="empty">Package မရှိပါ</p>';
+      };
+      console.log('✅ Admin: loadProductsAdmin with subCategory');
+    }
+  }, 2000);
+  
+  // Game Images list ကို မထိ
+})();
 
 </script>
 </body>
