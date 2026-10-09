@@ -671,6 +671,203 @@ body.theme-neon{background:linear-gradient(135deg,#1a0033,#2d004d,#0a0a2e)}
   font-size: 10px; color: #94a3b8; margin-top: 4px;
 }
 </style>
+<style>
+/* FEATURES_20_CSS */
+
+/* 34. Animated Avatar Border */
+@keyframes _f20_avatarRotate { to { transform: rotate(360deg); } }
+._f20_avatarRing {
+  position: relative; display: inline-block;
+}
+._f20_avatarRing::before {
+  content: ''; position: absolute; inset: -4px;
+  border-radius: 50%;
+  background: conic-gradient(#38bdf8,#a855f7,#ec4899,#f59e0b,#22c55e,#38bdf8);
+  animation: _f20_avatarRotate 3s linear infinite;
+  z-index: -1;
+}
+
+/* 35. Name Glow Effect */
+._f20_nameGlow {
+  text-shadow: 0 0 10px rgba(56,189,248,0.8), 0 0 20px rgba(168,85,247,0.6);
+  animation: _f20_glowPulse 2s ease-in-out infinite;
+}
+@keyframes _f20_glowPulse {
+  0%,100% { text-shadow: 0 0 10px rgba(56,189,248,0.8), 0 0 20px rgba(168,85,247,0.6); }
+  50% { text-shadow: 0 0 20px rgba(56,189,248,1), 0 0 40px rgba(168,85,247,0.9); }
+}
+
+/* 36, 37, 55. Profile Themes */
+._f20_themeSunset { background: linear-gradient(135deg,#1a0b2e,#2d1b3d,#3d1f2e) !important; }
+._f20_themeOcean { background: linear-gradient(135deg,#0a1929,#0c2340,#0d3b66) !important; }
+._f20_themeForest { background: linear-gradient(135deg,#0a1f0a,#0d2818,#1a3d2e) !important; }
+._f20_themeNeon { background: linear-gradient(135deg,#1a0033,#2d004d,#0a0a2e) !important; }
+._f20_themeRose { background: linear-gradient(135deg,#2d0a1e,#4a1a3a,#6b2044) !important; }
+
+/* 44. Chat Stickers */
+._f20_stickerPanel {
+  display: grid; grid-template-columns: repeat(6, 1fr);
+  gap: 6px; padding: 10px;
+  background: rgba(15,23,42,0.95);
+  border-radius: 12px; margin-bottom: 8px;
+  max-height: 220px; overflow-y: auto;
+  border: 1px solid #334155;
+}
+._f20_sticker {
+  font-size: 26px; text-align: center;
+  padding: 6px; cursor: pointer;
+  border-radius: 8px; transition: 0.2s;
+}
+._f20_sticker:hover { background: rgba(56,189,248,0.15); }
+._f20_sticker:active { transform: scale(0.9); }
+
+/* 46. Emoji Picker */
+._f20_emojiPanel {
+  display: grid; grid-template-columns: repeat(8, 1fr);
+  gap: 4px; padding: 10px;
+  background: rgba(15,23,42,0.95);
+  border-radius: 12px; margin-bottom: 8px;
+  max-height: 200px; overflow-y: auto;
+  border: 1px solid #334155;
+}
+._f20_emoji {
+  font-size: 20px; text-align: center;
+  padding: 4px; cursor: pointer;
+  border-radius: 6px;
+}
+._f20_emoji:hover { background: rgba(56,189,248,0.15); }
+
+/* 15. Achievement Badges */
+._f20_achGrid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-top: 12px;
+}
+._f20_achCard {
+  background: linear-gradient(135deg,rgba(56,189,248,0.1),rgba(168,85,247,0.1));
+  border: 1px solid #334155; border-radius: 12px;
+  padding: 12px 6px; text-align: center;
+  position: relative; overflow: hidden;
+}
+._f20_achCard.locked { opacity: 0.4; filter: grayscale(1); }
+._f20_achCard.unlocked {
+  border-color: #f59e0b;
+  box-shadow: 0 0 15px rgba(245,158,11,0.3);
+  animation: _f20_achPop 0.6s ease;
+}
+@keyframes _f20_achPop {
+  0% { transform: scale(0.8); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
+._f20_achIcon { font-size: 26px; margin-bottom: 4px; }
+._f20_achName { font-size: 10px; color: #94a3b8; line-height: 1.3; }
+
+/* 32. Avatar Upload */
+._f20_avatarWrap {
+  position: relative; display: inline-block;
+  width: 100px; height: 100px; cursor: pointer;
+}
+._f20_avatarWrap img {
+  width: 100%; height: 100%; border-radius: 50%;
+  object-fit: cover; border: 3px solid #38bdf8;
+}
+._f20_avatarWrap::after {
+  content: '📸'; position: absolute;
+  bottom: 0; right: 0; background: #38bdf8;
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; border: 2px solid #0b1120;
+}
+
+/* 50. Video Tutorials */
+._f20_videoCard {
+  background: rgba(30,41,59,0.8);
+  border-radius: 14px; padding: 12px;
+  margin-bottom: 10px; border: 1px solid #334155;
+  display: flex; gap: 12px; align-items: center;
+  cursor: pointer;
+}
+._f20_videoCard:active { transform: scale(0.97); }
+._f20_videoThumb {
+  width: 60px; height: 45px; border-radius: 8px;
+  background: linear-gradient(135deg,#38bdf8,#a855f7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+._f20_videoInfo { flex: 1; min-width: 0; }
+._f20_videoTitle { font-size: 13px; font-weight: bold; color: #fff; }
+._f20_videoDesc { font-size: 11px; color: #94a3b8; margin-top: 3px; }
+
+/* 52. Terms Update Notification */
+._f20_termsBadge {
+  display: inline-block; background: #ef4444;
+  color: #fff; font-size: 10px; font-weight: bold;
+  padding: 2px 8px; border-radius: 10px;
+  margin-left: 6px; animation: _f20_pulse 1.5s infinite;
+}
+@keyframes _f20_pulse {
+  0%,100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+/* 40, 43. Session & Devices */
+._f20_deviceItem {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px; background: rgba(15,23,42,0.6);
+  border-radius: 12px; margin-bottom: 8px;
+  border: 1px solid #334155;
+}
+._f20_deviceIcon {
+  width: 40px; height: 40px; border-radius: 10px;
+  background: linear-gradient(135deg,#38bdf8,#a855f7);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; flex-shrink: 0;
+}
+._f20_deviceInfo { flex: 1; min-width: 0; }
+._f20_deviceName { font-size: 13px; font-weight: bold; color: #fff; }
+._f20_deviceMeta { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+._f20_deviceCurrent {
+  display: inline-block; background: #22c55e;
+  color: #fff; font-size: 9px; font-weight: bold;
+  padding: 2px 6px; border-radius: 6px;
+  margin-left: 6px;
+}
+
+/* Feature Buttons Grid */
+._f20_btnGrid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  gap: 10px; padding: 15px;
+}
+._f20_btn {
+  padding: 14px 12px;
+  background: rgba(30,41,59,0.8);
+  border: 1px solid #334155;
+  border-radius: 14px;
+  color: #fff; font-size: 12px; font-weight: bold;
+  font-family: inherit; cursor: pointer;
+  display: flex; flex-direction: column; align-items: center;
+  gap: 6px; text-align: center;
+  transition: transform 0.2s;
+}
+._f20_btn:active { transform: scale(0.96); }
+._f20_btnIcon { font-size: 24px; }
+._f20_btnLabel { font-size: 11px; }
+
+/* RTL Support */
+body._f20_rtl { direction: rtl; }
+body._f20_rtl .header { flex-direction: row-reverse; }
+body._f20_rtl .bottom-nav { flex-direction: row-reverse; }
+
+/* Widget Hint */
+._f20_widgetHint {
+  background: linear-gradient(135deg,rgba(56,189,248,0.1),rgba(168,85,247,0.1));
+  border: 1px solid #38bdf8;
+  border-radius: 14px; padding: 14px;
+  font-size: 12px; color: #cbd5e1;
+  line-height: 1.7; margin-bottom: 12px;
+}
+._f20_widgetHint b { color: #fff; }
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -3165,6 +3362,793 @@ window.buyPremiumDirect = async function(productId) {
     document.addEventListener('DOMContentLoaded', init);
   } else {
     setTimeout(init, 100);
+  }
+})();
+</script>
+<script>
+/* FEATURES_20_JS */
+(function(){
+  'use strict';
+  var _siteCache = null;
+  
+  function getSite() {
+    if (_siteCache) return Promise.resolve(_siteCache);
+    return fetch('/api/site', {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
+      _siteCache = d; return d;
+    }).catch(function(){ return {}; });
+  }
+  
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  
+  function openModal(id, html) {
+    var m = document.getElementById(id);
+    if (!m) {
+      m = document.createElement('div');
+      m.id = id;
+      m.className = 'modal';
+      document.body.appendChild(m);
+    }
+    m.innerHTML = '<div class="modal-box">' + html + '</div>';
+    m.classList.add('show');
+  }
+  
+  function closeModal(id) {
+    var m = document.getElementById(id);
+    if (m) m.classList.remove('show');
+  }
+  window._f20_close = closeModal;
+  
+  // ============================================
+  // 15. Achievement Showcase
+  // ============================================
+  var ACHIEVEMENTS = [
+    { id: 'first_order', icon: '🎯', name: 'First Order', desc: 'ပထမဆုံး Order' },
+    { id: 'ten_orders', icon: '🔟', name: '10 Orders', desc: '၁၀ ခါ ဝယ်ပြီး' },
+    { id: 'big_spender', icon: '💎', name: 'Big Spender', desc: '100K+ သုံးပြီး' },
+    { id: 'week_streak', icon: '🔥', name: '7-Day Streak', desc: '၇ ရက်ဆက် ဝင်' },
+    { id: 'vip_bronze', icon: '🥉', name: 'Bronze VIP', desc: 'Bronze အဆင့်' },
+    { id: 'vip_silver', icon: '🥈', name: 'Silver VIP', desc: 'Silver အဆင့်' },
+    { id: 'vip_gold', icon: '🥇', name: 'Gold VIP', desc: 'Gold အဆင့်' },
+    { id: 'vip_diamond', icon: '💠', name: 'Diamond VIP', desc: 'Diamond အဆင့်' },
+    { id: 'referrer', icon: '🎁', name: 'Referrer', desc: '၁ ယောက် Refer' },
+    { id: 'reviewer', icon: '⭐', name: 'Reviewer', desc: 'Review ပေးပြီး' },
+    { id: 'sharer', icon: '📤', name: 'Sharer', desc: 'App Share ပြီး' },
+    { id: 'big_points', icon: '✨', name: 'Point Master', desc: '1000+ Points' }
+  ];
+  
+  function getUnlockedAchievements() {
+    try {
+      var u = (typeof userData !== 'undefined' && userData) || {};
+      var orders = u.totalSpent || 0;
+      var pts = u.points || 0;
+      var achs = u.achievements || [];
+      var unlocked = achs.slice();
+      if (orders > 0 && unlocked.indexOf('first_order') === -1) unlocked.push('first_order');
+      if ((u.orders || []).length >= 10) unlocked.push('ten_orders');
+      if (orders >= 100000) unlocked.push('big_spender');
+      if (u.vip) {
+        var v = u.vip.toLowerCase();
+        unlocked.push('vip_' + v);
+      }
+      if (pts >= 1000) unlocked.push('big_points');
+      if (pts > 0) unlocked.push('sharer');
+      return unlocked;
+    } catch(e) { return []; }
+  }
+  
+  window._f20_achievements = function() {
+    var unlocked = getUnlockedAchievements();
+    var html = '<h3>🏅 Achievements (' + unlocked.length + '/' + ACHIEVEMENTS.length + ')</h3>' +
+      '<div class="_f20_achGrid">';
+    ACHIEVEMENTS.forEach(function(a) {
+      var has = unlocked.indexOf(a.id) > -1;
+      html += '<div class="_f20_achCard ' + (has ? 'unlocked' : 'locked') + '">' +
+        '<div class="_f20_achIcon">' + a.icon + '</div>' +
+        '<div class="_f20_achName">' + a.name + '</div>' +
+      '</div>';
+    });
+    html += '</div>';
+    html += '<button class="cancel" style="margin-top:15px" onclick="window._f20_close(\'_f20_achModal\')">Close</button>';
+    openModal('_f20_achModal', html);
+  };
+  
+  // ============================================
+  // 18. Price Drop Alert
+  // ============================================
+  window._f20_priceAlert = function() {
+    var alerts = JSON.parse(localStorage.getItem('_f20_priceAlerts') || '[]');
+    var products = (typeof products !== 'undefined' && products) || [];
+    var games = [];
+    var seen = {};
+    products.forEach(function(p) { if (!seen[p.game]) { seen[p.game] = 1; games.push(p.game); } });
+    
+    var html = '<h3>📉 Price Drop Alert</h3>' +
+      '<p style="font-size:12px;color:#94a3b8;margin-bottom:12px">ဈေး ကျသွားရင် Notification ရမယ်။ Alert လိုချင်တဲ့ ဂိမ်း ရွေးပါ။</p>' +
+      '<div style="max-height:300px;overflow-y:auto">';
+    games.forEach(function(g) {
+      var on = alerts.indexOf(g) > -1;
+      html += '<div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:10px;margin-bottom:6px">' +
+        '<span style="font-size:13px">' + esc(g) + '</span>' +
+        '<button class="toggle-switch ' + (on ? 'on' : '') + '" onclick="window._f20_toggleAlert(\'' + g.replace(/'/g, "\\'") + '\',this)"></button>' +
+      '</div>';
+    });
+    html += '</div>';
+    html += '<button class="cancel" style="margin-top:12px" onclick="window._f20_close(\'_f20_paModal\')">Close</button>';
+    openModal('_f20_paModal', html);
+  };
+  
+  window._f20_toggleAlert = function(game, btn) {
+    var alerts = JSON.parse(localStorage.getItem('_f20_priceAlerts') || '[]');
+    var i = alerts.indexOf(game);
+    if (i > -1) { alerts.splice(i, 1); btn.classList.remove('on'); }
+    else { alerts.push(game); btn.classList.add('on'); }
+    localStorage.setItem('_f20_priceAlerts', JSON.stringify(alerts));
+    // Save products price snapshot
+    var snap = JSON.parse(localStorage.getItem('_f20_priceSnap') || '{}');
+    ((typeof products !== 'undefined' && products) || []).forEach(function(p) {
+      if (!snap[p.id]) snap[p.id] = p.price;
+    });
+    localStorage.setItem('_f20_priceSnap', JSON.stringify(snap));
+    if (typeof showToast === 'function') showToast('✅ ' + game + ' Alert ' + (i === -1 ? 'On' : 'Off'), 'success');
+  };
+  
+  function checkPriceDrops() {
+    try {
+      var alerts = JSON.parse(localStorage.getItem('_f20_priceAlerts') || '[]');
+      if (!alerts.length) return;
+      var snap = JSON.parse(localStorage.getItem('_f20_priceSnap') || '{}');
+      var products = (typeof products !== 'undefined' && products) || [];
+      var newSnap = {};
+      products.forEach(function(p) {
+        newSnap[p.id] = p.price;
+        if (snap[p.id] && snap[p.id] > p.price && alerts.indexOf(p.game) > -1) {
+          var diff = snap[p.id] - p.price;
+          if (typeof showToast === 'function') showToast('📉 ' + p.game + ' ' + p.name + ' ဈေး ' + diff.toLocaleString() + ' Ks ကျ!', 'success');
+        }
+      });
+      localStorage.setItem('_f20_priceSnap', JSON.stringify(newSnap));
+    } catch(e) {}
+  }
+  
+  // ============================================
+  // 24. Auto-Reorder
+  // ============================================
+  window._f20_autoReorder = function() {
+    var list = JSON.parse(localStorage.getItem('_f20_autoReorders') || '[]');
+    var html = '<h3>🔄 Auto-Reorder</h3>' +
+      '<p style="font-size:12px;color:#94a3b8;margin-bottom:12px">Order တွေ အလိုအလျောက် ပြန်မှာ</p>';
+    
+    if (!list.length) {
+      html += '<div style="text-align:center;padding:30px;color:#64748b">' +
+        '⚙️ Auto-Reorder မရှိသေးပါ<br>' +
+        '<span style="font-size:11px">Order History ကနေ သတ်မှတ်နိုင်ပါတယ်</span>' +
+      '</div>';
+    } else {
+      list.forEach(function(r, i) {
+        html += '<div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:10px;margin-bottom:8px;font-size:12px;border:1px solid #334155">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center">' +
+            '<div><b style="color:#38bdf8">' + esc(r.game) + '</b><div style="color:#94a3b8">' + esc(r.product) + ' · ' + (r.price||0).toLocaleString() + ' Ks</div></div>' +
+            '<button style="background:#ef4444;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="window._f20_delAuto(' + i + ')">✕</button>' +
+          '</div>' +
+          '<div style="color:#94a3b8;margin-top:6px;font-size:11px">⏰ ' + (r.days || 7) + ' ရက်တစ်ခါ · နောက်ဆုံး: ' + (r.lastRun ? new Date(r.lastRun).toLocaleDateString() : 'Never') + '</div>' +
+        '</div>';
+      });
+    }
+    html += '<button class="cancel" style="margin-top:12px" onclick="window._f20_close(\'_f20_arModal\')">Close</button>';
+    openModal('_f20_arModal', html);
+  };
+  
+  window._f20_delAuto = function(i) {
+    var list = JSON.parse(localStorage.getItem('_f20_autoReorders') || '[]');
+    list.splice(i, 1);
+    localStorage.setItem('_f20_autoReorders', JSON.stringify(list));
+    window._f20_autoReorder();
+  };
+  
+  window._f20_addAutoReorder = function(order) {
+    var list = JSON.parse(localStorage.getItem('_f20_autoReorders') || '[]');
+    list.push({ game: order.game, product: order.product, playerId: order.playerId, serverId: order.serverId || '', price: order.price, days: 7, lastRun: 0 });
+    localStorage.setItem('_f20_autoReorders', JSON.stringify(list));
+    if (typeof showToast === 'function') showToast('✅ Auto-Reorder ထည့်ပြီ', 'success');
+  };
+  
+  // ============================================
+  // 25. Order Reminders
+  // ============================================
+  window._f20_reminders = function() {
+    var list = JSON.parse(localStorage.getItem('_f20_reminders') || '[]');
+    var html = '<h3>⏰ Order Reminders</h3>' +
+      '<p style="font-size:12px;color:#94a3b8;margin-bottom:12px">ပြန်မှာဖို့ Reminder သတ်မှတ်ပါ</p>';
+    if (!list.length) {
+      html += '<div style="text-align:center;padding:30px;color:#64748b">' +
+        '⏰ Reminder မရှိသေးပါ<br>' +
+        '<span style="font-size:11px">Profile → Add Reminder</span>' +
+      '</div>';
+    } else {
+      list.forEach(function(r, i) {
+        var when = new Date(r.at);
+        var passed = Date.now() > r.at;
+        html += '<div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:10px;margin-bottom:8px;font-size:12px;border:1px solid ' + (passed ? '#22c55e' : '#334155') + '">' +
+          '<div style="display:flex;justify-content:space-between;align-items:center">' +
+            '<div><b>' + esc(r.title) + '</b><div style="color:#94a3b8;margin-top:3px">' + when.toLocaleString() + '</div></div>' +
+            '<button style="background:#ef4444;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="window._f20_delReminder(' + i + ')">✕</button>' +
+          '</div>' +
+        '</div>';
+      });
+    }
+    html += '<button onclick="window._f20_newReminder()" style="background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;padding:12px;width:100%;margin-top:10px;font-weight:bold;font-family:inherit;cursor:pointer">➕ Add Reminder</button>';
+    html += '<button class="cancel" style="margin-top:8px" onclick="window._f20_close(\'_f20_remModal\')">Close</button>';
+    openModal('_f20_remModal', html);
+  };
+  
+  window._f20_newReminder = function() {
+    var title = prompt('Reminder title:', 'MLBB ပြန်မှာရန်');
+    if (!title) return;
+    var hours = parseInt(prompt('ဘယ်နှစ်နာရီအကြာ Reminder လုပ်မလဲ?', '24')) || 24;
+    var list = JSON.parse(localStorage.getItem('_f20_reminders') || '[]');
+    list.push({ title: title, at: Date.now() + hours * 3600000 });
+    localStorage.setItem('_f20_reminders', JSON.stringify(list));
+    if (typeof showToast === 'function') showToast('✅ Reminder ထည့်ပြီ', 'success');
+    window._f20_reminders();
+  };
+  
+  window._f20_delReminder = function(i) {
+    var list = JSON.parse(localStorage.getItem('_f20_reminders') || '[]');
+    list.splice(i, 1);
+    localStorage.setItem('_f20_reminders', JSON.stringify(list));
+    window._f20_reminders();
+  };
+  
+  function checkReminders() {
+    try {
+      var list = JSON.parse(localStorage.getItem('_f20_reminders') || '[]');
+      var now = Date.now();
+      var changed = false;
+      list.forEach(function(r) {
+        if (!r.notified && now >= r.at) {
+          if (typeof showToast === 'function') showToast('⏰ ' + r.title, 'info');
+          r.notified = true;
+          changed = true;
+        }
+      });
+      if (changed) localStorage.setItem('_f20_reminders', JSON.stringify(list));
+    } catch(e) {}
+  }
+  
+  // ============================================
+  // 32, 34, 35. Avatar Upload + Animated Border + Name Glow
+  // ============================================
+  window._f20_avatar = function() {
+    var curAvatar = localStorage.getItem('_f20_avatar') || '';
+    var glowOn = localStorage.getItem('_f20_nameGlow') === '1';
+    var html = '<h3>👤 Avatar & Profile</h3>' +
+      '<div style="text-align:center;margin-bottom:15px">' +
+        '<div class="_f20_avatarWrap" onclick="document.getElementById(\'_f20_avatarInput\').click()">' +
+          '<img id="_f20_avatarPreview" src="' + (curAvatar || 'https://i.imgur.com/iRwIfqs.png') + '">' +
+        '</div>' +
+        '<input type="file" id="_f20_avatarInput" accept="image/*" style="display:none" onchange="window._f20_uploadAvatar(this)">' +
+        '<div style="font-size:11px;color:#94a3b8;margin-top:8px">ပုံ နှိပ်ပြီး ပြောင်းပါ (Max 2MB)</div>' +
+      '</div>' +
+      '<div class="settings-toggle">' +
+        '<div><b style="font-size:13px">✨ Name Glow Effect</b><div style="font-size:11px;color:#94a3b8">နာမည်မှာ အလင်းရောင်</div></div>' +
+        '<div class="toggle-switch ' + (glowOn ? 'on' : '') + '" id="_f20_glowToggle" onclick="window._f20_toggleGlow(this)"></div>' +
+      '</div>' +
+      '<button onclick="window._f20_saveAvatar()" style="background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;padding:12px;width:100%;margin-top:10px;font-weight:bold;font-family:inherit;cursor:pointer">💾 Save</button>' +
+      '<button class="cancel" style="margin-top:8px" onclick="window._f20_close(\'_f20_avModal\')">Close</button>';
+    openModal('_f20_avModal', html);
+  };
+  
+  window._f20_uploadAvatar = function(input) {
+    var file = input.files[0];
+    if (!file) return;
+    if (file.size > 2 * 1024 * 1024) { if (typeof showToast === 'function') showToast('❌ ပုံ 2MB အောက်သာ', 'error'); return; }
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var p = document.getElementById('_f20_avatarPreview');
+      if (p) p.src = e.target.result;
+      localStorage.setItem('_f20_avatar', e.target.result);
+      if (typeof showToast === 'function') showToast('✅ ပုံ တင်ပြီ', 'success');
+    };
+    reader.readAsDataURL(file);
+  };
+  
+  window._f20_toggleGlow = function(el) {
+    el.classList.toggle('on');
+    localStorage.setItem('_f20_nameGlow', el.classList.contains('on') ? '1' : '0');
+    applyAvatar();
+  };
+  
+  window._f20_saveAvatar = function() {
+    applyAvatar();
+    if (typeof showToast === 'function') showToast('✅ Save ပြီ', 'success');
+    closeModal('_f20_avModal');
+  };
+  
+  function applyAvatar() {
+    try {
+      var av = localStorage.getItem('_f20_avatar');
+      var glow = localStorage.getItem('_f20_nameGlow') === '1';
+      var pAvatar = document.getElementById('pAvatar');
+      if (pAvatar && av) {
+        pAvatar.style.backgroundImage = 'url(' + av + ')';
+        pAvatar.style.backgroundSize = 'cover';
+        pAvatar.style.backgroundPosition = 'center';
+        pAvatar.style.color = 'transparent';
+        pAvatar.textContent = '';
+      }
+      // Animated border
+      if (pAvatar && !pAvatar.parentElement.querySelector('._f20_avatarRing')) {
+        var wrap = document.createElement('div');
+        wrap.className = '_f20_avatarRing';
+        wrap.style.cssText = 'display:inline-block;position:relative';
+        pAvatar.parentNode.insertBefore(wrap, pAvatar);
+        wrap.appendChild(pAvatar);
+      }
+      // Name glow
+      var pName = document.getElementById('pName');
+      if (pName) pName.classList.toggle('_f20_nameGlow', glow);
+    } catch(e) { console.log('applyAvatar err:', e.message); }
+  }
+  
+  // ============================================
+  // 36, 37. Profile Themes + Background
+  // ============================================
+  window._f20_profileThemes = function() {
+    var cur = localStorage.getItem('_f20_profileTheme') || 'default';
+    var themes = [
+      { id: 'default', name: 'Default', cls: '' },
+      { id: 'sunset', name: '🌅 Sunset', cls: '_f20_themeSunset' },
+      { id: 'ocean', name: '🌊 Ocean', cls: '_f20_themeOcean' },
+      { id: 'forest', name: '🌲 Forest', cls: '_f20_themeForest' },
+      { id: 'neon', name: '💜 Neon', cls: '_f20_themeNeon' },
+      { id: 'rose', name: '🌹 Rose', cls: '_f20_themeRose' }
+    ];
+    var html = '<h3>🎨 Profile Themes</h3>' +
+      '<p style="font-size:12px;color:#94a3b8;margin-bottom:12px">Profile Page ရဲ့ နောက်ခံ အရောင်</p>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+    themes.forEach(function(t) {
+      var active = cur === t.id;
+      html += '<div onclick="window._f20_setTheme(\'' + t.id + '\')" style="padding:14px;border-radius:12px;cursor:pointer;border:2px solid ' + (active ? '#38bdf8' : '#334155') + ';background:rgba(15,23,42,0.6);text-align:center;font-size:12px;font-weight:bold">' +
+        t.name + (active ? ' ✓' : '') +
+      '</div>';
+    });
+    html += '</div>';
+    html += '<button class="cancel" style="margin-top:12px" onclick="window._f20_close(\'_f20_ptModal\')">Close</button>';
+    openModal('_f20_ptModal', html);
+  };
+  
+  window._f20_setTheme = function(id) {
+    localStorage.setItem('_f20_profileTheme', id);
+    applyProfileTheme();
+    window._f20_profileThemes();
+  };
+  
+  function applyProfileTheme() {
+    var id = localStorage.getItem('_f20_profileTheme') || 'default';
+    var pv = document.getElementById('view-profile');
+    if (!pv) return;
+    pv.classList.remove('_f20_themeSunset','_f20_themeOcean','_f20_themeForest','_f20_themeNeon','_f20_themeRose');
+    if (id !== 'default') pv.classList.add('_f20_theme' + id.charAt(0).toUpperCase() + id.slice(1));
+  }
+  
+  // ============================================
+  // 40, 43. Trusted Devices + Session Management
+  // ============================================
+  window._f20_devices = function() {
+    var devices = JSON.parse(localStorage.getItem('_f20_devices') || '[]');
+    var currentUA = navigator.userAgent;
+    var currentId = localStorage.getItem('_f20_deviceId');
+    if (!currentId) {
+      currentId = 'dev_' + Date.now();
+      localStorage.setItem('_f20_deviceId', currentId);
+      devices.push({
+        id: currentId,
+        name: getDeviceName(currentUA),
+        ua: currentUA.substring(0, 60),
+        lastActive: Date.now(),
+        trusted: true
+      });
+      localStorage.setItem('_f20_devices', JSON.stringify(devices));
+    } else {
+      // Update last active
+      devices.forEach(function(d) { if (d.id === currentId) d.lastActive = Date.now(); });
+      localStorage.setItem('_f20_devices', JSON.stringify(devices));
+    }
+    
+    var html = '<h3>📱 Trusted Devices</h3>' +
+      '<p style="font-size:12px;color:#94a3b8;margin-bottom:12px">ဒီ Account ကို ဝင်ထားတဲ့ ကိရိယာများ</p>';
+    devices.forEach(function(d) {
+      var isCurrent = d.id === currentId;
+      html += '<div class="_f20_deviceItem">' +
+        '<div class="_f20_deviceIcon">' + (d.name.indexOf('iPhone') > -1 || d.name.indexOf('iPad') > -1 ? '📱' : '💻') + '</div>' +
+        '<div class="_f20_deviceInfo">' +
+          '<div class="_f20_deviceName">' + esc(d.name) + (isCurrent ? '<span class="_f20_deviceCurrent">CURRENT</span>' : '') + '</div>' +
+          '<div class="_f20_deviceMeta">' + new Date(d.lastActive).toLocaleString() + '</div>' +
+        '</div>' +
+        (isCurrent ? '' : '<button style="background:#ef4444;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;font-family:inherit" onclick="window._f20_removeDevice(\'' + d.id + '\')">✕</button>') +
+      '</div>';
+    });
+    html += '<button class="cancel" style="margin-top:12px" onclick="window._f20_close(\'_f20_devModal\')">Close</button>';
+    openModal('_f20_devModal', html);
+  };
+  
+  function getDeviceName(ua) {
+    if (/iPhone/.test(ua)) return 'iPhone';
+    if (/iPad/.test(ua)) return 'iPad';
+    if (/Android/.test(ua)) return 'Android Device';
+    if (/Mac/.test(ua)) return 'Mac';
+    if (/Windows/.test(ua)) return 'Windows PC';
+    return 'Unknown Device';
+  }
+  
+  window._f20_removeDevice = function(id) {
+    var devices = JSON.parse(localStorage.getItem('_f20_devices') || '[]');
+    devices = devices.filter(function(d) { return d.id !== id; });
+    localStorage.setItem('_f20_devices', JSON.stringify(devices));
+    window._f20_devices();
+  };
+  
+  // ============================================
+  // 41. Two-Factor Auth
+  // ============================================
+  window._f20_2fa = function() {
+    var enabled = localStorage.getItem('_f20_2fa') === '1';
+    var html = '<h3>🔐 Two-Factor Authentication</h3>' +
+      '<p style="font-size:12px;color:#94a3b8;margin-bottom:12px">Telegram OTP နဲ့ လုံခြုံရေး မြှင့်</p>' +
+      '<div class="settings-toggle">' +
+        '<div><b style="font-size:13px">🔒 2FA Enabled</b><div style="font-size:11px;color:#94a3b8">Login ဝင်တိုင်း OTP လိုမယ်</div></div>' +
+        '<div class="toggle-switch ' + (enabled ? 'on' : '') + '" onclick="window._f20_toggle2fa(this)"></div>' +
+      '</div>' +
+      '<div style="background:rgba(56,189,248,0.08);border:1px solid #38bdf8;border-radius:12px;padding:12px;margin-top:12px;font-size:12px;color:#cbd5e1;line-height:1.7">' +
+        '💡 Telegram Link လုပ်ထားရင် 2FA အလုပ်လုပ်မယ်<br>' +
+        '• OTP Code ၆ လုံး Telegram ဆီ ရောက်မယ်<br>' +
+        '• တစ်ခါ Login တိုင်း လိုမယ်' +
+      '</div>' +
+      '<button class="cancel" style="margin-top:12px" onclick="window._f20_close(\'_f20_2faModal\')">Close</button>';
+    openModal('_f20_2faModal', html);
+  };
+  
+  window._f20_toggle2fa = function(el) {
+    el.classList.toggle('on');
+    var on = el.classList.contains('on');
+    localStorage.setItem('_f20_2fa', on ? '1' : '0');
+    if (typeof showToast === 'function') showToast(on ? '🔐 2FA On' : '🔓 2FA Off', on ? 'success' : 'info');
+  };
+  
+  // ============================================
+  // 44, 46. Chat Stickers + Emojis
+  // ============================================
+  var STICKERS = ['😀','😂','🥰','😎','🤔','😴','😭','😡','🥳','🤩','😱','🤗','😇','🤠','🥶','🤯','😈','👻','💀','🤖','🎮','💎','🔥','⭐','❤️','💜','🎁','🏆','⚡','🚀','👑','💪','🙏','👍','👏','🎉','🎊','🌈','💯','✨','🍕','🍔','🎂','☕','🍻'];
+  
+  window._f20_stickers = function() {
+    var html = '<h3>😀 Chat Stickers</h3>' +
+      '<div class="_f20_stickerPanel">';
+    STICKERS.forEach(function(s) {
+      html += '<div class="_f20_sticker" onclick="window._f20_insertSticker(\'' + s + '\')">' + s + '</div>';
+    });
+    html += '</div>' +
+      '<button class="cancel" onclick="window._f20_close(\'_f20_stModal\')">Close</button>';
+    openModal('_f20_stModal', html);
+  };
+  
+  window._f20_insertSticker = function(s) {
+    var inp = document.getElementById('chatInput');
+    if (inp) {
+      inp.value += s;
+      inp.focus();
+    }
+    closeModal('_f20_stModal');
+  };
+  
+  window._f20_emojis = function() {
+    var html = '<h3>😊 Emoji Picker</h3>' +
+      '<div class="_f20_emojiPanel">';
+    STICKERS.forEach(function(s) {
+      html += '<div class="_f20_emoji" onclick="window._f20_insertSticker(\'' + s + '\')">' + s + '</div>';
+    });
+    html += '</div>' +
+      '<button class="cancel" onclick="window._f20_close(\'_f20_emModal\')">Close</button>';
+    openModal('_f20_emModal', html);
+  };
+  
+  // ============================================
+  // 45. Voice Messages
+  // ============================================
+  var _f20_recorder = null;
+  var _f20_chunks = [];
+  var _f20_recording = false;
+  
+  window._f20_voice = function() {
+    var html = '<h3>🎤 Voice Message</h3>' +
+      '<p style="font-size:12px;color:#94a3b8;margin-bottom:12px">Chat မှာ အသံ ပို့ရန်</p>' +
+      '<div style="text-align:center;padding:20px">' +
+        '<button id="_f20_recBtn" onclick="window._f20_toggleRecord()" style="width:100px;height:100px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#dc2626);border:none;color:#fff;font-size:40px;cursor:pointer;box-shadow:0 10px 30px rgba(239,68,68,0.5)">🎤</button>' +
+        '<div id="_f20_recStatus" style="margin-top:15px;font-size:13px;color:#94a3b8">နှိပ်ပြီး စတင် ရိုက်ပါ</div>' +
+      '</div>' +
+      '<div style="background:rgba(56,189,248,0.08);border:1px solid #38bdf8;border-radius:12px;padding:12px;font-size:12px;color:#cbd5e1;line-height:1.7">' +
+        '💡 မှတ်ချက်: Browser Permission လိုမယ်<br>' +
+        '• ရိုက်ပြီး ရပ်ရင် အလိုအလျောက် ပို့မယ်<br>' +
+        '• ကြာချိန် ၆၀ စက္ကန့် အထိ' +
+      '</div>' +
+      '<button class="cancel" style="margin-top:12px" onclick="window._f20_close(\'_f20_vcModal\')">Close</button>';
+    openModal('_f20_vcModal', html);
+  };
+  
+  window._f20_toggleRecord = async function() {
+    var btn = document.getElementById('_f20_recBtn');
+    var st = document.getElementById('_f20_recStatus');
+    if (_f20_recording) {
+      if (_f20_recorder) _f20_recorder.stop();
+      _f20_recording = false;
+      if (btn) btn.style.background = 'linear-gradient(135deg,#ef4444,#dc2626)';
+      return;
+    }
+    try {
+      var stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      _f20_recorder = new MediaRecorder(stream);
+      _f20_chunks = [];
+      _f20_recorder.ondataavailable = function(e) { _f20_chunks.push(e.data); };
+      _f20_recorder.onstop = function() {
+        var blob = new Blob(_f20_chunks, { type: 'audio/webm' });
+        var reader = new FileReader();
+        reader.onload = async function(e) {
+          var b64 = e.target.result;
+          try {
+            if (typeof api === 'function') {
+              var r = await api('/api/chat', { method:'POST', body: JSON.stringify({ audio: b64, text: '🎤 Voice Message' }) });
+              if (r && r.success) {
+                if (typeof showToast === 'function') showToast('✅ Voice Message ပို့ပြီ', 'success');
+                if (typeof loadChat === 'function') loadChat();
+                closeModal('_f20_vcModal');
+              }
+            }
+          } catch(err) { console.log('voice send err:', err.message); }
+        };
+        reader.readAsDataURL(blob);
+        stream.getTracks().forEach(function(t) { t.stop(); });
+      };
+      _f20_recorder.start();
+      _f20_recording = true;
+      if (btn) btn.style.background = 'linear-gradient(135deg,#22c55e,#059669)';
+      if (st) st.textContent = '🔴 Recording... ထပ်နှိပ်ရင် ရပ်မယ်';
+      setTimeout(function() {
+        if (_f20_recording) window._f20_toggleRecord();
+      }, 60000);
+    } catch(e) {
+      if (typeof showToast === 'function') showToast('❌ Microphone ခွင့်ပြုပါ', 'error');
+    }
+  };
+  
+  // ============================================
+  // 50. Video Tutorials
+  // ============================================
+  var VIDEOS = [
+    { title: 'Wallet ဖြည့်နည်း', desc: 'Deposit တင်နည်း အဆင့်ဆင့်', url: 'https://www.youtube.com/results?search_query=how+to+top+up+mlbb' },
+    { title: 'MLBB ဝယ်နည်း', desc: 'Player ID ထည့်ပြီး Order တင်နည်း', url: 'https://www.youtube.com/results?search_query=mlbb+diamond+top+up' },
+    { title: 'Point လဲနည်း', desc: 'Points ကို Balance ပြန်လဲနည်း', url: 'https://www.youtube.com/' },
+    { title: 'Referral Share', desc: 'သူငယ်ချင်းကို Share လုပ်နည်း', url: 'https://www.youtube.com/' }
+  ];
+  
+  window._f20_videos = function() {
+    var html = '<h3>📺 Video Tutorials</h3>';
+    VIDEOS.forEach(function(v) {
+      html += '<div class="_f20_videoCard" onclick="window.open(\'' + v.url + '\', \'_blank\')">' +
+        '<div class="_f20_videoThumb">▶️</div>' +
+        '<div class="_f20_videoInfo">' +
+          '<div class="_f20_videoTitle">' + esc(v.title) + '</div>' +
+          '<div class="_f20_videoDesc">' + esc(v.desc) + '</div>' +
+        '</div>' +
+      '</div>';
+    });
+    html += '<button class="cancel" style="margin-top:12px" onclick="window._f20_close(\'_f20_vidModal\')">Close</button>';
+    openModal('_f20_vidModal', html);
+  };
+  
+  // ============================================
+  // 52. Terms Update Notification
+  // ============================================
+  function checkTermsUpdate() {
+    try {
+      fetch('/api/terms', { cache: 'no-store' }).then(function(r){ return r.json(); }).then(function(d){
+        if (!d || !d.terms) return;
+        var hash = (d.terms + (d.privacy||'')).length + '_' + (d.terms.substring(0,20));
+        var seen = localStorage.getItem('_f20_termsHash');
+        if (seen && seen !== hash) {
+          localStorage.setItem('_f20_termsHash', hash);
+          if (typeof showToast === 'function') showToast('📜 Terms & Privacy Update ဖြစ်သွားပါပြီ', 'info');
+        } else if (!seen) {
+          localStorage.setItem('_f20_termsHash', hash);
+        }
+      }).catch(function(){});
+    } catch(e) {}
+  }
+  
+  // ============================================
+  // 55. App Theme (Dark/Light/Sunset/Ocean)
+  // ============================================
+  window._f20_appTheme = function() {
+    var cur = localStorage.getItem('_f20_appTheme') || 'dark';
+    var themes = [
+      { id: 'dark', name: '🌙 Dark' },
+      { id: 'light', name: '☀️ Light' },
+      { id: 'sunset', name: '🌅 Sunset' },
+      { id: 'ocean', name: '🌊 Ocean' }
+    ];
+    var html = '<h3>🎨 App Theme</h3>' +
+      '<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">';
+    themes.forEach(function(t) {
+      var active = cur === t.id;
+      html += '<div onclick="window._f20_setAppTheme(\'' + t.id + '\')" style="padding:14px;border-radius:12px;cursor:pointer;border:2px solid ' + (active ? '#38bdf8' : '#334155') + ';background:rgba(15,23,42,0.6);text-align:center;font-size:12px;font-weight:bold">' +
+        t.name + (active ? ' ✓' : '') +
+      '</div>';
+    });
+    html += '</div>';
+    html += '<button class="cancel" style="margin-top:12px" onclick="window._f20_close(\'_f20_atModal\')">Close</button>';
+    openModal('_f20_atModal', html);
+  };
+  
+  window._f20_setAppTheme = function(id) {
+    localStorage.setItem('_f20_appTheme', id);
+    applyAppTheme();
+    if (typeof showToast === 'function') showToast('✅ ' + id + ' Theme', 'success');
+    window._f20_appTheme();
+  };
+  
+  function applyAppTheme() {
+    var id = localStorage.getItem('_f20_appTheme') || 'dark';
+    document.body.classList.remove('_f20_themeSunset','_f20_themeOcean');
+    document.body.classList.remove('light');
+    if (id === 'light') document.body.classList.add('light');
+    else if (id === 'sunset') document.body.classList.add('_f20_themeSunset');
+    else if (id === 'ocean') document.body.classList.add('_f20_themeOcean');
+  }
+  
+  // ============================================
+  // 57. RTL Support
+  // ============================================
+  window._f20_toggleRTL = function() {
+    var on = localStorage.getItem('_f20_rtl') === '1';
+    var html = '<h3>🔀 RTL Support</h3>' +
+      '<p style="font-size:12px;color:#94a3b8;margin-bottom:12px">Right-to-Left (အာရပ်၊ ဟီဘရူး ဘာသာစကားအတွက်)</p>' +
+      '<div class="settings-toggle">' +
+        '<div><b style="font-size:13px">🔀 Enable RTL</b><div style="font-size:11px;color:#94a3b8">စာ ညာဘက်ကနေ ဘယ်ဘက်</div></div>' +
+        '<div class="toggle-switch ' + (on ? 'on' : '') + '" onclick="window._f20_setRTL(this)"></div>' +
+      '</div>' +
+      '<button class="cancel" style="margin-top:12px" onclick="window._f20_close(\'_f20_rtlModal\')">Close</button>';
+    openModal('_f20_rtlModal', html);
+  };
+  
+  window._f20_setRTL = function(el) {
+    el.classList.toggle('on');
+    var on = el.classList.contains('on');
+    localStorage.setItem('_f20_rtl', on ? '1' : '0');
+    document.body.classList.toggle('_f20_rtl', on);
+  };
+  
+  // ============================================
+  // 60. Widget Support (PWA Shortcuts)
+  // ============================================
+  window._f20_widget = function() {
+    var html = '<h3>📱 Widget & Shortcuts</h3>' +
+      '<div class="_f20_widgetHint">' +
+        '💡 <b>Home Screen Widget ရနည်း:</b><br><br>' +
+        '1. App ကို Install လုပ်ပါ (Profile → Install App)<br>' +
+        '2. Home Screen မှာ ၁ စက္ကန့် နှိပ်<br>' +
+        '3. "Widgets" ကို ရွေး<br>' +
+        '4. Safe Zone ကို ရှာ<br>' +
+        '5. Widget ဆွဲချ<br><br>' +
+        '<b>Quick Shortcuts:</b><br>' +
+        '• 💰 Wallet — App ဖွင့်တာနဲ့ Wallet Tab<br>' +
+        '• 🎮 Topup — Home Tab<br>' +
+        '• 💬 Chat — Chat Tab<br><br>' +
+        '<b>Tip:</b> App ကို Chrome Menu → "Add to Home screen" နဲ့ ထည့်ပါ' +
+      '</div>' +
+      '<button onclick="window._f20_installShortcut()" style="background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;padding:12px;width:100%;font-weight:bold;font-family:inherit;cursor:pointer">📱 Install App ပြန်လုပ်</button>' +
+      '<button class="cancel" style="margin-top:8px" onclick="window._f20_close(\'_f20_wdModal\')">Close</button>';
+    openModal('_f20_wdModal', html);
+  };
+  
+  window._f20_installShortcut = function() {
+    if (typeof installPWA === 'function') {
+      installPWA();
+      closeModal('_f20_wdModal');
+    }
+  };
+  
+  // ============================================
+  // Inject Features Grid into Profile
+  // ============================================
+  function renderFeaturesGrid() {
+    try {
+      var pv = document.getElementById('view-profile');
+      if (!pv) return;
+      if (pv.querySelector('._f20_btnGrid')) return;
+      
+      var grid = document.createElement('div');
+      grid.className = '_f20_btnGrid';
+      grid.innerHTML = 
+        '<button class="_f20_btn" onclick="window._f20_achievements()"><div class="_f20_btnIcon">🏅</div><div class="_f20_btnLabel">Achievements</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_avatar()"><div class="_f20_btnIcon">👤</div><div class="_f20_btnLabel">Avatar & Glow</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_appTheme()"><div class="_f20_btnIcon">🎨</div><div class="_f20_btnLabel">App Theme</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_profileThemes()"><div class="_f20_btnIcon">🖼️</div><div class="_f20_btnLabel">Profile BG</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_devices()"><div class="_f20_btnIcon">📱</div><div class="_f20_btnLabel">Devices</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_2fa()"><div class="_f20_btnIcon">🔐</div><div class="_f20_btnLabel">2FA</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_priceAlert()"><div class="_f20_btnIcon">📉</div><div class="_f20_btnLabel">Price Alert</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_reminders()"><div class="_f20_btnIcon">⏰</div><div class="_f20_btnLabel">Reminders</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_autoReorder()"><div class="_f20_btnIcon">🔄</div><div class="_f20_btnLabel">Auto-Reorder</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_videos()"><div class="_f20_btnIcon">📺</div><div class="_f20_btnLabel">Tutorials</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_stickers()"><div class="_f20_btnIcon">😀</div><div class="_f20_btnLabel">Stickers</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_voice()"><div class="_f20_btnIcon">🎤</div><div class="_f20_btnLabel">Voice Msg</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_widget()"><div class="_f20_btnIcon">📲</div><div class="_f20_btnLabel">Widget</div></button>' +
+        '<button class="_f20_btn" onclick="window._f20_toggleRTL()"><div class="_f20_btnIcon">🔀</div><div class="_f20_btnLabel">RTL</div></button>';
+      
+      // Insert before last child (logout button)
+      var lastChild = pv.lastElementChild;
+      if (lastChild && lastChild.parentNode) {
+        lastChild.parentNode.insertBefore(grid, lastChild);
+      } else {
+        pv.appendChild(grid);
+      }
+      console.log('✅ Features grid injected');
+    } catch(e) { console.log('renderFeaturesGrid err:', e.message); }
+  }
+  
+  // ============================================
+  // INIT
+  // ============================================
+  function init() {
+    applyAvatar();
+    applyProfileTheme();
+    applyAppTheme();
+    if (localStorage.getItem('_f20_rtl') === '1') document.body.classList.add('_f20_rtl');
+    
+    setTimeout(renderFeaturesGrid, 3000);
+    setTimeout(renderFeaturesGrid, 6000);
+    setTimeout(renderFeaturesGrid, 10000);
+    
+    setTimeout(checkTermsUpdate, 4000);
+    setInterval(checkReminders, 30000);
+    setTimeout(checkPriceDrops, 8000);
+    setInterval(checkPriceDrops, 60000);
+    
+    // Re-render on profile tab
+    if (typeof window.switchTab === 'function') {
+      var _orig = window.switchTab;
+      window.switchTab = function(n, b) {
+        _orig(n, b);
+        if (n === 'profile') {
+          setTimeout(renderFeaturesGrid, 500);
+          setTimeout(applyAvatar, 600);
+          setTimeout(applyProfileTheme, 700);
+        }
+      };
+    }
+    
+    // MutationObserver
+    if (window.MutationObserver) {
+      try {
+        var pv = document.getElementById('view-profile');
+        if (pv) {
+          new MutationObserver(function(){
+            if (pv.style.display !== 'none' && !pv.querySelector('._f20_btnGrid')) {
+              renderFeaturesGrid();
+            }
+          }).observe(pv, { attributes: true, attributeFilter: ['style'] });
+        }
+      } catch(e) {}
+    }
+    
+    console.log('✅ Features 20 loaded');
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    setTimeout(init, 200);
   }
 })();
 </script>
