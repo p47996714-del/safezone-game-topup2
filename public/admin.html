@@ -461,6 +461,42 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
       <p style="font-size:12px;color:#94a3b8;margin-top:10px">💡 @BotFather → token · @userinfobot → chat id</p>
     </div>
 
+  <!-- Point Multiplier Section -->
+  <div class="section" style="border:2px solid #a855f7">
+    <h3 style="color:#a855f7">⭐ Point Multiplier</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:12px">User တွေ Order တင်တိုင်း ရမယ့် Point ကို မြှောက်ပေးမယ်။ ၁၀၀ Ks = ၁ Point (မြှောက်ကိန်း × )</p>
+    <div style="background:rgba(15,23,42,0.6);padding:15px;border-radius:12px;margin-bottom:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="color:#94a3b8;font-size:13px">Base Rate</span>
+        <b style="color:#38bdf8">100 Ks = 1 Point</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <span style="color:#94a3b8;font-size:13px">Multiplier</span>
+        <b style="color:#a855f7;font-size:18px" id="pmDisplay">×1</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span style="color:#94a3b8;font-size:13px">Effective Rate</span>
+        <b style="color:#22c55e" id="pmEffective">100 Ks = 1 Point</b>
+      </div>
+    </div>
+    
+    <div class="row" style="flex-wrap:wrap;gap:6px;margin-bottom:10px">
+      <button onclick="setPointsMultiplier(0.5)" class="btn gray" style="margin:0;flex:1;min-width:60px">×0.5</button>
+      <button onclick="setPointsMultiplier(1)" class="btn blue" style="margin:0;flex:1;min-width:60px">×1</button>
+      <button onclick="setPointsMultiplier(2)" class="btn" style="margin:0;flex:1;min-width:60px">×2</button>
+      <button onclick="setPointsMultiplier(3)" class="btn orange" style="margin:0;flex:1;min-width:60px">×3</button>
+      <button onclick="setPointsMultiplier(5)" class="btn red" style="margin:0;flex:1;min-width:60px">×5</button>
+    </div>
+    
+    <div class="row">
+      <input id="pmCustomInput" type="number" step="0.1" min="0" placeholder="Custom multiplier (ဥပမာ 1.5)" style="flex:1">
+      <button onclick="setPointsMultiplier(document.getElementById('pmCustomInput').value)">💾 Set</button>
+    </div>
+    
+    <p style="font-size:11px;color:#64748b;margin-top:10px">💡 ဥပမာ — ×2 ဆိုရင် ၁၀၀၀ Ks order = ၂၀ points ရမယ်</p>
+  </div>
+
+
     <div class="section">
       <h3>🎨 Banners</h3>
       <div id="bannerList"></div>
@@ -1711,6 +1747,52 @@ window._prettyConfirm = function(msg) {
     }
   });
 };
+
+
+/* POINTS_MULTIPLIER_ADMIN */
+async function loadPointsMultiplier() {
+  try {
+    var c = await api('/api/admin/config');
+    var pm = parseFloat(c.pointsMultiplier) || 1;
+    updatePMDisplay(pm);
+  } catch(e) {}
+}
+
+function updatePMDisplay(pm) {
+  pm = parseFloat(pm) || 1;
+  var d = document.getElementById('pmDisplay');
+  var e = document.getElementById('pmEffective');
+  if (d) d.textContent = '×' + pm;
+  if (e) {
+    var rate = Math.round(100 / pm);
+    e.textContent = rate + ' Ks = 1 Point';
+  }
+  var inp = document.getElementById('pmCustomInput');
+  if (inp) inp.value = pm;
+}
+
+async function setPointsMultiplier(pm) {
+  pm = parseFloat(pm);
+  if (isNaN(pm) || pm < 0) { alert('❌ မှန်ကန်တဲ့ နံပါတ် ထည့်ပါ'); return; }
+  if (pm > 100) { alert('❌ Multiplier 100 အောက်သာ ထားပါ'); return; }
+  var d = await api('/api/admin/config/section', { method: 'POST', body: JSON.stringify({ section: 'pointsMultiplier', value: pm }) });
+  if (d && d.success) {
+    updatePMDisplay(pm);
+    alert('✅ Point Multiplier ×' + pm + ' သိမ်းပြီး');
+  } else {
+    alert('❌ ' + ((d && d.error) || 'Failed'));
+  }
+}
+
+// Tab ပြောင်းရင် multiplier load
+var _origTabPM = tab;
+tab = function(name, btn) {
+  _origTabPM(name, btn);
+  if (name === 'settings' || name === 'site') {
+    setTimeout(loadPointsMultiplier, 300);
+  }
+};
+setTimeout(loadPointsMultiplier, 1500);
 
 </script>
 </body>

@@ -126,6 +126,7 @@ function defaultDB() {
           { value: 0, weight: 1 }
         ]
       },
+      pointsMultiplier: 1,
       coupons: { 'WELCOME100': { amount: 100, uses: 1000, usesLeft: 1000, expires: 0 } }
     },
     banners: [
@@ -269,6 +270,7 @@ app.get('/api/site', (req, res) => res.json({
   customSound: db.config.customSound || '',
   musicUrl: db.config.musicUrl || '',
   spinConfig: db.config.spinConfig || { enabled: true, prizes: [] },
+  pointsMultiplier: db.config.pointsMultiplier || 1,
   hero: db.config.hero || {title:'Safe Zone Topup', subtitle:'⚡ Instant Delivery', videoUrl:''},
   theme: db.config.theme || {primary:'#38bdf8', secondary:'#a855f7'},
   payments: db.config.payments || [
@@ -426,7 +428,9 @@ app.post('/api/order', auth, (req, res) => {
   const finalPrice = Math.round(product.price * (1 - vipDiscount/100));
   if (req.user.balance < finalPrice) return res.status(400).json({error:'လက်ကျန်ငွေ မလုံလောက်ပါ'});
   req.user.balance -= finalPrice;
-  req.user.points = (req.user.points || 0) + Math.floor(finalPrice/100);
+  var _pm = parseFloat((db.config && db.config.pointsMultiplier) || 1);
+  if (isNaN(_pm) || _pm < 0) _pm = 1;
+  req.user.points = (req.user.points || 0) + Math.floor((finalPrice/100) * _pm);
   // cashback 2%
   const cashback = Math.floor(finalPrice * 0.02);
   req.user.cashback = (req.user.cashback || 0) + cashback;

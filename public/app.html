@@ -2141,6 +2141,32 @@ window.buyPremiumDirect = async function(productId) {
     showToast('❌ ' + err.message, 'error');
   }
 };
+
+/* POINT_INFO_UI */
+(function(){
+  function addPointInfo() {
+    var pts = document.getElementById('pPts');
+    if (!pts || pts.dataset.pInfo) return;
+    pts.dataset.pInfo = '1';
+    // Points ရဲ့ ဘေးမှာ multiplier info ထည့်မယ်
+    fetch('/api/site', {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
+      var pm = parseFloat(d.pointsMultiplier) || 1;
+      if (pm !== 1) {
+        var row = pts.parentElement;
+        if (row && !row.querySelector('._pmBadge')) {
+          var b = document.createElement('span');
+          b.className = '_pmBadge';
+          b.style.cssText = 'background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;font-size:9px;font-weight:bold;padding:2px 6px;border-radius:10px;margin-left:5px';
+          b.textContent = '×' + pm + ' BOOST';
+          row.appendChild(b);
+        }
+      }
+    }).catch(function(){});
+  }
+  setTimeout(addPointInfo, 3000);
+  setInterval(addPointInfo, 5000);
+})();
+
 </script>
 </body>
 </html>
