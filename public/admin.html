@@ -461,6 +461,57 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
       <p style="font-size:12px;color:#94a3b8;margin-top:10px">💡 @BotFather → token · @userinfobot → chat id</p>
     </div>
 
+  <!-- VIDEO GUIDES EDITOR -->
+  <div class="section" style="border:2px solid #ec4899">
+    <h3 style="color:#ec4899">📺 Video Guides</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:12px">User ရဲ့ Profile မှာ ပြမယ့် Video လမ်းညွှန်များ</p>
+    
+    <!-- SECTION SETTINGS -->
+    <div style="background:rgba(15,23,42,0.6);padding:14px;border-radius:12px;margin-bottom:12px;border-left:3px solid #ec4899">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px">
+        <div>
+          <b style="font-size:13px;color:#ec4899">📺 Video Section</b>
+          <div id="vidEnabledStatus" style="font-size:11px;color:#94a3b8;margin-top:2px">Checking...</div>
+        </div>
+        <button id="vidToggleBtn" onclick="toggleVideoSection()" style="padding:8px 16px;background:#334155;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-family:inherit">...</button>
+      </div>
+      <div class="row">
+        <input id="vidSectionTitle" placeholder="Section Title (📺 Video Guides)">
+      </div>
+      <div class="row">
+        <input id="vidSectionDesc" placeholder="Short description">
+      </div>
+      <div class="row">
+        <button onclick="saveVideoSettings()">💾 Save Settings</button>
+      </div>
+    </div>
+    
+    <!-- VIDEO LIST -->
+    <div style="font-size:13px;font-weight:bold;color:#ec4899;margin-bottom:8px">🎬 Video List</div>
+    <div id="videoList"></div>
+    
+    <!-- ADD NEW VIDEO -->
+    <div style="background:rgba(15,23,42,0.6);padding:14px;border-radius:12px;margin-top:12px">
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:10px">➕ Video အသစ် ထည့်</div>
+      <div class="row">
+        <input id="vNewTitle" placeholder="Video Title" style="flex:1">
+      </div>
+      <div class="row">
+        <input id="vNewUrl" placeholder="YouTube URL or Video Link" style="flex:1">
+      </div>
+      <div class="row">
+        <input id="vNewIcon" placeholder="Icon (🎮)" value="🎬" style="max-width:80px">
+        <input id="vNewCat" placeholder="Category (Beginner)" style="flex:1">
+        <input id="vNewDesc" placeholder="Description (optional)" style="flex:1">
+      </div>
+      <div class="row">
+        <button onclick="addVideo()">➕ Add Video</button>
+      </div>
+    </div>
+    
+    <p style="font-size:11px;color:#64748b;margin-top:10px">💡 YouTube URL တွေ ထည့်လို့ရ · User Profile မှာ အလိုအလျောက် ပြမယ်</p>
+  </div>
+
   <!-- Point Multiplier Section -->
   <div class="section" style="border:2px solid #a855f7">
     <h3 style="color:#a855f7">⭐ Point System Settings</h3>
@@ -2043,6 +2094,192 @@ tab = function(name, btn) {
   }
 };
 setTimeout(loadRedeemRate, 2000);
+
+
+/* VIDEO_GUIDE_ADMIN */
+var _videosState = { videos: [], categories: [], title: '📺 Video Guides', desc: '', enabled: true };
+
+async function loadVideosAdmin() {
+  try {
+    var d = await api('/api/admin/videos');
+    if (d.error) return;
+    _videosState = d;
+    renderVideoList();
+    renderVideoSettings();
+  } catch(e) { console.log('loadVideosAdmin err:', e.message); }
+}
+
+function renderVideoSettings() {
+  var titleEl = document.getElementById('vidSectionTitle');
+  var descEl = document.getElementById('vidSectionDesc');
+  if (titleEl) titleEl.value = _videosState.title || '📺 Video Guides';
+  if (descEl) descEl.value = _videosState.desc || '';
+  var st = document.getElementById('vidEnabledStatus');
+  var btn = document.getElementById('vidToggleBtn');
+  if (st && btn) {
+    if (_videosState.enabled !== false) {
+      st.innerHTML = '<span style="color:#22c55e;font-weight:bold">🟢 ဖွင့်ထားသည်</span>';
+      btn.textContent = '🔴 ပိတ်မည်';
+      btn.style.background = '#ef4444';
+    } else {
+      st.innerHTML = '<span style="color:#ef4444;font-weight:bold">🔴 ပိတ်ထားသည်</span>';
+      btn.textContent = '🟢 ဖွင့်မည်';
+      btn.style.background = '#22c55e';
+    }
+  }
+}
+
+function renderVideoList() {
+  var list = document.getElementById('videoList');
+  if (!list) return;
+  var vids = _videosState.videos || [];
+  if (!vids.length) {
+    list.innerHTML = '<p style="text-align:center;color:#64748b;font-size:12px;padding:15px">Video မရှိသေးပါ</p>';
+    return;
+  }
+  list.innerHTML = vids.map(function(v, i) {
+    return '<div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:12px;margin-bottom:8px;border:1px solid #334155">' +
+      '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">' +
+        '<div style="flex:1;min-width:0">' +
+          '<div style="font-size:13px;font-weight:bold;color:#fff">' + (v.icon || '🎬') + ' ' + escapeHtmlAdmin(v.title || '') + '</div>' +
+          '<div style="font-size:11px;color:#38bdf8;margin-top:4px;word-break:break-all">' + escapeHtmlAdmin(v.url || '') + '</div>' +
+          (v.desc ? '<div style="font-size:11px;color:#94a3b8;margin-top:3px">' + escapeHtmlAdmin(v.desc) + '</div>' : '') +
+          '<div style="font-size:10px;color:#64748b;margin-top:4px">🏷️ ' + (v.category || 'Other') + '</div>' +
+        '</div>' +
+        '<button onclick="deleteVideo(' + i + ')" style="background:#ef4444;color:#fff;border:none;border-radius:8px;padding:6px 10px;font-size:11px;cursor:pointer;font-family:inherit;flex-shrink:0">✕</button>' +
+      '</div>' +
+      '<div style="display:flex;gap:6px;margin-top:8px">' +
+        '<button onclick="moveVideoUp(' + i + ')" style="flex:1;padding:6px;background:#334155;color:#fff;border:none;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit" ' + (i === 0 ? 'disabled style="opacity:0.3;flex:1;padding:6px;background:#334155;color:#fff;border:none;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit"' : '') + '>⬆️ Up</button>' +
+        '<button onclick="moveVideoDown(' + i + ')" style="flex:1;padding:6px;background:#334155;color:#fff;border:none;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit" ' + (i === vids.length - 1 ? 'disabled style="opacity:0.3;flex:1;padding:6px;background:#334155;color:#fff;border:none;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit"' : '') + '>⬇️ Down</button>' +
+        '<button onclick="editVideo(' + i + ')" style="flex:1;padding:6px;background:#38bdf8;color:#fff;border:none;border-radius:8px;font-size:11px;cursor:pointer;font-family:inherit">✏️ Edit</button>' +
+      '</div>' +
+    '</div>';
+  }).join('');
+}
+
+function escapeHtmlAdmin(s) {
+  return String(s || '').replace(/[&<>"']/g, function(c){
+    return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+  });
+}
+
+async function addVideo() {
+  var title = document.getElementById('vNewTitle').value.trim();
+  var url = document.getElementById('vNewUrl').value.trim();
+  var icon = document.getElementById('vNewIcon').value.trim() || '🎬';
+  var cat = document.getElementById('vNewCat').value.trim() || 'Other';
+  var desc = document.getElementById('vNewDesc').value.trim();
+  if (!title || !url) return alert('Title နဲ့ URL ဖြည့်ပါ');
+  
+  var vids = (_videosState.videos || []).slice();
+  vids.push({
+    id: 'v' + Date.now(),
+    title: title,
+    url: url,
+    icon: icon,
+    category: cat,
+    desc: desc
+  });
+  _videosState.videos = vids;
+  var d = await api('/api/admin/videos', { method: 'POST', body: JSON.stringify({ videos: vids }) });
+  if (d && d.success) {
+    document.getElementById('vNewTitle').value = '';
+    document.getElementById('vNewUrl').value = '';
+    document.getElementById('vNewDesc').value = '';
+    renderVideoList();
+    alert('✅ Video ထည့်ပြီ');
+  } else {
+    alert('❌ ' + ((d && d.error) || 'Failed'));
+  }
+}
+
+async function deleteVideo(i) {
+  if (!confirm('ဖျက်မှာလား?')) return;
+  var vids = (_videosState.videos || []).slice();
+  vids.splice(i, 1);
+  _videosState.videos = vids;
+  var d = await api('/api/admin/videos', { method: 'POST', body: JSON.stringify({ videos: vids }) });
+  if (d && d.success) renderVideoList();
+}
+
+async function editVideo(i) {
+  var v = _videosState.videos[i];
+  if (!v) return;
+  var newTitle = prompt('Title:', v.title);
+  if (newTitle === null) return;
+  var newUrl = prompt('URL:', v.url);
+  if (newUrl === null) return;
+  var newIcon = prompt('Icon:', v.icon || '🎬');
+  if (newIcon === null) return;
+  var newCat = prompt('Category:', v.category || 'Other');
+  if (newCat === null) return;
+  var newDesc = prompt('Description:', v.desc || '');
+  if (newDesc === null) return;
+  
+  v.title = newTitle.trim();
+  v.url = newUrl.trim();
+  v.icon = newIcon.trim() || '🎬';
+  v.category = newCat.trim() || 'Other';
+  v.desc = newDesc.trim();
+  
+  var vids = _videosState.videos.slice();
+  var d = await api('/api/admin/videos', { method: 'POST', body: JSON.stringify({ videos: vids }) });
+  if (d && d.success) {
+    renderVideoList();
+    alert('✅ ပြင်ပြီ');
+  }
+}
+
+async function moveVideoUp(i) {
+  if (i <= 0) return;
+  var vids = _videosState.videos.slice();
+  var tmp = vids[i - 1];
+  vids[i - 1] = vids[i];
+  vids[i] = tmp;
+  _videosState.videos = vids;
+  var d = await api('/api/admin/videos', { method: 'POST', body: JSON.stringify({ videos: vids }) });
+  if (d && d.success) renderVideoList();
+}
+
+async function moveVideoDown(i) {
+  var vids = _videosState.videos.slice();
+  if (i >= vids.length - 1) return;
+  var tmp = vids[i + 1];
+  vids[i + 1] = vids[i];
+  vids[i] = tmp;
+  _videosState.videos = vids;
+  var d = await api('/api/admin/videos', { method: 'POST', body: JSON.stringify({ videos: vids }) });
+  if (d && d.success) renderVideoList();
+}
+
+async function saveVideoSettings() {
+  var title = document.getElementById('vidSectionTitle').value.trim();
+  var desc = document.getElementById('vidSectionDesc').value.trim();
+  var d = await api('/api/admin/videos/settings', { method: 'POST', body: JSON.stringify({ title: title, desc: desc }) });
+  if (d && d.success) {
+    _videosState.title = title;
+    _videosState.desc = desc;
+    alert('✅ Settings သိမ်းပြီ');
+  }
+}
+
+async function toggleVideoSection() {
+  var newEnabled = _videosState.enabled === false;
+  var d = await api('/api/admin/videos/settings', { method: 'POST', body: JSON.stringify({ enabled: newEnabled }) });
+  if (d && d.success) {
+    _videosState.enabled = newEnabled;
+    renderVideoSettings();
+    alert(newEnabled ? '🟢 Video Section ဖွင့်ပြီ' : '🔴 Video Section ပိတ်ပြီ');
+  }
+}
+
+// Tab hook
+var _origTabVideos = tab;
+tab = function(name, btn) {
+  _origTabVideos(name, btn);
+  if (name === 'site' || name === 'settings') setTimeout(loadVideosAdmin, 500);
+};
+setTimeout(loadVideosAdmin, 2000);
 
 </script>
 </body>

@@ -868,6 +868,25 @@ body._f20_rtl .bottom-nav { flex-direction: row-reverse; }
 }
 ._f20_widgetHint b { color: #fff; }
 </style>
+<style>
+/* USER_VIDEOS_CSS */
+._uvSection{background:rgba(30,41,59,0.8);border-radius:18px;padding:15px;margin:15px;border:1px solid #334155}
+._uvTitle{font-size:14px;font-weight:bold;color:#ec4899;margin-bottom:4px;display:flex;align-items:center;gap:6px}
+._uvDesc{font-size:11px;color:#94a3b8;margin-bottom:12px}
+._uvList{display:flex;flex-direction:column;gap:8px}
+._uvCard{display:flex;align-items:center;gap:12px;padding:12px;background:rgba(15,23,42,0.7);border-radius:12px;text-decoration:none;color:#fff;border:1px solid #334155;transition:transform 0.2s;cursor:pointer;position:relative;overflow:hidden}
+._uvCard:active{transform:scale(0.97)}
+._uvCard::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:linear-gradient(180deg,#ec4899,#a855f7)}
+._uvThumb{width:56px;height:42px;border-radius:10px;background:linear-gradient(135deg,#ec4899,#a855f7);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0;position:relative}
+._uvThumb::after{content:'';position:absolute;inset:0;background:rgba(0,0,0,0.3);border-radius:10px;opacity:0;transition:0.2s}
+._uvCard:hover ._uvThumb::after{opacity:1}
+._uvPlayIcon{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:18px;color:#fff;z-index:2;opacity:0.9}
+._uvInfo{flex:1;min-width:0}
+._uvName{font-size:13px;font-weight:bold;color:#fff;margin-bottom:3px}
+._uvMeta{font-size:11px;color:#94a3b8;display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+._uvCat{padding:2px 8px;background:rgba(236,72,153,0.15);color:#ec4899;font-size:9px;font-weight:bold;border-radius:8px;border:1px solid rgba(236,72,153,0.3)}
+._uvArrow{font-size:16px;color:#64748b;flex-shrink:0}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -4150,6 +4169,114 @@ window.buyPremiumDirect = async function(productId) {
   } else {
     setTimeout(init, 200);
   }
+})();
+</script>
+<script>
+/* USER_VIDEOS */
+(function(){
+  'use strict';
+  var _videosCache = null;
+  
+  function getSite() {
+    if (_videosCache) return Promise.resolve(_videosCache);
+    return fetch('/api/site', {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
+      _videosCache = d;
+      return d;
+    }).catch(function(){ return {}; });
+  }
+  
+  function esc(s) {
+    return String(s || '').replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+  
+  function getYoutubeId(url) {
+    if (!url) return '';
+    try {
+      var u = new URL(url);
+      if (u.hostname.indexOf('youtu.be') > -1) return u.pathname.substring(1);
+      if (u.hostname.indexOf('youtube') > -1) return u.searchParams.get('v') || '';
+    } catch(e) {}
+    return '';
+  }
+  
+  async function renderVideos() {
+    try {
+      var pv = document.getElementById('view-profile');
+      if (!pv) return;
+      
+      var site = await getSite();
+      if (site.videoSectionEnabled === false) {
+        var old = pv.querySelector('._uvSection');
+        if (old) old.remove();
+        return;
+      }
+      
+      var videos = site.videos || [];
+      if (!videos.length) {
+        var old2 = pv.querySelector('._uvSection');
+        if (old2) old2.remove();
+        return;
+      }
+      
+      // ရှိပြီးသား ဖျက်
+      var existing = pv.querySelector('._uvSection');
+      if (existing) existing.remove();
+      
+      var title = site.videoGuideTitle || '📺 Video Guides';
+      var desc = site.videoGuideDesc || '';
+      
+      var itemsHtml = videos.map(function(v, i) {
+        var icon = v.icon || '🎬';
+        var cat = v.category || 'Other';
+        var desc = v.desc || '';
+        var url = v.url || '#';
+        return '<a class="_uvCard" href="' + esc(url) + '" target="_blank" rel="noopener">' +
+          '<div class="_uvThumb">' + esc(icon) + '<div class="_uvPlayIcon">▶️</div></div>' +
+          '<div class="_uvInfo">' +
+            '<div class="_uvName">' + esc(v.title || 'Video') + '</div>' +
+            '<div class="_uvMeta">' +
+              (cat ? '<span class="_uvCat">' + esc(cat) + '</span>' : '') +
+              (desc ? '<span>' + esc(desc) + '</span>' : '') +
+            '</div>' +
+          '</div>' +
+          '<div class="_uvArrow">›</div>' +
+        '</a>';
+      }).join('');
+      
+      var html = '<div class="_uvSection">' +
+        '<div class="_uvTitle">' + esc(title) + '</div>' +
+        (desc ? '<div class="_uvDesc">' + esc(desc) + '</div>' : '') +
+        '<div class="_uvList">' + itemsHtml + '</div>' +
+      '</div>';
+      
+      pv.insertAdjacentHTML('beforeend', html);
+      console.log('✅ Videos rendered: ' + videos.length);
+    } catch(e) {
+      console.log('renderVideos err:', e.message);
+    }
+  }
+  
+  // Init
+  setTimeout(renderVideos, 3500);
+  setTimeout(renderVideos, 7000);
+  setInterval(function(){
+    var pv = document.getElementById('view-profile');
+    if (pv && pv.style.display !== 'none') {
+      if (!pv.querySelector('._uvSection')) renderVideos();
+    }
+  }, 5000);
+  
+  if (typeof window.switchTab === 'function') {
+    var _orig = window.switchTab;
+    window.switchTab = function(n, b) {
+      _orig(n, b);
+      if (n === 'profile') setTimeout(renderVideos, 500);
+    };
+  }
+  
+  console.log('✅ User Videos loaded');
 })();
 </script>
 </script>

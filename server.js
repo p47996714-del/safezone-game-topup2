@@ -93,7 +93,16 @@ function defaultDB() {
         whatsapp: '09763442881',
         viber: '09763442881',
         telegram: ''
-      },
+      ,
+      videos: [
+        { id: 'v1', title: 'Wallet ဖြည့်နည်း', url: 'https://www.youtube.com/', icon: '💰', category: 'Beginner', desc: '' },
+        { id: 'v2', title: 'MLBB ဝယ်နည်း', url: 'https://www.youtube.com/', icon: '🎮', category: 'Game', desc: '' },
+        { id: 'v3', title: 'Points လဲနည်း', url: 'https://www.youtube.com/', icon: '⭐', category: 'Points', desc: '' }
+      ],
+      videoCategories: ['Beginner', 'Game', 'Points', 'Advanced'],
+      videoGuideTitle: '📺 Video Guides',
+      videoGuideDesc: 'App အသုံးပြုနည်း Video တွေ',
+      videoSectionEnabled: true},
       trustBadges: [
         { icon: '✅', text: 'Verified Shop' },
         { icon: '⚡', text: 'Fast Delivery' },
@@ -957,6 +966,42 @@ app.delete('/api/admin/uploads/:id', adminAuth, superAdmin, (req, res) => {
 });
 
 app.get('/api/admin/config', adminAuth, (req, res) => res.json(db.config));
+
+// ===== VIDEO GUIDES API =====
+app.get('/api/admin/videos', adminAuth, (req, res) => {
+  res.json({
+    videos: db.config.videos || [],
+    categories: db.config.videoCategories || [],
+    title: db.config.videoGuideTitle || '📺 Video Guides',
+    desc: db.config.videoGuideDesc || '',
+    enabled: db.config.videoSectionEnabled !== false
+  });
+});
+
+app.post('/api/admin/videos', adminAuth, superAdmin, (req, res) => {
+  var videos = req.body.videos;
+  if (!Array.isArray(videos)) return res.status(400).json({ error: 'videos must be array' });
+  if (!db.config) db.config = {};
+  db.config.videos = videos;
+  saveDB();
+  logActivity(req.admin.username, 'update-videos', videos.length + ' videos');
+  res.json({ success: true, count: videos.length });
+});
+
+app.post('/api/admin/videos/settings', adminAuth, superAdmin, (req, res) => {
+  var title = req.body.title;
+  var desc = req.body.desc;
+  var enabled = req.body.enabled;
+  var categories = req.body.categories;
+  if (!db.config) db.config = {};
+  if (typeof title === 'string') db.config.videoGuideTitle = title;
+  if (typeof desc === 'string') db.config.videoGuideDesc = desc;
+  if (typeof enabled === 'boolean') db.config.videoSectionEnabled = enabled;
+  if (Array.isArray(categories)) db.config.videoCategories = categories;
+  saveDB();
+  res.json({ success: true });
+});
+
 app.post('/api/admin/config/section', adminAuth, superAdmin, (req, res) => {
   const { section, value } = req.body;
   if (!section) return res.status(400).json({error:'Section လိုတယ်'});
