@@ -397,6 +397,42 @@ body.theme-neon{background:linear-gradient(135deg,#1a0033,#2d004d,#0a0a2e)}
 ._pRedeemBtn{flex:1;padding:14px;border-radius:14px;border:none;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit}
 ._pRedeemBtn.cancel{background:rgba(51,65,85,0.8);color:#cbd5e1;border:1px solid #475569}
 </style>
+<style>
+/* POINTS_SOCIAL_CSS */
+._pCardBig{background:linear-gradient(135deg,#a855f7,#ec4899);border-radius:18px;padding:20px;margin:0 0 12px 0;position:relative;overflow:hidden;box-shadow:0 10px 30px rgba(168,85,247,0.3)}
+._pCardBig::after{content:'';position:absolute;right:-30px;top:-30px;width:120px;height:120px;background:rgba(255,255,255,0.1);border-radius:50%}
+._pHeadV3{display:flex;align-items:center;gap:10px;margin-bottom:12px;position:relative;z-index:1}
+._pIconV3{font-size:32px;animation:_pStar 2s ease-in-out infinite}
+@keyframes _pStar{0%,100%{transform:scale(1) rotate(0)}50%{transform:scale(1.15) rotate(15deg)}}
+._pTitleV3{font-size:14px;font-weight:bold;color:#fff}
+._pSubV3{font-size:11px;opacity:0.9;color:#fff;margin-top:2px}
+._pBigV3{font-size:40px;font-weight:bold;color:#fff;position:relative;z-index:1;margin-bottom:6px}
+._pLabelV3{font-size:11px;color:rgba(255,255,255,0.8);position:relative;z-index:1;margin-bottom:15px}
+._pInfoV3{background:rgba(0,0,0,0.25);border-radius:12px;padding:12px;position:relative;z-index:1;margin-bottom:12px}
+._pInfoRowV3{display:flex;justify-content:space-between;padding:5px 0;font-size:12px;color:rgba(255,255,255,0.9)}
+._pInfoRowV3 b{color:#fff}
+._pBtnV3{width:100%;padding:14px;background:rgba(255,255,255,0.95);color:#7c3aed;border:none;border-radius:14px;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit;position:relative;z-index:1}
+._pBtnV3:disabled{opacity:0.5}
+._pHowV3{background:rgba(56,189,248,0.08);border:1px solid #38bdf8;border-radius:12px;padding:14px;margin-bottom:12px;font-size:12px;color:#cbd5e1;line-height:1.8}
+._pHowV3 b{color:#fff}
+
+/* Social Section */
+._socialSection{background:rgba(30,41,59,0.8);border-radius:18px;padding:18px;margin-top:15px;border:1px solid #334155}
+._socialTitle{font-size:14px;font-weight:bold;color:#38bdf8;margin-bottom:12px;display:flex;align-items:center;gap:6px}
+._socialGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+._socialItem{display:flex;align-items:center;gap:10px;padding:12px;background:rgba(15,23,42,0.7);border-radius:12px;text-decoration:none;color:#fff;border:1px solid #334155;transition:transform 0.2s;cursor:pointer}
+._socialItem:active{transform:scale(0.97)}
+._socialIcon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+._socialFb{background:linear-gradient(135deg,#1877f2,#3b5998)}
+._socialTt{background:linear-gradient(135deg,#000,#25f4ee,#fe2c55)}
+._socialWa{background:linear-gradient(135deg,#25d366,#128c7e)}
+._socialVb{background:linear-gradient(135deg,#7360f2,#5b4bc4)}
+._socialTg{background:linear-gradient(135deg,#0088cc,#00b4ff)}
+._socialInfo{flex:1;min-width:0}
+._socialName{font-size:12px;font-weight:bold;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+._socialHandle{font-size:10px;color:#94a3b8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+._socialCopyBtn{background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;border-radius:8px;padding:4px 8px;font-size:10px;font-weight:bold;cursor:pointer;font-family:inherit}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -2372,6 +2408,218 @@ window.buyPremiumDirect = async function(productId) {
   }
   
   console.log('✅ Points UI V2 loaded');
+})();
+</script>
+<script>
+/* POINTS_SOCIAL_V3 */
+(function(){
+  'use strict';
+  var _siteCache = null;
+  
+  function getSite() {
+    if (_siteCache) return Promise.resolve(_siteCache);
+    return fetch('/api/site', {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
+      _siteCache = d;
+      return d;
+    }).catch(function(){ return {}; });
+  }
+  
+  async function renderAll() {
+    try {
+      var pv = document.getElementById('view-profile');
+      if (!pv) return;
+      
+      var site = await getSite();
+      var rate = parseFloat(site.pointsRedeemRate) || 10;
+      var pm = parseFloat(site.pointsMultiplier) || 1;
+      var pts = (typeof userData !== 'undefined' && userData && userData.points) || 0;
+      var hundred = 100 * rate;
+      var canRedeem = pts >= 100;
+      
+      // ===== Points Card =====
+      var oldP = pv.querySelector('._pCardBig');
+      if (oldP) oldP.remove();
+      var oldH = pv.querySelector('._pHowV3');
+      if (oldH) oldH.remove();
+      
+      var pointsHtml = '<div class="_pCardBig">' +
+        '<div class="_pHeadV3">' +
+          '<div class="_pIconV3">⭐</div>' +
+          '<div>' +
+            '<div class="_pTitleV3">Points ' + (pm !== 1 ? '×' + pm + ' BOOST' : '') + '</div>' +
+            '<div class="_pSubV3">100 Points = ' + hundred.toLocaleString() + ' Ks</div>' +
+          '</div>' +
+        '</div>' +
+        '<div class="_pBigV3">' + pts.toLocaleString() + '</div>' +
+        '<div class="_pLabelV3">Total Points</div>' +
+        '<div class="_pInfoV3">' +
+          '<div class="_pInfoRowV3"><span>💰 လဲလို့ရမယ့် Balance</span><b>' + Math.floor(pts * rate).toLocaleString() + ' Ks</b></div>' +
+        '</div>' +
+        '<button class="_pBtnV3" ' + (canRedeem ? '' : 'disabled') + ' onclick="window._pOpen()">' +
+          (canRedeem ? '💰 Points လဲမယ်' : '❌ 100 Points မပြည့်သေးပါ') +
+        '</button>' +
+      '</div>';
+      
+      var howHtml = '<div class="_pHowV3">' +
+        '💡 <b>Point ဘယ်လိုရမလဲ?</b><br>' +
+        '• Order တင်တိုင်း Point ရမယ်<br>' +
+        '• 100 Points = ' + hundred.toLocaleString() + ' Ks ပြန်လဲလို့ရ<br>' +
+        '• Point များလေ VIP မြင့်လေ' +
+      '</div>';
+      
+      // Insert after avatar block (first div after h2)
+      var firstBox = pv.querySelector('div[style*="text-align:center"]') || pv.querySelector('div[style*="background:rgba(30,41,59"]');
+      if (firstBox && firstBox.parentNode) {
+        firstBox.insertAdjacentHTML('afterend', pointsHtml + howHtml);
+      } else {
+        pv.insertAdjacentHTML('beforeend', pointsHtml + howHtml);
+      }
+      
+      // ===== Social Section =====
+      var oldS = pv.querySelector('._socialSection');
+      if (oldS) oldS.remove();
+      
+      var social = site.social || {};
+      var fb = social.facebook || '';
+      var tt = social.tiktok || '';
+      var wa = social.whatsapp || '';
+      var vb = social.viber || '';
+      var tg = social.telegram || '';
+      
+      var socialItems = '';
+      if (fb) socialItems += socialItemHtml('fb', '📘', 'Facebook', fb, '_socialFb');
+      if (tt) socialItems += socialItemHtml('tt', '🎵', 'TikTok', tt, '_socialTt');
+      if (wa) socialItems += socialItemHtml('wa', '💬', 'WhatsApp', wa, '_socialWa');
+      if (vb) socialItems += socialItemHtml('vb', '📞', 'Viber', vb, '_socialVb');
+      if (tg) socialItems += socialItemHtml('tg', '✈️', 'Telegram', tg, '_socialTg');
+      
+      if (socialItems) {
+        var socialHtml = '<div class="_socialSection">' +
+          '<div class="_socialTitle">🔗 Contact Us</div>' +
+          '<div class="_socialGrid">' + socialItems + '</div>' +
+        '</div>';
+        pv.insertAdjacentHTML('beforeend', socialHtml);
+      }
+      
+    } catch(e) {
+      console.log('renderAll err:', e.message);
+    }
+  }
+  
+  function socialItemHtml(key, icon, name, value, cls) {
+    var isUrl = value.indexOf('http') === 0;
+    var href = isUrl ? value : '#';
+    var display = value.length > 25 ? value.substring(0, 22) + '...' : value;
+    var onclick = isUrl ? '' : 'onclick="event.preventDefault();window._copySocial(\'' + value.replace(/'/g, "\\'") + '\')"';
+    return '<a class="_socialItem" href="' + href + '" ' + (isUrl ? 'target="_blank"' : '') + ' ' + onclick + '>' +
+      '<div class="_socialIcon ' + cls + '">' + icon + '</div>' +
+      '<div class="_socialInfo">' +
+        '<div class="_socialName">' + name + '</div>' +
+        '<div class="_socialHandle">' + display + '</div>' +
+      '</div>' +
+    '</a>';
+  }
+  
+  window._copySocial = function(val) {
+    if (navigator.clipboard) {
+      navigator.clipboard.writeText(val).then(function(){ 
+        if (typeof showToast === 'function') showToast('✅ ကူးပြီး: ' + val, 'success'); 
+      }).catch(function(){ 
+        prompt('Copy:', val); 
+      });
+    } else {
+      prompt('Copy:', val);
+    }
+  };
+  
+  window._pOpen = async function() {
+    try {
+      var site = await getSite();
+      var rate = parseFloat(site.pointsRedeemRate) || 10;
+      var pts = (typeof userData !== 'undefined' && userData && userData.points) || 0;
+      if (pts < 100) return showToast('❌ 100 Points မပြည့်သေးပါ', 'error');
+      
+      var max = Math.floor(pts / 100) * 100;
+      var opts = [];
+      [100, 200, 500, 1000, 5000].forEach(function(v){ if (v <= max) opts.push(v); });
+      if (opts.indexOf(max) === -1 && max > 0) opts.push(max);
+      
+      var m = document.getElementById('_pM');
+      if (!m) {
+        m = document.createElement('div');
+        m.id = '_pM';
+        m.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)';
+        document.body.appendChild(m);
+      }
+      
+      var optsH = opts.map(function(v){
+        return '<button style="width:100%;padding:12px;background:rgba(168,85,247,0.15);color:#a855f7;border:1px solid #a855f7;border-radius:12px;font-weight:bold;cursor:pointer;font-family:inherit;margin-bottom:8px" onclick="window._pDo(' + v + ')">⭐ ' + v + ' Points → ' + (v * rate).toLocaleString() + ' Ks</button>';
+      }).join('');
+      
+      m.innerHTML = '<div style="background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:24px;width:100%;max-width:380px;border:1px solid rgba(168,85,247,0.3);overflow:hidden;animation:_pStar 0.3s">' +
+        '<div style="padding:24px 24px 16px;text-align:center;background:linear-gradient(135deg,rgba(168,85,247,0.15),rgba(236,72,153,0.15))">' +
+          '<div style="width:70px;height:70px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:34px;background:linear-gradient(135deg,#a855f7,#ec4899);box-shadow:0 10px 30px rgba(168,85,247,0.5)">⭐</div>' +
+          '<div style="font-size:18px;font-weight:bold;color:#fff">Points လဲမယ်</div>' +
+          '<div style="font-size:12px;color:#94a3b8;margin-top:4px">လဲမယ့် Points ရွေးပါ</div>' +
+        '</div>' +
+        '<div style="padding:16px 24px 20px">' +
+          '<div style="display:flex;justify-content:space-between;padding:12px 14px;background:rgba(15,23,42,0.7);border-radius:12px;margin-bottom:8px;font-size:13px"><span style="color:#94a3b8">⭐ လက်ရှိ Points</span><b style="color:#a855f7">' + pts.toLocaleString() + '</b></div>' +
+          '<div style="display:flex;justify-content:space-between;padding:12px 14px;background:rgba(15,23,42,0.7);border-radius:12px;margin-bottom:12px;font-size:13px"><span style="color:#94a3b8">💰 Rate</span><b style="color:#fff">100 Points = ' + (100*rate).toLocaleString() + ' Ks</b></div>' +
+          optsH +
+        '</div>' +
+        '<div style="display:flex;padding:0 24px 24px">' +
+          '<button style="flex:1;padding:14px;background:rgba(51,65,85,0.8);color:#cbd5e1;border:1px solid #475569;border-radius:14px;font-weight:bold;cursor:pointer;font-family:inherit" onclick="document.getElementById(\'_pM\').style.display=\'none\'">Cancel</button>' +
+        '</div>' +
+      '</div>';
+      m.style.display = 'flex';
+    } catch(e) {
+      showToast('❌ ' + e.message, 'error');
+    }
+  };
+  
+  window._pDo = async function(pts) {
+    try {
+      if (!confirm('⭐ ' + pts + ' Points ကို Balance လဲမလား?')) return;
+      showToast('⏳ လဲနေတယ်...', 'info');
+      var d = await api('/api/redeem-points', { method: 'POST', body: JSON.stringify({ points: pts }) });
+      if (d && d.success) {
+        try { playSound('success'); haptic(100); } catch(e){}
+        if (typeof confetti === 'function') try { confetti(); } catch(e){}
+        showToast('✅ +' + d.amount.toLocaleString() + ' Ks ရပြီ!', 'success');
+        var m = document.getElementById('_pM');
+        if (m) m.style.display = 'none';
+        if (typeof loadMe === 'function') await loadMe();
+        setTimeout(renderAll, 800);
+      } else {
+        showToast('❌ ' + ((d && d.error) || 'Error'), 'error');
+      }
+    } catch(e) {
+      showToast('❌ ' + e.message, 'error');
+    }
+  };
+  
+  // Init
+  setTimeout(renderAll, 2500);
+  setTimeout(renderAll, 5000);
+  setInterval(function(){
+    var pv = document.getElementById('view-profile');
+    if (pv && pv.style.display !== 'none') {
+      if (!pv.querySelector('._pCardBig') || !pv.querySelector('._socialSection')) {
+        renderAll();
+      }
+    }
+  }, 4000);
+  
+  // switchTab hook
+  if (typeof window.switchTab === 'function') {
+    var _o = window.switchTab;
+    window.switchTab = function(n, b) {
+      _o(n, b);
+      if (n === 'profile') setTimeout(renderAll, 500);
+    };
+  }
+  
+  console.log('✅ Points + Social loaded');
 })();
 </script>
 </script>
