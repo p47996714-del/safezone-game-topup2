@@ -259,6 +259,11 @@ button.main:active{transform:scale(0.97)}
 /* ===== SMART RECOMMEND (Feature 22) ===== */
 .recommend-badge{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:bold;padding:3px 8px;border-radius:10px;z-index:2}
 
+
+/* Force hide splash after 3 seconds even if JS fails */
+.splash { animation: forceHideSplash 0.5s ease 3s forwards !important; }
+@keyframes forceHideSplash { to { opacity: 0; visibility: hidden; pointer-events: none; z-index: -9999; } }
+
 </style>
 </head>
 <body>
