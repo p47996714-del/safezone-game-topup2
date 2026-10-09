@@ -309,6 +309,47 @@ body.theme-neon{background:linear-gradient(135deg,#1a0033,#2d004d,#0a0a2e)}
 #receiptImg{max-width:100%;max-height:250px;border-radius:10px;display:block}
 .deposit-file{font-size:12px}
 </style>
+<style>
+/* NICE_MODAL_CSS */
+._niceModal{position:fixed;inset:0;background:rgba(0,0,0,0.85);z-index:99999;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(8px)}
+._niceModal.show{display:flex;animation:_niceFadeIn 0.3s}
+@keyframes _niceFadeIn{from{opacity:0}to{opacity:1}}
+._niceBox{background:linear-gradient(135deg,#1e293b,#0f172a);border-radius:24px;padding:0;width:100%;max-width:380px;border:1px solid rgba(56,189,248,0.3);box-shadow:0 30px 80px rgba(0,0,0,0.8),0 0 60px rgba(56,189,248,0.2);animation:_niceSlide 0.35s cubic-bezier(0.34,1.56,0.64,1);overflow:hidden}
+@keyframes _niceSlide{from{transform:scale(0.7) translateY(30px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+._niceHead{padding:24px 24px 16px;text-align:center;position:relative;background:linear-gradient(135deg,rgba(56,189,248,0.1),rgba(168,85,247,0.1))}
+._niceIcon{width:72px;height:72px;margin:0 auto 14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:36px;background:linear-gradient(135deg,#38bdf8,#a855f7);box-shadow:0 10px 30px rgba(56,189,248,0.5);animation:_niceIconPulse 2s ease-in-out infinite}
+@keyframes _niceIconPulse{0%,100%{box-shadow:0 10px 30px rgba(56,189,248,0.5)}50%{box-shadow:0 10px 40px rgba(168,85,247,0.7)}}
+._niceTitle{font-size:19px;font-weight:bold;color:#fff;margin-bottom:6px}
+._niceSubtitle{font-size:12px;color:#94a3b8}
+._niceBody{padding:16px 24px 20px}
+._niceRow{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;background:rgba(15,23,42,0.7);border-radius:12px;margin-bottom:8px;border:1px solid rgba(51,65,85,0.5)}
+._niceLabel{font-size:12px;color:#94a3b8}
+._niceValue{font-size:14px;font-weight:bold;color:#fff}
+._niceValue.green{color:#22c55e}
+._niceValue.blue{color:#38bdf8}
+._niceValue.purple{color:#a855f7}
+._niceActions{display:flex;gap:10px;padding:0 24px 24px}
+._niceBtn{flex:1;padding:14px;border-radius:14px;border:none;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit;transition:all 0.2s}
+._niceBtn:active{transform:scale(0.97)}
+._niceBtn.cancel{background:rgba(51,65,85,0.8);color:#cbd5e1;border:1px solid #475569}
+._niceBtn.confirm{background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;box-shadow:0 8px 25px rgba(56,189,248,0.4)}
+
+/* Maintenance Overlay */
+._maintOv{position:fixed;inset:0;background:radial-gradient(circle at 50% 30%,#1e293b 0%,#0b1120 70%);z-index:999999;display:none;align-items:center;justify-content:center;padding:30px;text-align:center;flex-direction:column}
+._maintOv.show{display:flex}
+._maintIcon{font-size:90px;margin-bottom:20px;animation:_maintPulse 2s ease-in-out infinite;filter:drop-shadow(0 0 30px rgba(245,158,11,0.6))}
+@keyframes _maintPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+._maintTitle{font-size:26px;font-weight:bold;background:linear-gradient(135deg,#f59e0b,#ef4444,#ec4899);background-size:200% 200%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:_maintGrad 3s ease infinite;margin-bottom:10px}
+@keyframes _maintGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+._maintSub{font-size:13px;color:#94a3b8;letter-spacing:3px;margin-bottom:25px}
+._maintMsg{color:#cbd5e1;font-size:15px;line-height:1.7;max-width:400px;padding:18px 24px;background:rgba(30,41,59,0.6);backdrop-filter:blur(10px);border-radius:18px;border:1px solid rgba(245,158,11,0.3);margin-bottom:25px}
+._maintDots{display:flex;gap:8px;margin-bottom:25px}
+._maintDot{width:10px;height:10px;border-radius:50%;background:#334155;animation:_maintDot 1.5s ease-in-out infinite}
+._maintDot:nth-child(2){animation-delay:0.2s}
+._maintDot:nth-child(3){animation-delay:0.4s}
+@keyframes _maintDot{0%,100%{background:#334155;transform:scale(1)}50%{background:#f59e0b;transform:scale(1.3)}}
+._maintBtn{background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;padding:14px 30px;border-radius:14px;font-weight:bold;font-size:14px;border:none;cursor:pointer;font-family:inherit;box-shadow:0 10px 30px rgba(245,158,11,0.4)}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -1944,5 +1985,145 @@ async function buyPremiumDirect(productId) {
 window.buyPremiumDirect = buyPremiumDirect;
 </script>
 
+<script>
+/* NICE_MODAL_JS */
+
+// ===== Nice Modal =====
+window.showNiceConfirm = function(opts) {
+  return new Promise(function(resolve) {
+    var m = document.getElementById('_niceModal');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = '_niceModal';
+      m.className = '_niceModal';
+      document.body.appendChild(m);
+    }
+    var icon = opts.icon || '❓';
+    var title = opts.title || 'Confirm';
+    var subtitle = opts.subtitle || '';
+    var rows = (opts.rows || []).map(function(r){
+      return '<div class="_niceRow"><span class="_niceLabel">' + r.label + '</span><span class="_niceValue ' + (r.color||'') + '">' + r.value + '</span></div>';
+    }).join('');
+    m.innerHTML = '<div class="_niceBox">' +
+      '<div class="_niceHead">' +
+        '<div class="_niceIcon">' + icon + '</div>' +
+        '<div class="_niceTitle">' + title + '</div>' +
+        (subtitle ? '<div class="_niceSubtitle">' + subtitle + '</div>' : '') +
+      '</div>' +
+      '<div class="_niceBody">' + rows + '</div>' +
+      '<div class="_niceActions">' +
+        '<button class="_niceBtn cancel" onclick="window._niceResolve(false)">' + (opts.cancelText||'Cancel') + '</button>' +
+        '<button class="_niceBtn confirm" onclick="window._niceResolve(true)">' + (opts.confirmText||'OK') + '</button>' +
+      '</div>' +
+    '</div>';
+    window._niceResolve = function(v) {
+      m.classList.remove('show');
+      setTimeout(function(){ resolve(v); }, 100);
+    };
+    m.classList.add('show');
+  });
+};
+
+// ===== Maintenance Overlay =====
+window._showMaintenance = function(msg) {
+  var ov = document.getElementById('_maintOverlay');
+  if (!ov) {
+    ov = document.createElement('div');
+    ov.id = '_maintOverlay';
+    ov.className = '_maintOv';
+    ov.innerHTML = '<div class="_maintIcon">🚧</div>' +
+      '<div class="_maintTitle">ခဏပိတ်ထားပါသည်</div>' +
+      '<div class="_maintSub">TEMPORARILY CLOSED</div>' +
+      '<div class="_maintDots"><div class="_maintDot"></div><div class="_maintDot"></div><div class="_maintDot"></div></div>' +
+      '<div class="_maintMsg" id="_maintMsg">မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။</div>' +
+      '<button class="_maintBtn" onclick="location.reload()">🔄 Refresh</button>';
+    document.body.appendChild(ov);
+  }
+  var msg = document.getElementById('_maintMsg');
+  if (msg && msg) msg.textContent = msg || 'မကြာမီ ပြန်လည် ဖွင့်ပေးပါမည်။';
+  ov.classList.add('show');
+};
+
+window._hideMaintenance = function() {
+  var ov = document.getElementById('_maintOverlay');
+  if (ov) ov.classList.remove('show');
+};
+
+// Maintenance Check (၅ စက္ကန့်တစ်ခါ)
+function _checkMaint() {
+  fetch('/api/maintenance', {cache:'no-store'}).then(function(r){ return r.json(); }).then(function(d){
+    if (!d || typeof d.enabled === 'undefined') return;
+    if (d.enabled) window._showMaintenance(d.message);
+    else window._hideMaintenance();
+  }).catch(function(){});
+}
+setTimeout(_checkMaint, 500);
+setInterval(_checkMaint, 5000);
+document.addEventListener('visibilitychange', function(){ if (!document.hidden) _checkMaint(); });
+
+// ===== buyPremiumDirect (Nice Modal သုံးပြီး) =====
+window.buyPremiumDirect = async function(productId) {
+  try {
+    var p = products.find(function(x){ return x.id === productId; });
+    if (!p) { showToast('❌ Product မတွေ့', 'error'); return; }
+    
+    var bal = (userData && userData.balance) || 0;
+    if (bal < p.price) {
+      try { playSound('error'); } catch(e){}
+      showToast('❌ Balance မလုံလောက်ပါ (' + p.price.toLocaleString() + ' Ks လိုတယ်)', 'error');
+      return;
+    }
+    
+    var ok = await showNiceConfirm({
+      icon: '📱',
+      title: 'App Premium ဝယ်မလား?',
+      subtitle: 'Balance ဖြတ်ပြီး Admin ဆီ ပို့ပါမယ်',
+      rows: [
+        { label: '🎁 Package', value: p.name },
+        { label: '💵 ဈေးနှုန်း', value: p.price.toLocaleString() + ' Ks', color: 'green' },
+        { label: '💰 လက်ကျန်', value: bal.toLocaleString() + ' Ks', color: 'blue' },
+        { label: '💳 ဖြတ်ပြီးနောက်', value: (bal - p.price).toLocaleString() + ' Ks', color: 'purple' }
+      ],
+      cancelText: 'မဝယ်တော့ဘူး',
+      confirmText: '✅ ဝယ်မယ်'
+    });
+    
+    if (!ok) return;
+    
+    showToast('⏳ Order တင်နေတယ်...', 'info');
+    var d = await api('/api/order', { method: 'POST', body: JSON.stringify({ productId: p.id, playerId: 'App Premium Buy' }) });
+    if (!d || !d.success) {
+      try { playSound('error'); } catch(e){}
+      showToast('❌ ' + ((d && d.error) || 'Error'), 'error');
+      return;
+    }
+    
+    try { playSound('success'); haptic(100); } catch(e){}
+    if (typeof confetti === 'function') try { confetti(); } catch(e){}
+    showToast('✅ Balance ဖြတ်ပြီး — Admin ဆီ ပို့မယ်', 'success');
+    closeModal('productModal');
+    if (typeof loadMe === 'function') loadMe();
+    if (typeof loadOrders === 'function') loadOrders();
+    
+    setTimeout(function(){
+      try {
+        var navBtns = document.querySelectorAll('.nav-item');
+        if (typeof switchTab === 'function' && navBtns[3]) switchTab('chat', navBtns[3]);
+        setTimeout(function(){
+          var inp = document.getElementById('chatInput');
+          if (inp) {
+            inp.value = '📱 App Premium ဝယ်ပြီးပါပြီ\n\n🎁 ' + p.name + '\n💵 ' + p.price.toLocaleString() + ' Ks\n🔖 Order: ' + d.orderId + '\n\nAdmin ရေ — ဆောင်ရွက်ပေးပါ 🙏';
+            inp.focus();
+          }
+          showToast('📩 ➤ နှိပ်ပြီး Admin ဆီ ပို့ပါ', 'info');
+        }, 600);
+      } catch(e){}
+    }, 400);
+  } catch(err) {
+    console.log('err:', err.message);
+    showToast('❌ ' + err.message, 'error');
+  }
+};
+</script>
 </body>
 </html>
