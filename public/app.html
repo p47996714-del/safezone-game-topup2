@@ -184,6 +184,124 @@ div[onclick*="openSpin"] { display: none !important; }
 @keyframes _skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
 ._skeletonCard{height:180px;border-radius:16px;margin-bottom:12px}
 </style>
+<style>
+/* EPIC_FEATURES_CSS */
+
+/* ===== 1. Glassmorphism ===== */
+.glass-card{background:rgba(30,41,59,0.5) !important;backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border:1px solid rgba(148,163,184,0.2) !important;box-shadow:0 8px 32px rgba(0,0,0,0.3)}
+.quick-card,.game-card,.balance-card,.section{backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px)}
+
+/* ===== 2. Neon Glow ===== */
+.neon-btn{position:relative;overflow:hidden;box-shadow:0 0 10px rgba(56,189,248,0.4),0 0 20px rgba(56,189,248,0.2)}
+.neon-btn:active{box-shadow:0 0 20px rgba(56,189,248,0.8),0 0 40px rgba(56,189,248,0.4)}
+.nav-item.active .nav-icon{filter:drop-shadow(0 0 8px #38bdf8)}
+.modal-box{box-shadow:0 0 40px rgba(56,189,248,0.3),0 20px 60px rgba(0,0,0,0.6)}
+.quick-card:hover,.game-card:hover{box-shadow:0 0 25px rgba(56,189,248,0.3)}
+
+/* ===== 3. Animated Gradient BG ===== */
+@keyframes _bgShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+.balance-card{background:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899,#3b82f6) !important;background-size:300% 300% !important;animation:_bgShift 8s ease infinite}
+
+/* ===== 4. Floating Action Button ===== */
+._fab{position:fixed;bottom:90px;left:15px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#a855f7);border:none;color:#fff;font-size:22px;cursor:pointer;z-index:98;box-shadow:0 8px 25px rgba(168,85,247,0.5);display:flex;align-items:center;justify-content:center;transition:transform 0.3s}
+._fab:active{transform:scale(0.9) rotate(90deg)}
+._fabMenu{position:fixed;bottom:150px;left:15px;display:none;flex-direction:column;gap:10px;z-index:98}
+._fabMenu.show{display:flex;animation:_fabIn 0.3s ease}
+@keyframes _fabIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+._fabItem{width:46px;height:46px;border-radius:50%;background:rgba(30,41,59,0.95);border:1px solid #38bdf8;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,0.5);backdrop-filter:blur(10px)}
+
+/* ===== 5. Card Hover ===== */
+.quick-card,.game-card{transition:transform 0.2s cubic-bezier(0.4,0,0.2,1),box-shadow 0.2s}
+.quick-card:active,.game-card:active{transform:scale(0.96)}
+
+/* ===== 6. Smooth Page Transition ===== */
+@keyframes _pageIn{from{opacity:0;transform:translateY(15px)}to{opacity:1;transform:translateY(0)}}
+[id^="view-"]{animation:_pageIn 0.35s ease}
+
+/* ===== 7. Custom Spinner ===== */
+._spinner{display:inline-block;width:40px;height:40px;border:3px solid rgba(56,189,248,0.2);border-top-color:#38bdf8;border-radius:50%;animation:_spin 0.8s linear infinite}
+@keyframes _spin{to{transform:rotate(360deg)}}
+._spinnerWrap{display:flex;align-items:center;justify-content:center;padding:40px}
+
+/* ===== 8. Themes ===== */
+body.theme-sunset{background:linear-gradient(135deg,#1a0b2e,#2d1b3d,#3d1f2e)}
+body.theme-ocean{background:linear-gradient(135deg,#0a1929,#0c2340,#0d3b66)}
+body.theme-forest{background:linear-gradient(135deg,#0a1f0a,#0d2818,#1a3d2e)}
+body.theme-neon{background:linear-gradient(135deg,#1a0033,#2d004d,#0a0a2e)}
+
+/* ===== 36. Confetti ===== */
+@keyframes _confFall{to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+._conf{position:fixed;width:10px;height:10px;z-index:10001;pointer-events:none;animation:_confFall 3s linear forwards}
+
+/* ===== 37. Level Up ===== */
+._levelUp{position:fixed;inset:0;background:rgba(0,0,0,0.9);z-index:10002;display:none;align-items:center;justify-content:center;flex-direction:column}
+._levelUp.show{display:flex;animation:_levelIn 0.5s}
+@keyframes _levelIn{from{opacity:0;transform:scale(0.5)}to{opacity:1;transform:scale(1)}}
+
+/* ===== 38. Badge Unlock ===== */
+._badgePop{animation:_badgePop 0.6s ease}
+@keyframes _badgePop{0%{transform:scale(0) rotate(-180deg)}50%{transform:scale(1.2) rotate(10deg)}100%{transform:scale(1) rotate(0)}}
+
+/* ===== 39. Typing Indicator ===== */
+._typing{display:inline-flex;gap:4px;padding:10px 16px;background:#1e293b;border-radius:16px;margin:5px 0}
+._typing span{width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_typeBounce 1.4s infinite}
+._typing span:nth-child(2){animation-delay:0.2s}
+._typing span:nth-child(3){animation-delay:0.4s}
+@keyframes _typeBounce{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-8px);opacity:1}}
+
+/* ===== 40. Empty State ===== */
+._emptyState{text-align:center;padding:50px 20px;color:#64748b}
+._emptyState ._emptyIcon{font-size:60px;margin-bottom:15px;opacity:0.5;animation:_emptyFloat 3s ease-in-out infinite}
+@keyframes _emptyFloat{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+
+/* ===== 41. Haptic Visual ===== */
+.haptic-active{animation:_hapticPulse 0.15s}
+@keyframes _hapticPulse{0%,100%{transform:scale(1)}50%{transform:scale(0.98)}}
+
+/* ===== 21. Game Modal ===== */
+._gameModalImg{width:100%;height:160px;object-fit:cover;border-radius:16px 16px 0 0;margin-bottom:10px}
+
+/* ===== 31. Quick Top-up ===== */
+._presetBtn{padding:14px;background:rgba(56,189,248,0.1);border:1px solid #38bdf8;border-radius:12px;color:#38bdf8;font-weight:bold;cursor:pointer;font-family:inherit;font-size:13px;transition:all 0.2s}
+._presetBtn:active{background:rgba(56,189,248,0.3);transform:scale(0.97)}
+._presetGrid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px}
+
+/* ===== 33. Search ===== */
+._searchBox{position:relative;margin-bottom:12px}
+._searchBox input{padding-left:40px !important}
+._searchBox::before{content:'🔍';position:absolute;left:14px;top:50%;transform:translateY(-50%);font-size:16px;pointer-events:none;z-index:1}
+
+/* ===== 34. Wallet Card ===== */
+._walletCard{background:linear-gradient(135deg,#1e293b,#334155);border-radius:20px;padding:22px;border:1px solid #475569;position:relative;overflow:hidden;margin-bottom:15px}
+._walletCard::after{content:'';position:absolute;right:-40px;top:-40px;width:180px;height:180px;background:radial-gradient(circle,rgba(56,189,248,0.3),transparent 70%);border-radius:50%}
+._walletChip{width:38px;height:28px;background:linear-gradient(135deg,#f59e0b,#fbbf24);border-radius:6px;margin-bottom:14px;box-shadow:0 2px 8px rgba(245,158,11,0.4)}
+
+/* ===== 49. Chart ===== */
+._chartBars{display:flex;align-items:flex-end;gap:8px;height:130px;padding:10px 5px}
+._chartBarWrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;height:100%;justify-content:flex-end}
+._chartBar{width:100%;max-width:32px;background:linear-gradient(180deg,#38bdf8,#a855f7);border-radius:6px 6px 0 0;min-height:4px;transition:height 0.6s;box-shadow:0 0 12px rgba(56,189,248,0.3)}
+._chartLabel{font-size:9px;color:#94a3b8}
+._chartVal{font-size:9px;color:#38bdf8;font-weight:bold}
+
+/* ===== 50. Monthly Report ===== */
+._reportCard{background:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899);background-size:200% 200%;animation:_bgShift 6s ease infinite;border-radius:20px;padding:22px;color:#fff;text-align:center;margin-bottom:15px;position:relative;overflow:hidden}
+._reportCard::before{content:'🎊';position:absolute;left:15px;top:15px;font-size:24px;opacity:0.3}
+._reportCard::after{content:'✨';position:absolute;right:15px;bottom:15px;font-size:24px;opacity:0.3}
+
+/* ===== 52. Trust Score ===== */
+._trustScore{display:flex;align-items:center;gap:12px;padding:14px;background:rgba(15,23,42,0.6);border-radius:14px;border:1px solid #334155}
+._trustCircle{width:60px;height:60px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;font-weight:bold;color:#fff;box-shadow:0 0 20px rgba(34,197,94,0.5)}
+
+/* ===== 55. Verified Badge ===== */
+._verified{display:inline-flex;align-items:center;gap:4px;background:rgba(56,189,248,0.15);color:#38bdf8;padding:4px 10px;border-radius:20px;font-size:11px;font-weight:bold;border:1px solid #38bdf8}
+._verified::before{content:'✓';background:#38bdf8;color:#0b1120;width:14px;height:14px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:bold}
+
+/* ===== 53. 2FA ===== */
+._otpInput{letter-spacing:8px;text-align:center;font-size:20px;font-weight:bold}
+
+/* ===== 54. Login History ===== */
+._logItem{padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px;border-left:3px solid #38bdf8;font-size:12px}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -1381,6 +1499,358 @@ setTimeout(function() { if (Notification.permission === 'granted') subscribeToPu
     init();
   }
 })();
+<script>
+/* EPIC_FEATURES_JS */
+(function(){
+  'use strict';
+  
+  /* ===== 4. FAB ===== */
+  window.toggleFab = function() {
+    var m = document.getElementById('_fabMenu');
+    if (m) m.classList.toggle('show');
+    hapticSoft(20);
+  };
+  
+  /* ===== 36. Confetti ===== */
+  function confetti() {
+    var colors = ['#38bdf8','#a855f7','#f59e0b','#22c55e','#ec4899'];
+    for (var i = 0; i < 40; i++) {
+      (function(){
+        var c = document.createElement('div');
+        c.className = '_conf';
+        c.style.left = (Math.random()*100)+'%';
+        c.style.top = '-10px';
+        c.style.background = colors[i%5];
+        c.style.animationDelay = (Math.random()*0.5)+'s';
+        document.body.appendChild(c);
+        setTimeout(function(){ if(c.parentNode) c.parentNode.removeChild(c); }, 4000);
+      })();
+    }
+  }
+  
+  /* ===== 41. Haptic ===== */
+  function hapticSoft(ms) {
+    if (typeof hapticOn !== 'undefined' && hapticOn && navigator.vibrate) navigator.vibrate(ms || 15);
+  }
+  
+  /* ===== 42. Sound ===== */
+  function playSuccessSound() {
+    try {
+      var ctx = new (window.AudioContext||window.webkitAudioContext)();
+      [523,659,784,1047].forEach(function(f,i){
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = f; o.type = 'sine';
+        g.gain.setValueAtTime(0, ctx.currentTime + i*0.1);
+        g.gain.linearRampToValueAtTime(0.15, ctx.currentTime + i*0.1 + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + i*0.1 + 0.3);
+        o.start(ctx.currentTime + i*0.1); o.stop(ctx.currentTime + i*0.1 + 0.3);
+      });
+    } catch(e){}
+  }
+  
+  /* ===== 37. Level Up Modal ===== */
+  function showLevelUp(level) {
+    var m = document.createElement('div');
+    m.className = '_levelUp show';
+    m.innerHTML = '<div style="font-size:80px;margin-bottom:20px;animation:_badgePop 0.8s">🎉</div>' +
+      '<div style="font-size:28px;font-weight:bold;background:linear-gradient(135deg,#38bdf8,#a855f7,#ec4899);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:10px">LEVEL UP!</div>' +
+      '<div style="font-size:20px;color:#fff;margin-bottom:20px">Level ' + level + '</div>' +
+      '<button onclick="this.parentElement.remove()" style="padding:12px 30px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;font-weight:bold;cursor:pointer;font-family:inherit">Continue</button>';
+    document.body.appendChild(m);
+    confetti();
+    playSuccessSound();
+    hapticSoft(100);
+  }
+  window.showLevelUp = showLevelUp;
+  
+  /* ===== 40. Empty State Helper ===== */
+  function emptyState(icon, text) {
+    return '<div class="_emptyState"><div class="_emptyIcon">' + (icon||'📭') + '</div><div>' + (text||'ဘာမှ မရှိပါ') + '</div></div>';
+  }
+  window.emptyState = emptyState;
+  
+  /* ===== 39. Typing Indicator ===== */
+  function typingIndicator() {
+    return '<div class="_typing"><span></span><span></span><span></span></div>';
+  }
+  window.typingIndicator = typingIndicator;
+  
+  /* ===== 34. Wallet Card (Profile) ===== */
+  function enhanceProfile() {
+    var bal = document.getElementById('pBal');
+    if (!bal || bal.dataset.enhanced) return;
+    var card = bal.closest('div[style*="background:#0f172a"]') || bal.parentElement;
+    if (!card || card.dataset.enhanced) return;
+    card.dataset.enhanced = '1';
+    card.className = '_walletCard';
+    card.innerHTML = '<div class="_walletChip"></div>' +
+      '<div style="font-size:11px;color:#94a3b8;margin-bottom:4px">CARD BALANCE</div>' +
+      '<div style="font-size:30px;font-weight:bold;color:#22c55e;margin-bottom:8px">' + bal.textContent + '</div>' +
+      '<div style="font-size:11px;color:#64748b">SAFE ZONE · •••• ' + Math.floor(Math.random()*9000+1000) + '</div>';
+  }
+  
+  /* ===== 35. Splash Animation ===== */
+  function enhanceSplash() {
+    var s = document.getElementById('splash');
+    if (!s || s.dataset.enhanced) return;
+    s.dataset.enhanced = '1';
+    var t = s.querySelector('.splash-title');
+    if (t) {
+      t.style.animation = 'none';
+      t.innerHTML = t.textContent.split('').map(function(ch, i){ 
+        return '<span style="display:inline-block;animation:_pageIn 0.5s ease ' + (i*0.08) + 's both">' + (ch===' '?'&nbsp;':ch) + '</span>'; 
+      }).join('');
+    }
+  }
+  
+  /* ===== 31. Quick Top-up Preset ===== */
+  function addPresets() {
+    var amt = document.getElementById('dAmt');
+    if (!amt || amt.dataset.presets) return;
+    amt.dataset.presets = '1';
+    var grid = document.createElement('div');
+    grid.className = '_presetGrid';
+    grid.innerHTML = [1000, 5000, 10000, 50000].map(function(v){
+      return '<button class="_presetBtn" onclick="document.getElementById(\'dAmt\').value=' + v + '">' + v.toLocaleString() + ' Ks</button>';
+    }).join('');
+    amt.parentNode.insertBefore(grid, amt.nextSibling);
+  }
+  
+  /* ===== 33. Search Enhancement ===== */
+  function enhanceSearch() {
+    var s = document.getElementById('searchInput');
+    if (!s || s.dataset.enhanced) return;
+    s.dataset.enhanced = '1';
+    var p = s.parentElement;
+    if (p) p.classList.add('_searchBox');
+  }
+  
+  /* ===== 34. Wallet Card (Wallet Tab) ===== */
+  function enhanceWallet() {
+    var list = document.getElementById('paymentList');
+    if (!list || list.dataset.enhanced) return;
+    list.dataset.enhanced = '1';
+  }
+  
+  /* ===== 49/50/51/52. My Stats Enhancements ===== */
+  function enhanceStats() {
+    // Chart
+    var analyticsView = document.getElementById('view-analytics');
+    if (!analyticsView || analyticsView.dataset.enhanced) return;
+    analyticsView.dataset.enhanced = '1';
+    
+    // Sample chart data from orders
+    var orders = (typeof userData !== 'undefined' && userData && userData.orders) || [];
+    var days = ['M','T','W','T','F','S','S'];
+    var vals = [0,0,0,0,0,0,0];
+    orders.forEach(function(o){
+      var d = new Date(o.createdAt).getDay();
+      vals[d === 0 ? 6 : d-1]++;
+    });
+    var max = Math.max.apply(null, vals.concat([1]));
+    var chartHtml = '<div style="background:rgba(30,41,59,0.8);padding:18px;border-radius:16px;border:1px solid #334155;margin-bottom:15px"><div style="font-size:13px;color:#38bdf8;font-weight:bold;margin-bottom:10px">📊 ၇ ရက်အတွင်း Order များ</div><div class="_chartBars">' +
+      days.map(function(d,i){ 
+        var pct = Math.max(5, (vals[i]/max)*100);
+        return '<div class="_chartBarWrap"><div class="_chartVal">' + (vals[i]||'') + '</div><div class="_chartBar" style="height:' + pct + '%"></div><div class="_chartLabel">' + d + '</div></div>';
+      }).join('') + '</div></div>';
+    
+    // Monthly Report
+    var now = new Date();
+    var monthOrders = orders.filter(function(o){
+      var d = new Date(o.createdAt);
+      return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+    });
+    var monthSpent = monthOrders.filter(function(o){ return o.status === 'completed'; }).reduce(function(s,o){ return s + (o.price||0); }, 0);
+    var reportHtml = '<div class="_reportCard">' +
+      '<div style="font-size:13px;opacity:0.9;margin-bottom:6px">' + (now.getMonth()+1) + ' လ Report</div>' +
+      '<div style="font-size:32px;font-weight:bold;margin-bottom:4px">' + monthOrders.length + ' Orders</div>' +
+      '<div style="font-size:13px;opacity:0.9">Total: ' + monthSpent.toLocaleString() + ' Ks</div>' +
+      '</div>';
+    
+    // Trust Score
+    var trust = Math.min(100, 50 + orders.length * 5 + (userData.points || 0) / 10);
+    var trustColor = trust >= 80 ? '#22c55e' : trust >= 50 ? '#f59e0b' : '#ef4444';
+    var trustHtml = '<div class="_trustScore">' +
+      '<div class="_trustCircle" style="background:' + trustColor + '">' + Math.round(trust) + '</div>' +
+      '<div><div style="font-weight:bold;font-size:14px">🛡️ Trust Score</div><div style="font-size:11px;color:#94a3b8;margin-top:3px">' + (trust>=80?'အလွန်ကောင်း':trust>=50?'ကောင်း':'ပုံမှန်') + '</div></div>' +
+      '</div>';
+    
+    // Insert at top
+    var backBtn = analyticsView.querySelector('button[onclick*="switchTab"]');
+    if (backBtn) {
+      backBtn.parentElement.insertAdjacentHTML('afterend', chartHtml + reportHtml + trustHtml);
+    }
+  }
+  
+  /* ===== 53. 2FA Toggle ===== */
+  function enhance2FA() {
+    var card = document.getElementById('view-profile');
+    if (!card || card.dataset.twofa) return;
+    card.dataset.twofa = '1';
+    var buttons = card.querySelectorAll('button[onclick*="installPWA"]');
+    if (buttons.length) {
+      var btn = buttons[0];
+      var tfa = document.createElement('button');
+      tfa.style.cssText = 'width:100%;padding:12px;background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;border-radius:12px;font-weight:bold;margin-top:12px;cursor:pointer;font-family:inherit';
+      tfa.textContent = '🔐 2FA Toggle';
+      tfa.onclick = function(){ 
+        if (typeof api === 'function') {
+          api('/api/toggle-2fa', {method:'POST'}).then(function(d){
+            if (d.success) showToast('✅ 2FA ' + (d.twoFA?'ON':'OFF'), 'success');
+            else showToast('❌ ' + (d.error||'Error'), 'error');
+          });
+        }
+      };
+      btn.parentNode.insertBefore(tfa, btn);
+    }
+  }
+  
+  /* ===== 54. Login History ===== */
+  function enhanceLoginHistory() {
+    var card = document.getElementById('view-profile');
+    if (!card || card.dataset.hist) return;
+    card.dataset.hist = '1';
+    var tfa = card.querySelector('button[onclick*="2FA"], button:contains("2FA")');
+  }
+  
+  /* ===== 55. Verified Badge ===== */
+  function enhanceVerified() {
+    var name = document.getElementById('pName');
+    if (!name || name.dataset.verified) return;
+    name.dataset.verified = '1';
+    if (typeof userData !== 'undefined' && userData && userData.telegramId) {
+      name.insertAdjacentHTML('afterend', ' <span class="_verified">Verified</span>');
+    }
+  }
+  
+  /* ===== 20. Trending Badge ===== */
+  function enhanceGames() {
+    var grid = document.getElementById('gamesGrid');
+    if (!grid || grid.dataset.enh) return;
+    grid.dataset.enh = '1';
+    var cards = grid.querySelectorAll('.game-card');
+    var badges = ['🔥 HOT', '⭐ NEW', '💎 TOP'];
+    cards.forEach(function(c, i){
+      if (i < 3 && !c.querySelector('._trendBadge')) {
+        var b = document.createElement('div');
+        b.className = '_trendBadge';
+        b.textContent = badges[i];
+        b.style.cssText = 'position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:bold;padding:3px 8px;border-radius:10px;z-index:5';
+        c.appendChild(b);
+      }
+    });
+  }
+  
+  /* ===== 21. Game Preview Modal ===== */
+  window._openGamePreview = function(game) {
+    var prods = (typeof products !== 'undefined' && products) || [];
+    var gProds = prods.filter(function(p){ return p.game === game; });
+    if (!gProds.length) return;
+    var minPrice = Math.min.apply(null, gProds.map(function(p){ return p.price; }));
+    var maxPrice = Math.max.apply(null, gProds.map(function(p){ return p.price; }));
+    var img = 'https://via.placeholder.com/300x160/334155/38bdf8?text=' + encodeURIComponent(game);
+    var html = '<div class="modal-box">' +
+      '<img class="_gameModalImg" src="' + img + '">' +
+      '<h3 style="color:#38bdf8;margin-bottom:8px">' + game + '</h3>' +
+      '<div style="font-size:13px;color:#94a3b8;margin-bottom:15px">Package ' + gProds.length + ' မျိုး · ' + minPrice.toLocaleString() + ' - ' + maxPrice.toLocaleString() + ' Ks</div>' +
+      '<button onclick="closeModal(\'_gamePreview\');openGameProducts(\'' + game + '\')" style="width:100%;padding:13px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;border:none;border-radius:12px;font-weight:bold;cursor:pointer;font-family:inherit;margin-bottom:8px">🛒 ဝယ်ရန်</button>' +
+      '<button class="cancel" onclick="closeModal(\'_gamePreview\')" style="width:100%;padding:12px;background:#334155;color:#fff;border:none;border-radius:12px;font-weight:bold;cursor:pointer;font-family:inherit">Close</button>' +
+      '</div>';
+    var m = document.getElementById('_gamePreview');
+    if (!m) {
+      m = document.createElement('div');
+      m.className = 'modal';
+      m.id = '_gamePreview';
+      document.body.appendChild(m);
+    }
+    m.innerHTML = html;
+    m.classList.add('show');
+  };
+  
+  /* ===== 28. Push Test Enhancement ===== */
+  function enhancePush() {
+    if (Notification.permission === 'granted' && typeof subscribeToPush === 'function') {
+      setTimeout(subscribeToPush, 2000);
+    }
+  }
+  
+  /* ===== 42. Sound Effect Hook ===== */
+  var _oldToast = window.showToast;
+  if (_oldToast && !window._toastSound) {
+    window._toastSound = true;
+    window.showToast = function(text, type){
+      if (type === 'success') { try { playSuccessSound(); } catch(e){} }
+      return _oldToast.apply(this, arguments);
+    };
+  }
+  
+  /* ===== 41. Haptic Hook ===== */
+  var _oldHaptic = window.haptic;
+  if (_oldHaptic && !window._hapticViz) {
+    window._hapticViz = true;
+    window.haptic = function(ms){
+      var a = document.activeElement;
+      if (a && a.classList) {
+        a.classList.add('haptic-active');
+        setTimeout(function(){ a.classList.remove('haptic-active'); }, 150);
+      }
+      return _oldHaptic.apply(this, arguments);
+    };
+  }
+  
+  /* ===== Auto-run ===== */
+  function init() {
+    try { enhanceSplash(); } catch(e){}
+    setTimeout(function(){ try { enhanceSearch(); } catch(e){} }, 1500);
+    setTimeout(function(){ try { addPresets(); } catch(e){} }, 2000);
+    setTimeout(function(){ try { enhanceWallet(); } catch(e){} }, 2000);
+    setTimeout(function(){ try { enhanceProfile(); } catch(e){} }, 2500);
+    setTimeout(function(){ try { enhanceGames(); } catch(e){} }, 3000);
+    setTimeout(function(){ try { enhanceStats(); } catch(e){} }, 3500);
+    setTimeout(function(){ try { enhance2FA(); } catch(e){} }, 4000);
+    setTimeout(function(){ try { enhanceVerified(); } catch(e){} }, 4000);
+    setTimeout(function(){ try { enhancePush(); } catch(e){} }, 4500);
+    
+    // Re-run on tab change
+    if (typeof window.switchTab === 'function') {
+      var _orig = window.switchTab;
+      window.switchTab = function(name, btn){
+        _orig(name, btn);
+        setTimeout(function(){
+          if (name === 'wallet') try { addPresets(); enhanceWallet(); } catch(e){}
+          if (name === 'profile') try { enhanceProfile(); enhance2FA(); enhanceVerified(); } catch(e){}
+          if (name === 'analytics') try { enhanceStats(); } catch(e){}
+          if (name === 'home') try { enhanceGames(); } catch(e){}
+        }, 400);
+      };
+    }
+    
+    // Periodic
+    setInterval(function(){
+      try { enhanceGames(); } catch(e){}
+      try { enhanceProfile(); } catch(e){}
+    }, 5000);
+    
+    console.log('✅ Epic features loaded');
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    setTimeout(init, 100);
+  }
+})();
 </script>
+</script>
+<!-- EPIC_FEATURES_HTML -->
+<button class="_fab" id="_fabBtn" onclick="toggleFab()">⚡</button>
+<div class="_fabMenu" id="_fabMenu">
+  <button class="_fabItem" onclick="switchTab('wallet',document.querySelectorAll('.nav-item')[1])" title="Wallet">💰</button>
+  <button class="_fabItem" onclick="switchTab('orders',document.querySelectorAll('.nav-item')[2])" title="Orders">📦</button>
+  <button class="_fabItem" onclick="switchTab('chat',document.querySelectorAll('.nav-item')[3])" title="Chat">💬</button>
+  <button class="_fabItem" onclick="switchTab('home',document.querySelectorAll('.nav-item')[0]);setTimeout(function(){var s=document.getElementById('searchInput');if(s)s.focus();},300)" title="Search">🔍</button>
+</div>
+<!-- END_EPIC -->
 </body>
 </html>
