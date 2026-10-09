@@ -188,6 +188,104 @@ async function doSpin() {
 }
 var _spinCanPlay = true;
 
+
+// 1. Settings ဖွင့်တဲ့ Function ကို ပြန်ရေးခြင်း
+window.openSettings = function() {
+  var m = document.getElementById('settingsModal');
+  if (m) {
+    m.classList.add('show');
+    if (typeof populateThemeColors === 'function') populateThemeColors();
+    if (typeof updateToggles === 'function') updateToggles();
+  }
+};
+
+// 2. Theme Color ခလုတ်တွေ ဖန်တီးခြင်း
+var THEME_COLORS = [
+  {name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},
+  {name:'Green', primary:'#10b981', secondary:'#3b82f6'},
+  {name:'Red', primary:'#ef4444', secondary:'#f59e0b'},
+  {name:'Pink', primary:'#ec4899', secondary:'#a855f7'},
+  {name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},
+  {name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}
+];
+function setThemeColor(name) {
+  var c = THEME_COLORS.find(function(x){ return x.name === name; });
+  if (!c) return;
+  localStorage.setItem('themeColor', name);
+  document.documentElement.style.setProperty('--accent1', c.primary);
+  document.documentElement.style.setProperty('--accent2', c.secondary);
+  var dots = document.querySelectorAll('.theme-color-dot');
+  dots.forEach(function(dot){ dot.classList.remove('active'); });
+  var activeDot = document.querySelector('.theme-color-dot[data-name="' + name + '"]');
+  if (activeDot) activeDot.classList.add('active');
+  if (typeof showToast === 'function') showToast('✅ ' + name + ' Theme', 'success');
+}
+function populateThemeColors() {
+  var cur = localStorage.getItem('themeColor') || 'Blue';
+  var row = document.getElementById('themeColorRow');
+  if (!row) return;
+  row.innerHTML = THEME_COLORS.map(function(c){
+    return '<div class="theme-color-dot ' + (cur===c.name?'active':'') + '" data-name="' + c.name + '" style="background:linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')" onclick="setThemeColor(\'' + c.name + '\')" title="' + c.name + '"></div>';
+  }).join('');
+}
+// စတင်ဖွင့်တာနဲ့ Theme Color ကို Apply လုပ်ခြင်း
+(function(){ 
+  var name = localStorage.getItem('themeColor') || 'Blue'; 
+  setThemeColor(name); 
+  setTimeout(populateThemeColors, 1000); 
+})();
+
+// 3. Tab ပြောင်းရင် Modal တွေ ပိတ်သွားအောင် လုပ်ခြင်း
+var _origSwitchTab = window.switchTab;
+window.switchTab = function(name, btn) {
+  document.querySelectorAll('.modal').forEach(function(m){ m.classList.remove('show'); });
+  if (_origSwitchTab) _origSwitchTab(name, btn);
+};
+
+// 4. My Stats ကို Analytics ကို ပို့ခြင်း (Profile မဟုတ်တော့ပါ)
+window.openStats = function() { 
+  window.switchTab('analytics', document.querySelector('.nav-item')); 
+};
+
+// 5. Spin ရလာတဲ့ ပိုက်ဆံ ချက်ချင်းပေါ်အောင် ပြင်ခြင်း
+window.doSpin = async function() {
+  if (!_spinCanPlay) return;
+  var btn = document.getElementById('spinBtn');
+  if (!btn) return;
+  btn.textContent = '⏳ လှည့်နေတယ်...';
+  _spinCanPlay = false;
+  var r = Math.floor(Math.random() * 8);
+  var rotations = 360 * 5 + (r * 45);
+  var wheel = document.getElementById('spinWheel');
+  if (wheel) wheel.style.transform = 'rotate(' + rotations + 'deg)';
+  await new Promise(function(res){ setTimeout(res, 4200); });
+  
+  var d = await api('/api/spin', {method:'POST'});
+  var resEl = document.getElementById('spinResult');
+  
+  if (d.success) {
+    if (d.reward > 0) {
+      playSound('success'); haptic(100);
+      if (resEl) resEl.innerHTML = '<b style="color:#22c55e;font-size:18px">🎉 +' + d.reward.toLocaleString() + ' Ks!</b>';
+    } else {
+      if (resEl) resEl.innerHTML = '<b style="color:#ef4444">😢 မရပါ</b>';
+    }
+    // ပိုက်ဆံ ချက်ချင်း Update လုပ်ခြင်း
+    if (typeof d.balance !== 'undefined') {
+      var balEl = document.getElementById('bal');
+      if (balEl) balEl.innerHTML = d.balance.toLocaleString() + ' <span>Ks</span>';
+      var pBalEl = document.getElementById('pBal');
+      if (pBalEl) pBalEl.textContent = d.balance.toLocaleString() + ' Ks';
+    }
+    if (typeof loadMe === 'function') loadMe();
+  } else {
+    if (resEl) resEl.innerHTML = '<b style="color:#ef4444">' + (d.error || 'Error') + '</b>';
+  }
+  btn.textContent = 'Close';
+  btn.onclick = function(){ closeModal('spinModal'); _spinCanPlay = true; };
+};
+var _spinCanPlay = true;
+
 </script>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -361,6 +459,17 @@ body.light .faq-item{background:#fff}
 .theme-color-row{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap;min-height:36px}
 .theme-color-dot{width:36px;height:36px;border-radius:50%;cursor:pointer;border:3px solid transparent;transition:0.2s}
 .theme-color-dot.active{border-color:#fff;transform:scale(1.1)}
+
+
+/* Modal တွေကို ပုံမှန်အတိုင်း ပြန်ထားခြင်း */
+.modal { position: fixed; inset: 0; background: rgba(0,0,0,0.85); display: none; align-items: flex-end; justify-content: center; z-index: 9999; }
+.modal.show { display: flex !important; }
+.modal-box { background: #1e293b; padding: 25px; border-radius: 24px 24px 0 0; width: 100%; max-width: 500px; animation: slideUpModal 0.3s; max-height: 85vh; overflow-y: auto; border-top: 1px solid #334155; }
+@keyframes slideUpModal { from { transform: translateY(100%); } to { transform: translateY(0); } }
+/* Theme Color dots */
+.theme-color-row { display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; min-height: 36px; }
+.theme-color-dot { width: 36px; height: 36px; border-radius: 50%; cursor: pointer; border: 3px solid transparent; transition: 0.2s; }
+.theme-color-dot.active { border-color: #fff; transform: scale(1.1); }
 
 </style>
 <link rel="manifest" href="/manifest.json">
@@ -766,9 +875,7 @@ async function logout(){ if (!confirm('Logout လုပ်မှာသေချ�
 </script>
 
 <button class="music-btn" id="musicBtn" onclick="toggleMusic()">🎵</button>
-<div class="modal" id="settingsModal"><div class="modal-box">
-  <h3>⚙️ Settings</h3>
-  <div class="settings-toggle"><div><b style="font-size:14px">🔊 Sound</b><div style="font-size:11px;color:#94a3b8">Sound Effect</div></div><div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div></div>
+<div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div></div>
   <div class="settings-toggle"><div><b style="font-size:14px">📳 Haptic</b><div style="font-size:11px;color:#94a3b8">တုန်ခါမှု</div></div><div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div></div>
   <div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px">
     <b style="font-size:14px">🎨 Theme Color</b>
@@ -777,5 +884,25 @@ async function logout(){ if (!confirm('Logout လုပ်မှာသေချ�
   <button onclick="shareApp()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">📤 Share App</button>
   <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
 </div></div>
+
+<div class="modal" id="settingsModal">
+  <div class="modal-box">
+    <h3>⚙️ Settings</h3>
+    <div class="settings-toggle">
+      <div><b style="font-size:14px">🔊 Sound</b><div style="font-size:11px;color:#94a3b8">Sound Effect</div></div>
+      <div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div>
+    </div>
+    <div class="settings-toggle">
+      <div><b style="font-size:14px">📳 Haptic</b><div style="font-size:11px;color:#94a3b8">တုန်ခါမှု</div></div>
+      <div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div>
+    </div>
+    <div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px">
+      <b style="font-size:14px">🎨 Theme Color</b>
+      <div class="theme-color-row" id="themeColorRow"></div>
+    </div>
+    <button onclick="shareApp()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">📤 Share App</button>
+    <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
+  </div>
+</div>
 </body>
 </html>
