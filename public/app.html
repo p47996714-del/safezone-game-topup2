@@ -915,13 +915,7 @@ function openModal(id){
   selected = products.find(function(p){ return p.id === id; });
   if (!selected) return;
   closeModal('productModal');
-  
-  // App Premium ဆိုရင် ID မတောင်းဘဲ တိုက်ရိုက် ဝယ်မယ်
-  if (selected.game === 'App Premium') {
-    buyPremium();
-    return;
-  }
-  
+  if (selected.game === 'App Premium') { buyPremiumDirect(selected.id); return; }
   var t = document.getElementById('mTitle');
   if (t) t.textContent = selected.name + ' - ' + selected.price.toLocaleString() + ' Ks';
   var pid = document.getElementById('playerId');
@@ -929,8 +923,6 @@ function openModal(id){
   var sf = document.getElementById('serverIdField');
   var needsServer = ['Mobile Legends', 'Magic Chess'].indexOf(selected.game) >= 0;
   if (sf) sf.style.display = needsServer ? 'block' : 'none';
-  var si = document.getElementById('serverId');
-  if (si) si.value = '';
   var m = document.getElementById('orderModal');
   if (m) m.classList.add('show');
 }
@@ -981,15 +973,10 @@ async function deposit(){
   var amount = amtEl ? amtEl.value : '';
   if (!amount || amount < 1000) return showToast('အနည်းဆုံး 1000 Ks', 'error');
   
-  // Receipt ပုံ ရှိမရှိ စစ်ဆေးခြင်း
   var receipt = null;
-  var preview = document.getElementById('receiptPreview');
   var img = document.getElementById('receiptImg');
-  if (img && img.src && img.src.indexOf('data:') === 0) {
-    receipt = img.src;
-  }
+  if (img && img.src && img.src.indexOf('data:') === 0) receipt = img.src;
   
-  // Receipt မထည့်ရင် လုံးဝ မတင်ခိုင်းပါ
   if (!receipt) {
     try { playSound('error'); } catch(e){}
     showToast('📸 ငွေလွှဲ Receipt ပုံ မဖြစ်မနေ ထည့်ပါ', 'error');
@@ -1008,7 +995,8 @@ async function deposit(){
     if (amtEl) amtEl.value = '';
     var ri2 = document.getElementById('receiptInput');
     if (ri2) ri2.value = '';
-    if (preview) preview.style.display = 'none';
+    var prev = document.getElementById('receiptPreview');
+    if (prev) prev.style.display = 'none';
     if (img) img.src = '';
     if (typeof loadDeposits === 'function') loadDeposits();
   } else {
@@ -1888,6 +1876,21 @@ setTimeout(function() { if (Notification.permission === 'granted') subscribeToPu
 })();
 </script>
 
+
+
+</script>
+<!-- EPIC_FEATURES_HTML -->
+<button class="_fab" id="_fabBtn" onclick="toggleFab()">⚡</button>
+<div class="_fabMenu" id="_fabMenu">
+  <button class="_fabItem" onclick="switchTab('wallet',document.querySelectorAll('.nav-item')[1])" title="Wallet">💰</button>
+  <button class="_fabItem" onclick="switchTab('orders',document.querySelectorAll('.nav-item')[2])" title="Orders">📦</button>
+  <button class="_fabItem" onclick="switchTab('chat',document.querySelectorAll('.nav-item')[3])" title="Chat">💬</button>
+  <button class="_fabItem" onclick="switchTab('home',document.querySelectorAll('.nav-item')[0]);setTimeout(function(){var s=document.getElementById('searchInput');if(s)s.focus();},300)" title="Search">🔍</button>
+</div>
+<!-- END_EPIC -->
+
+<script>
+/* PREMIUM_DIRECT_SAFE */
 async function buyPremiumDirect(productId) {
   try {
     var p = products.find(function(x){ return x.id === productId; });
@@ -1919,7 +1922,6 @@ async function buyPremiumDirect(productId) {
     if (typeof loadMe === 'function') loadMe();
     if (typeof loadOrders === 'function') loadOrders();
     
-    // Chat ကို ဖွင့်ပြီး order info ထည့်
     setTimeout(function(){
       try {
         var navBtns = document.querySelectorAll('.nav-item');
@@ -1940,16 +1942,7 @@ async function buyPremiumDirect(productId) {
   }
 }
 window.buyPremiumDirect = buyPremiumDirect;
-
 </script>
-<!-- EPIC_FEATURES_HTML -->
-<button class="_fab" id="_fabBtn" onclick="toggleFab()">⚡</button>
-<div class="_fabMenu" id="_fabMenu">
-  <button class="_fabItem" onclick="switchTab('wallet',document.querySelectorAll('.nav-item')[1])" title="Wallet">💰</button>
-  <button class="_fabItem" onclick="switchTab('orders',document.querySelectorAll('.nav-item')[2])" title="Orders">📦</button>
-  <button class="_fabItem" onclick="switchTab('chat',document.querySelectorAll('.nav-item')[3])" title="Chat">💬</button>
-  <button class="_fabItem" onclick="switchTab('home',document.querySelectorAll('.nav-item')[0]);setTimeout(function(){var s=document.getElementById('searchInput');if(s)s.focus();},300)" title="Search">🔍</button>
-</div>
-<!-- END_EPIC -->
+
 </body>
 </html>
