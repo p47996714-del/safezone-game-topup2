@@ -535,6 +535,65 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     <p style="font-size:11px;color:#64748b;margin-top:10px">💡 ဥပမာ — Base 100, Mult ×2 ဆိုရင် 1,000 Ks = 20 Points ရမယ်</p>
   </div>
 
+  <!-- POINTS REDEEM RATE -->
+  <div class="section" style="border:2px solid #22c55e">
+    <h3 style="color:#22c55e">💰 Points Redeem Rate</h3>
+    <p style="font-size:12px;color:#94a3b8;margin-bottom:14px">User က Points ကို Balance ပြန်လဲတဲ့အခါ ရမယ့် နှုန်း</p>
+    
+    <!-- CURRENT RATE -->
+    <div style="background:linear-gradient(135deg,rgba(34,197,94,0.15),rgba(56,189,248,0.15));padding:15px;border-radius:12px;margin-bottom:12px;border-left:3px solid #22c55e">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+        <b style="color:#22c55e;font-size:13px">📊 လက်ရှိ Rate</b>
+      </div>
+      <div style="font-size:20px;font-weight:bold;color:#fff;margin-bottom:4px" id="rrDisplay">100 Points = 1,000 Ks</div>
+      <div style="font-size:11px;color:#94a3b8">1 Point = <span id="rrPerPoint">10</span> Ks</div>
+    </div>
+    
+    <!-- QUICK BUTTONS -->
+    <div style="margin-bottom:12px">
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">⚡ အမြန် ရွေးရန်</div>
+      <div class="row" style="flex-wrap:wrap;gap:6px">
+        <button onclick="quickSetRR(5)" class="btn gray" style="margin:0;flex:1;min-width:70px;font-size:11px;padding:9px">100 Points<br>500 Ks</button>
+        <button onclick="quickSetRR(10)" class="btn blue" style="margin:0;flex:1;min-width:70px;font-size:11px;padding:9px">100 Points<br>1,000 Ks</button>
+        <button onclick="quickSetRR(20)" class="btn" style="margin:0;flex:1;min-width:70px;font-size:11px;padding:9px">100 Points<br>2,000 Ks</button>
+      </div>
+      <div class="row" style="flex-wrap:wrap;gap:6px;margin-top:6px">
+        <button onclick="quickSetRR(50)" class="btn orange" style="margin:0;flex:1;min-width:70px;font-size:11px;padding:9px">100 Points<br>5,000 Ks</button>
+        <button onclick="quickSetRR(100)" class="btn red" style="margin:0;flex:1;min-width:70px;font-size:11px;padding:9px">100 Points<br>10,000 Ks</button>
+      </div>
+    </div>
+    
+    <!-- CUSTOM INPUT -->
+    <div style="background:rgba(15,23,42,0.6);padding:12px;border-radius:12px;margin-bottom:12px">
+      <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">✏️ Custom Rate</div>
+      <div class="row">
+        <span style="padding:10px;color:#94a3b8;font-size:13px">100 Points =</span>
+        <input id="rrCustomInput" type="number" min="1" step="1" placeholder="10" style="flex:1">
+        <span style="padding:10px;color:#94a3b8;font-size:13px">Ks</span>
+        <button onclick="saveRRCustom()">💾 Save</button>
+      </div>
+    </div>
+    
+    <!-- PREVIEW -->
+    <div style="background:rgba(15,23,42,0.6);padding:14px;border-radius:12px;border:1px solid rgba(34,197,94,0.3)">
+      <b style="color:#22c55e;font-size:12px;display:block;margin-bottom:10px">📊 User ရမယ့် ပမာဏ</b>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px">
+        <span style="color:#94a3b8">100 Points</span>
+        <b style="color:#22c55e" id="rrPreview100">1,000 Ks</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px">
+        <span style="color:#94a3b8">500 Points</span>
+        <b style="color:#22c55e" id="rrPreview500">5,000 Ks</b>
+      </div>
+      <div style="display:flex;justify-content:space-between;padding:5px 0;font-size:12px">
+        <span style="color:#94a3b8">1,000 Points</span>
+        <b style="color:#22c55e" id="rrPreview1000">10,000 Ks</b>
+      </div>
+    </div>
+    
+    <p style="font-size:11px;color:#64748b;margin-top:10px">💡 ဥပမာ — Rate = 10 ဆိုရင် 100 Points ကို 1,000 Ks ပြန်လဲနိုင်မယ်</p>
+  </div>
+
 
     <div class="section">
       <h3>🎨 Banners</h3>
@@ -1915,6 +1974,75 @@ tab = function(name, btn) {
   if (name === 'settings' || name === 'site') setTimeout(loadPointsSettings, 400);
 };
 setTimeout(loadPointsSettings, 2000);
+
+
+/* POINTS_REDEEM_ADMIN */
+var _rrState = { rate: 10 };
+
+async function loadRedeemRate() {
+  try {
+    var c = await api('/api/admin/config');
+    _rrState.rate = parseFloat(c.pointsRedeemRate) || 10;
+    updateRRDisplay(_rrState.rate);
+  } catch(e) { console.log('loadRedeemRate err:', e.message); }
+}
+
+function updateRRDisplay(rate) {
+  rate = parseFloat(rate) || 10;
+  if (rate < 0.01) rate = 0.01;
+  _rrState.rate = rate;
+  var set = function(id, v) { var el = document.getElementById(id); if (el) el.textContent = v; };
+  set('rrDisplay', '100 Points = ' + (100 * rate).toLocaleString() + ' Ks');
+  set('rrPerPoint', rate);
+  set('rrPreview100', (100 * rate).toLocaleString() + ' Ks');
+  set('rrPreview500', (500 * rate).toLocaleString() + ' Ks');
+  set('rrPreview1000', (1000 * rate).toLocaleString() + ' Ks');
+  var inp = document.getElementById('rrCustomInput');
+  if (inp) inp.value = rate;
+}
+
+async function saveRR(rate) {
+  rate = parseFloat(rate);
+  if (isNaN(rate) || rate < 0.01) { alert('❌ မှန်ကန်တဲ့ Rate ထည့်ပါ'); return; }
+  if (rate > 10000) { alert('❌ Rate အရမ်းကြီးနေတယ်'); return; }
+  var d = await api('/api/admin/points-redeem-rate', { method: 'POST', body: JSON.stringify({ rate: rate }) });
+  if (d && d.success) {
+    _rrState.rate = rate;
+    updateRRDisplay(rate);
+    alert('✅ သိမ်းပြီး — 100 Points = ' + (100 * rate).toLocaleString() + ' Ks');
+  } else {
+    alert('❌ ' + ((d && d.error) || 'Failed'));
+  }
+}
+
+function quickSetRR(rate) {
+  var inp = document.getElementById('rrCustomInput');
+  if (inp) inp.value = rate;
+  updateRRDisplay(rate);
+}
+
+function saveRRCustom() {
+  var inp = document.getElementById('rrCustomInput');
+  if (!inp) return;
+  saveRR(inp.value);
+}
+
+// Auto-preview on input
+setTimeout(function(){
+  var inp = document.getElementById('rrCustomInput');
+  if (inp) inp.addEventListener('input', function(){ updateRRDisplay(this.value); });
+}, 1500);
+
+// Tab hook
+var _origTabRR = tab;
+tab = function(name, btn) {
+  _origTabRR(name, btn);
+  if (name === 'settings' || name === 'site') {
+    setTimeout(loadRedeemRate, 400);
+    setTimeout(loadPointsSettings, 400);
+  }
+};
+setTimeout(loadRedeemRate, 2000);
 
 </script>
 </body>

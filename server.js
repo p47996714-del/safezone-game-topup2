@@ -128,6 +128,7 @@ function defaultDB() {
       },
       pointsMultiplier: 1,
       pointsBaseRate: 100,
+      pointsRedeemRate: 10,
       coupons: { 'WELCOME100': { amount: 100, uses: 1000, usesLeft: 1000, expires: 0 } }
     },
     banners: [
@@ -273,6 +274,7 @@ app.get('/api/site', (req, res) => res.json({
   spinConfig: db.config.spinConfig || { enabled: true, prizes: [] },
   pointsMultiplier: db.config.pointsMultiplier || 1,
   pointsBaseRate: db.config.pointsBaseRate || 100,
+  pointsRedeemRate: db.config.pointsRedeemRate || 10,
   hero: db.config.hero || {title:'Safe Zone Topup', subtitle:'⚡ Instant Delivery', videoUrl:''},
   theme: db.config.theme || {primary:'#38bdf8', secondary:'#a855f7'},
   payments: db.config.payments || [
@@ -465,6 +467,16 @@ app.post('/api/order', auth, (req, res) => {
   res.json({success:true, orderId: order.id, balance: req.user.balance, cashback,
     message:`Order တင်ပြီးပါပြီ (+${cashback} Ks cashback)`});
 });
+
+app.post('/api/admin/points-redeem-rate', adminAuth, superAdmin, (req, res) => {
+  var rate = parseFloat(req.body.rate);
+  if (isNaN(rate) || rate < 1) return res.status(400).json({error: 'Rate 1 အထက် ဖြစ်ရမယ်'});
+  if (!db.config) db.config = {};
+  db.config.pointsRedeemRate = rate;
+  saveDB();
+  res.json({ success: true, rate: rate });
+});
+
 app.get('/api/orders', auth, (req, res) => res.json(db.orders.filter(o => o.userId === req.user.id).reverse()));
 // Feature 14 — Reorder
 app.post('/api/reorder', auth, (req, res) => {
