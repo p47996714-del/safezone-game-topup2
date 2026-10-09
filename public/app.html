@@ -169,6 +169,21 @@ div[onclick*="openSpinWheel"],
 div[onclick*="SpinWheel"],
 div[onclick*="openSpin"] { display: none !important; }
 </style>
+<style>
+/* FEATURES_5_CSS */
+._progressWrap{margin-top:10px;height:6px;background:#0f172a;border-radius:3px;overflow:hidden}
+._progressBar{height:100%;border-radius:3px;transition:width 0.5s}
+._progressLabels{display:flex;justify-content:space-between;font-size:9px;color:#64748b;margin-top:3px}
+._reorderBtn{margin-top:10px;padding:8px 16px;background:rgba(56,189,248,0.15);color:#38bdf8;border:1px solid #38bdf8;border-radius:10px;font-size:12px;font-weight:bold;cursor:pointer;font-family:inherit}
+@keyframes _floatUp{from{transform:translateY(0) scale(0);opacity:0}10%{opacity:0.5}to{transform:translateY(-105vh) scale(1.2);opacity:0}}
+._particle{position:absolute;border-radius:50%;opacity:0.4;pointer-events:none}
+#_particlesBg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+@keyframes _confettiFall{to{transform:translateY(100vh) rotate(720deg);opacity:0}}
+._confetti{position:fixed;width:10px;height:10px;z-index:10001;pointer-events:none;animation:_confettiFall 3s linear forwards}
+._skeleton{background:linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);background-size:200% 100%;animation:_skelShimmer 1.5s infinite;border-radius:14px}
+@keyframes _skelShimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
+._skeletonCard{height:180px;border-radius:16px;margin-bottom:12px}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -1149,6 +1164,174 @@ setTimeout(function() { if (Notification.permission === 'granted') subscribeToPu
   setInterval(hideSpinCards, 1500);
   if (window.MutationObserver) {
     try { new MutationObserver(hideSpinCards).observe(document.body, {childList:true, subtree:true}); } catch(e){}
+  }
+})();
+</script>
+<script>
+/* FEATURES_5_IN_1 */
+(function(){
+  'use strict';
+  
+  /* --- Feature 13: Confetti --- */
+  function createConfetti() {
+    try {
+      var colors = ['#38bdf8','#a855f7','#f59e0b','#22c55e','#ec4899'];
+      for (var i = 0; i < 30; i++) {
+        var c = document.createElement('div');
+        c.className = '_confetti';
+        c.style.left = (Math.random() * 100) + '%';
+        c.style.top = '-10px';
+        c.style.background = colors[i % 5];
+        c.style.animationDelay = (Math.random() * 0.5) + 's';
+        document.body.appendChild(c);
+        setTimeout((function(el){ return function(){ if(el.parentNode) el.parentNode.removeChild(el); }; })(c), 4000);
+      }
+    } catch(e) {}
+  }
+  window.createConfetti = createConfetti;
+
+  /* Hook showToast → Order success → confetti */
+  setTimeout(function() {
+    if (typeof window.showToast === 'function' && !window._toastHooked) {
+      window._toastHooked = true;
+      var orig = window.showToast;
+      window.showToast = function(text, type) {
+        try { orig.apply(this, arguments); } catch(e) {}
+        try {
+          if (text && typeof text === 'string' && (text.indexOf('Order တင်') > -1 || text.indexOf('Order အောင်') > -1)) {
+            createConfetti();
+          }
+        } catch(e) {}
+      };
+    }
+  }, 500);
+
+  /* --- Feature 11: Particles --- */
+  function startParticles() {
+    try {
+      if (document.getElementById('_particlesBg')) return;
+      var bg = document.createElement('div');
+      bg.id = '_particlesBg';
+      document.body.appendChild(bg);
+      var colors = ['#38bdf8','#a855f7','#ec4899','#22c55e','#f59e0b'];
+      for (var i = 0; i < 18; i++) {
+        var p = document.createElement('div');
+        var size = 2 + Math.random() * 3;
+        p.className = '_particle';
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.background = colors[i % 5];
+        p.style.left = (Math.random() * 100) + '%';
+        p.style.top = '100%';
+        p.style.animation = '_floatUp ' + (10 + Math.random() * 8) + 's linear infinite';
+        p.style.animationDelay = (Math.random() * 8) + 's';
+        bg.appendChild(p);
+      }
+    } catch(e) {}
+  }
+
+  /* --- Feature 12: Skeleton --- */
+  function showGameSkeletons() {
+    try {
+      var grid = document.getElementById('gamesGrid');
+      if (!grid) return;
+      if (grid.children.length > 0) return;
+      var html = '';
+      for (var i = 0; i < 4; i++) html += '<div class="_skeleton _skeletonCard"></div>';
+      grid.innerHTML = html;
+    } catch(e) {}
+  }
+
+  /* --- Feature 2 & 4: Progress Bar + Quick Reorder --- */
+  function enhanceOrder(orderEl) {
+    if (!orderEl || orderEl.querySelector('._progressWrap')) return;
+    var status = 'pending';
+    var t = orderEl.textContent || '';
+    if (t.indexOf('processing') > -1) status = 'processing';
+    else if (t.indexOf('completed') > -1) status = 'completed';
+    else if (t.indexOf('rejected') > -1) status = 'rejected';
+    
+    var stages = {pending:33, processing:66, completed:100, rejected:100};
+    var colors = {
+      pending: 'linear-gradient(90deg,#eab308,#3b82f6)',
+      processing: 'linear-gradient(90deg,#3b82f6,#22c55e)',
+      completed: 'linear-gradient(90deg,#22c55e,#059669)',
+      rejected: 'linear-gradient(90deg,#ef4444,#dc2626)'
+    };
+    
+    var wrap = document.createElement('div');
+    wrap.className = '_progressWrap';
+    var bar = document.createElement('div');
+    bar.className = '_progressBar';
+    bar.style.width = (stages[status] || 33) + '%';
+    bar.style.background = colors[status] || colors.pending;
+    wrap.appendChild(bar);
+    orderEl.appendChild(wrap);
+    
+    var lbl = document.createElement('div');
+    lbl.className = '_progressLabels';
+    lbl.innerHTML = '<span>⏳ Pending</span><span>⚙️ Processing</span><span>✅ Done</span>';
+    orderEl.appendChild(lbl);
+    
+    /* Quick Reorder */
+    var orderId = null;
+    var match = t.match(/ORD\d+/);
+    if (match) orderId = match[0];
+    
+    if (orderId) {
+      var btn = document.createElement('button');
+      btn.className = '_reorderBtn';
+      btn.textContent = '⚡ Reorder';
+      btn.onclick = function(e) { e.stopPropagation(); quickReorder(orderId); };
+      orderEl.appendChild(btn);
+    }
+  }
+  
+  function quickReorder(orderId) {
+    if (!confirm('⚡ Order ကို ပြန်မှာမလား?')) return;
+    if (typeof api !== 'function') { alert('API not ready'); return; }
+    api('/api/reorder', {method:'POST', body: JSON.stringify({orderId: orderId})}).then(function(d) {
+      if (d && d.success) {
+        if (typeof showToast === 'function') showToast('✅ Reorder ပြီးပါပြီ', 'success');
+        createConfetti();
+        if (typeof loadMe === 'function') loadMe();
+        if (typeof loadOrders === 'function') loadOrders();
+      } else {
+        if (typeof showToast === 'function') showToast('❌ ' + ((d && d.error) || 'Error'), 'error');
+      }
+    }).catch(function(e) {
+      if (typeof showToast === 'function') showToast('❌ ' + e.message, 'error');
+    });
+  }
+  window.quickReorder = quickReorder;
+  
+  /* Watch orders for changes */
+  function observeOrders() {
+    try {
+      var el = document.getElementById('ordList');
+      if (!el) { setTimeout(observeOrders, 2000); return; }
+      var process = function() {
+        var items = el.querySelectorAll(':scope > div');
+        for (var i = 0; i < items.length; i++) enhanceOrder(items[i]);
+      };
+      var observer = new MutationObserver(process);
+      observer.observe(el, {childList: true, subtree: true});
+      process();
+    } catch(e) {}
+  }
+
+  /* --- INIT --- */
+  function init() {
+    try { startParticles(); } catch(e) {}
+    setTimeout(showGameSkeletons, 200);
+    setTimeout(observeOrders, 1500);
+    console.log('✅ Features loaded');
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    init();
   }
 })();
 </script>
