@@ -7,26 +7,7 @@ var hapticOn = true;
 window.onerror = function(msg, url, line, col, error) { return false; };
 
 let musicPlaying = false; let _customMusicEl = null; let musicCtx = null;
-function toggleMusic() {
-  if (musicPlaying) {
-    if (_customMusicEl) { try { _customMusicEl.pause(); _customMusicEl.currentTime = 0; } catch(e){} }
-    if (musicCtx) { try { musicCtx.suspend(); } catch(e){} }
-    musicPlaying = false; document.getElementById('musicBtn').textContent = '🔇'; showToast('🔇 Music Off', 'info');
-  } else {
-    const url = (siteData && siteData.musicUrl) ? siteData.musicUrl : '';
-    if (url) {
-      try {
-        if (!_customMusicEl) { _customMusicEl = new Audio(url); _customMusicEl.loop = true; _customMusicEl.volume = 0.3; }
-        _customMusicEl.play().then(() => { musicPlaying = true; document.getElementById('musicBtn').textContent = '🎵'; showToast('🎵 Music On', 'info'); }).catch(e => { console.log('Play err'); });
-      } catch(e) {}
-    } else {
-      if (!musicCtx) musicCtx = new (window.AudioContext || window.webkitAudioContext)();
-      if (musicCtx.state === 'suspended') musicCtx.resume();
-      musicPlaying = true; document.getElementById('musicBtn').textContent = '🎵'; showToast('🎵 Music On', 'info');
-    }
-  }
-  haptic(30);
-}
+
 
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); deferredPrompt = e; });
@@ -149,17 +130,148 @@ var _spinCanPlay = true;
 
 // 3. Tab ပြောင်းရင် Modal တွေ ပိတ်သွားအောင် လုပ်ခြင်း
 var _origSwitchTab = window.switchTab;
+
+
+// 4. My Stats ကို Analytics ကို ပို့ခြင်း (Profile မဟုတ်တော့ပါ)
+
+
+// 5. Spin ရလာတဲ့ ပိုက်ဆံ ချက်ချင်းပေါ်အောင် ပြင်ခြင်း
+
+var _spinCanPlay = true;
+
+
+// === SETTINGS & THEME COLOR FIX ===
+
+
+
+
+
+// === TAB SWITCH - CLOSE MODALS ===
+var _origSwitchTab2 = window.switchTab;
+
+
+// === MY STATS - GO TO ANALYTICS ===
+
+
+// === SPIN BALANCE UPDATE ===
+
+var _spinCanPlay = true;
+
+// === INIT THEME ===
+(function(){ 
+  var name = localStorage.getItem('themeColor') || 'Blue'; 
+  setThemeColor(name); 
+})();
+
+
+/* ===== SETTINGS FUNCTIONS ===== */
+var soundOn = (localStorage.getItem('soundOn') !== 'off');
+var hapticOn = (localStorage.getItem('hapticOn') !== 'off');
+
+function updateToggles() {
+  var st = document.getElementById('soundToggle');
+  var ht = document.getElementById('hapticToggle');
+  if (st) st.classList.toggle('on', soundOn);
+  if (ht) ht.classList.toggle('on', hapticOn);
+}
+function toggleSound() {
+  soundOn = !soundOn;
+  localStorage.setItem('soundOn', soundOn ? 'on' : 'off');
+  updateToggles();
+  try { if (navigator.vibrate && hapticOn) navigator.vibrate(20); } catch(e){}
+  if (typeof showToast === 'function') showToast(soundOn ? '🔊 Sound On' : '🔇 Sound Off', 'info');
+}
+function toggleHaptic() {
+  hapticOn = !hapticOn;
+  localStorage.setItem('hapticOn', hapticOn ? 'on' : 'off');
+  updateToggles();
+  try { if (navigator.vibrate && hapticOn) navigator.vibrate(30); } catch(e){}
+  if (typeof showToast === 'function') showToast(hapticOn ? '📳 Haptic On' : '📴 Haptic Off', 'info');
+}
+
+/* ===== THEME COLOR ===== */
+var THEME_COLORS = [
+  {name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},
+  {name:'Green', primary:'#10b981', secondary:'#3b82f6'},
+  {name:'Red', primary:'#ef4444', secondary:'#f59e0b'},
+  {name:'Pink', primary:'#ec4899', secondary:'#a855f7'},
+  {name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},
+  {name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}
+];
+function setThemeColor(name) {
+  var c = THEME_COLORS.find(function(x){ return x.name === name; });
+  if (!c) return;
+  localStorage.setItem('themeColor', name);
+  document.documentElement.style.setProperty('--accent1', c.primary);
+  document.documentElement.style.setProperty('--accent2', c.secondary);
+  var dots = document.querySelectorAll('.theme-color-dot');
+  dots.forEach(function(dot){ dot.classList.remove('active'); });
+  var activeDot = document.querySelector('.theme-color-dot[data-name="' + name + '"]');
+  if (activeDot) activeDot.classList.add('active');
+}
+function populateThemeColors() {
+  var cur = localStorage.getItem('themeColor') || 'Blue';
+  var row = document.getElementById('themeColorRow');
+  if (!row) return;
+  row.innerHTML = THEME_COLORS.map(function(c){
+    return '<div class="theme-color-dot ' + (cur === c.name ? 'active' : '') + '" data-name="' + c.name + '" style="background:linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')" onclick="setThemeColor(\'' + c.name + '\')"></div>';
+  }).join('');
+}
+
+/* ===== OPEN SETTINGS ===== */
+window.openSettings = function() {
+  var m = document.getElementById('settingsModal');
+  if (m) {
+    m.classList.add('show');
+    updateToggles();
+    populateThemeColors();
+  }
+};
+
+/* ===== MUSIC TOGGLE ===== */
+var musicPlaying = false;
+var _musicAudio = null;
+function toggleMusic() {
+  var btn = document.getElementById('musicBtn');
+  if (musicPlaying) {
+    if (_musicAudio) { try { _musicAudio.pause(); _musicAudio.currentTime = 0; } catch(e){} }
+    musicPlaying = false;
+    if (btn) btn.textContent = '🔇';
+    if (typeof showToast === 'function') showToast('🔇 Music Off', 'info');
+  } else {
+    var url = (typeof siteData !== 'undefined' && siteData && siteData.musicUrl) ? siteData.musicUrl : '';
+    if (url) {
+      try {
+        if (!_musicAudio) { _musicAudio = new Audio(url); _musicAudio.loop = true; _musicAudio.volume = 0.3; }
+        _musicAudio.play().then(function(){ 
+          musicPlaying = true; 
+          if (btn) btn.textContent = '🎵';
+          if (typeof showToast === 'function') showToast('🎵 Music On', 'info');
+        }).catch(function(){ 
+          if (typeof showToast === 'function') showToast('❌ Music ဖွင့်လို့မရပါ', 'error'); 
+        });
+      } catch(e) {}
+    } else {
+      if (typeof showToast === 'function') showToast('🎵 Music မရှိပါ', 'info');
+    }
+  }
+}
+
+/* ===== MY STATS → ANALYTICS ===== */
+window.openStats = function() {
+  var navItems = document.querySelectorAll('.nav-item');
+  if (typeof switchTab === 'function' && navItems[4]) switchTab('analytics', navItems[4]);
+};
+
+/* ===== TAB SWITCH → CLOSE MODALS ===== */
+var _origSwitchTab = window.switchTab;
 window.switchTab = function(name, btn) {
   document.querySelectorAll('.modal').forEach(function(m){ m.classList.remove('show'); });
   if (_origSwitchTab) _origSwitchTab(name, btn);
 };
 
-// 4. My Stats ကို Analytics ကို ပို့ခြင်း (Profile မဟုတ်တော့ပါ)
-window.openStats = function() { 
-  window.switchTab('analytics', document.querySelector('.nav-item')); 
-};
-
-// 5. Spin ရလာတဲ့ ပိုက်ဆံ ချက်ချင်းပေါ်အောင် ပြင်ခြင်း
+/* ===== SPIN BALANCE UPDATE ===== */
+var _spinCanPlay = true;
 window.doSpin = async function() {
   if (!_spinCanPlay) return;
   var btn = document.getElementById('spinBtn');
@@ -177,12 +289,11 @@ window.doSpin = async function() {
   
   if (d.success) {
     if (d.reward > 0) {
-      playSound('success'); haptic(100);
+      try { playSound('success'); haptic(100); } catch(e){}
       if (resEl) resEl.innerHTML = '<b style="color:#22c55e;font-size:18px">🎉 +' + d.reward.toLocaleString() + ' Ks!</b>';
     } else {
       if (resEl) resEl.innerHTML = '<b style="color:#ef4444">😢 မရပါ</b>';
     }
-    // ပိုက်ဆံ ချက်ချင်း Update လုပ်ခြင်း
     if (typeof d.balance !== 'undefined') {
       var balEl = document.getElementById('bal');
       if (balEl) balEl.innerHTML = d.balance.toLocaleString() + ' <span>Ks</span>';
@@ -194,107 +305,19 @@ window.doSpin = async function() {
     if (resEl) resEl.innerHTML = '<b style="color:#ef4444">' + (d.error || 'Error') + '</b>';
   }
   btn.textContent = 'Close';
-  btn.onclick = function(){ closeModal('spinModal'); _spinCanPlay = true; };
-};
-var _spinCanPlay = true;
-
-
-// === SETTINGS & THEME COLOR FIX ===
-var THEME_COLORS = [
-  {name:'Blue', primary:'#38bdf8', secondary:'#a855f7'},
-  {name:'Green', primary:'#10b981', secondary:'#3b82f6'},
-  {name:'Red', primary:'#ef4444', secondary:'#f59e0b'},
-  {name:'Pink', primary:'#ec4899', secondary:'#a855f7'},
-  {name:'Orange', primary:'#f59e0b', secondary:'#ef4444'},
-  {name:'Purple', primary:'#8b5cf6', secondary:'#ec4899'}
-];
-function setThemeColor(name) {
-  var c = THEME_COLORS.find(function(x){ return x.name === name; });
-  if (!c) return;
-  localStorage.setItem('themeColor', name);
-  var dots = document.querySelectorAll('.theme-color-dot');
-  dots.forEach(function(dot){ dot.classList.remove('active'); });
-  var activeDot = document.querySelector('.theme-color-dot[data-name="' + name + '"]');
-  if (activeDot) activeDot.classList.add('active');
-  if (typeof showToast === 'function') showToast('✅ ' + name + ' Theme', 'success');
-}
-function populateThemeColors() {
-  var cur = localStorage.getItem('themeColor') || 'Blue';
-  var row = document.getElementById('themeColorRow');
-  if (!row) { console.log('themeColorRow NOT FOUND'); return; }
-  row.innerHTML = THEME_COLORS.map(function(c){
-    return '<div class="theme-color-dot ' + (cur===c.name?'active':'') + '" data-name="' + c.name + '" style="background:linear-gradient(135deg,' + c.primary + ',' + c.secondary + ')" onclick="setThemeColor(\'' + c.name + '\')" title="' + c.name + '"></div>';
-  }).join('');
-  console.log('Theme colors populated: ' + THEME_COLORS.length);
-}
-window.openSettings = function() {
-  var m = document.getElementById('settingsModal');
-  if (m) {
-    m.classList.add('show');
-    populateThemeColors();
-    if (typeof updateToggles === 'function') updateToggles();
-  }
-};
-
-// === TAB SWITCH - CLOSE MODALS ===
-var _origSwitchTab2 = window.switchTab;
-window.switchTab = function(name, btn) {
-  document.querySelectorAll('.modal').forEach(function(m){ m.classList.remove('show'); });
-  if (_origSwitchTab2) _origSwitchTab2(name, btn);
-};
-
-// === MY STATS - GO TO ANALYTICS ===
-window.openStats = function() { 
-  window.switchTab('analytics', document.querySelector('.nav-item')); 
-};
-
-// === SPIN BALANCE UPDATE ===
-window.doSpin = async function() {
-  if (typeof _spinCanPlay !== 'undefined' && !_spinCanPlay) return;
-  var btn = document.getElementById('spinBtn');
-  if (!btn) return;
-  btn.textContent = '⏳ လှည့်နေတယ်...';
-  _spinCanPlay = false;
-  var r = Math.floor(Math.random() * 8);
-  var rotations = 360 * 5 + (r * 45);
-  var wheel = document.getElementById('spinWheel');
-  if (wheel) wheel.style.transform = 'rotate(' + rotations + 'deg)';
-  await new Promise(function(res){ setTimeout(res, 4200); });
-  
-  var d = await api('/api/spin', {method:'POST'});
-  var resEl = document.getElementById('spinResult');
-  
-  if (d.success) {
-    if (d.reward > 0) {
-      if (typeof playSound === 'function') playSound('success');
-      if (typeof haptic === 'function') haptic(100);
-      if (resEl) resEl.innerHTML = '<b style="color:#22c55e;font-size:18px">🎉 +' + d.reward.toLocaleString() + ' Ks!</b>';
-    } else {
-      if (resEl) resEl.innerHTML = '<b style="color:#ef4444">😢 မရပါ</b>';
-    }
-    // Force balance update
-    if (typeof d.balance !== 'undefined') {
-      var balEl = document.getElementById('bal');
-      if (balEl) balEl.innerHTML = d.balance.toLocaleString() + ' <span>Ks</span>';
-      var pBalEl = document.getElementById('pBal');
-      if (pBalEl) pBalEl.textContent = d.balance.toLocaleString() + ' Ks';
-    }
-    if (typeof loadMe === 'function') loadMe();
-  } else {
-    if (resEl) resEl.innerHTML = '<b style="color:#ef4444">' + (d.error || 'Error') + '</b>';
-  }
-  btn.textContent = 'Close';
-  btn.onclick = function(){ 
-    var m = document.getElementById('spinModal'); if (m) m.classList.remove('show'); 
+  btn.onclick = function() { 
+    var m = document.getElementById('spinModal'); 
+    if (m) m.classList.remove('show'); 
     _spinCanPlay = true; 
   };
 };
-var _spinCanPlay = true;
 
-// === INIT THEME ===
-(function(){ 
-  var name = localStorage.getItem('themeColor') || 'Blue'; 
-  setThemeColor(name); 
+/* INIT */
+(function(){
+  updateToggles();
+  var name = localStorage.getItem('themeColor') || 'Blue';
+  setThemeColor(name);
+  setTimeout(populateThemeColors, 500);
 })();
 
 </script>
@@ -617,7 +640,7 @@ body.light .modal-box { background: #fff; color: #0f172a; }
   
   <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
 </div></div>
-  <div class="settings-toggle"><div><b style="font-size:14px">📳 Haptic</b></div><div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div></div>
+  
 
 
   <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
@@ -664,56 +687,7 @@ function haptic(ms){ if (navigator.vibrate) navigator.vibrate(ms || 30); }
 function showToast(text, type){ var t = document.getElementById('toast'); if (!t) return; t.textContent = text; t.className = 'toast show ' + (type || ''); clearTimeout(t._timer); t._timer = setTimeout(function(){ t.classList.remove('show'); }, 2000); }
 if (localStorage.getItem('theme') === 'light') { document.body.classList.add('light'); document.getElementById('themeBtn').textContent = '☀️'; }
 function toggleTheme(){ document.body.classList.toggle('light'); var isLight = document.body.classList.contains('light'); document.getElementById('themeBtn').textContent = isLight ? '☀️' : '🌙'; localStorage.setItem('theme', isLight ? 'light' : 'dark'); haptic(20); }
-function updateToggles(){ var st = document.getElementById('soundToggle'); var ht = document.getElementById('hapticToggle'); if (st) st.classList.toggle('on', soundOn); if (ht) ht.classList.toggle('on', hapticOn); }
-function toggleSound(){ soundOn = !soundOn; localStorage.setItem('soundOn', soundOn?'on':'off'); updateToggles(); haptic(20); }
-function toggleHaptic(){ hapticOn = !hapticOn; localStorage.setItem('hapticOn', hapticOn?'on':'off'); updateToggles(); haptic(30); }
-function openSettings(){ document.getElementById('settingsModal').classList.add('show'); updateToggles(); }
-async function api(url, opts){ opts = opts || {}; try { var r = await fetch(url, {method: opts.method || 'GET', headers: Object.assign({}, H, opts.headers || {}), body: opts.body}); if (r.status === 401) { localStorage.clear(); location.href = '/'; return {error:'unauth'}; } if (!r.ok) return {error:'HTTP ' + r.status}; return r.json(); } catch(e) { return {error:'Network'}; } }
-function escapeHtml(s){ return String(s).replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
 
-async function loadSite(){
-  siteData = await api('/api/site'); if (siteData.error) return;
-  document.title = siteData.siteName || 'Safe Zone';
-  var car = document.getElementById('carousel'); var dotsBox = document.getElementById('dots');
-  if (car && dotsBox) {
-    (siteData.banners || []).forEach(function(b, i){
-      var div = document.createElement('div');
-      div.className = 'slide' + (i===0?' active':'');
-      div.style.background = b.bg || 'linear-gradient(135deg,#38bdf8,#a855f7)';
-      div.innerHTML = '<h3>' + (b.title||'') + '</h3><p>' + (b.subtitle||'') + '</p>';
-      car.insertBefore(div, dotsBox);
-      var dot = document.createElement('div');
-      dot.className = 'dot' + (i===0?' active':'');
-      dotsBox.appendChild(dot);
-    });
-  }
-  var payNameEl = document.getElementById('payName'); if (payNameEl) payNameEl.textContent = (siteData.payName||'') + ' — ' + (siteData.payNumber||'');
-  var pays = (siteData.payments && siteData.payments.length) ? siteData.payments : [{name:'KBZ Pay'},{name:'Wave Money'},{name:'UAB Pay'},{name:'AYA Pay'}];
-  var payList = document.getElementById('paymentList');
-  if (payList) payList.innerHTML = pays.map(function(p){
-    return '<div class="payment-method ' + (p.name===selectedPay?'selected':'') + '" onclick="selectPay(\'' + p.name + '\',this)"><div class="pay-logo">' + (p.short||p.name.substring(0,4)) + '</div><div class="pay-info"><div class="pay-name">' + p.name + '</div><div class="pay-num">' + (siteData.payNumber||'') + ' · ' + (siteData.payName||'') + '</div></div></div>';
-  }).join('');
-}
-function selectPay(name, el){ selectedPay = name; document.querySelectorAll('.payment-method').forEach(function(x){ x.classList.remove('selected'); }); el.classList.add('selected'); haptic(15); }
-function copyNum(){ navigator.clipboard.writeText(siteData.payNumber).then(function(){ showToast('✅ နံပါတ် ကူးပြီးပါပြီ', 'success'); }); }
-
-async function loadMe(){
-  var d = await api('/api/me'); if (d.error) return; userData = d;
-  var set = function(id, val){ var el = document.getElementById(id); if (el) el.textContent = val; };
-  var setH = function(id, val){ var el = document.getElementById(id); if (el) el.innerHTML = val; };
-  setH('bal', d.balance.toLocaleString() + ' <span>Ks</span>');
-  set('pBal', d.balance.toLocaleString() + ' Ks');
-  set('pts', d.points || 0); set('pPts', d.points || 0);
-  set('pSpent', (d.totalSpent||0).toLocaleString() + ' Ks'); set('pRef', d.referralCode || '-');
-  set('uName', d.username); set('uPhone', d.phone || '09xxxxxxxxx');
-  set('pName', d.username); set('pPhone', d.phone || '-');
-  set('avatar', d.username.charAt(0).toUpperCase()); set('pAvatar', d.username.charAt(0).toUpperCase());
-  var vip = d.vip || 'Bronze';
-  var vb = document.getElementById('vipBadge'); if (vb) { vb.textContent = vip; vb.className = 'vip-badge vip-' + vip; }
-  var pv = document.getElementById('pVip'); if (pv) { pv.textContent = vip; pv.className = 'vip-badge vip-' + vip; }
-  var nb = document.getElementById('notifBadge');
-  if (nb) { if (d.unread > 0) { nb.textContent = d.unread; nb.style.display = 'inline-block'; } else nb.style.display = 'none'; }
-}
 
 async function loadProducts(){
   var grid = document.getElementById('gamesGrid');
@@ -917,24 +891,7 @@ async function logout(){ if (!confirm('Logout လုပ်မှာသေချ�
   </div>
 </div>
 
-<div class="modal" id="settingsModal">
-  <div class="modal-box">
-    <h3>⚙️ Settings</h3>
-    <div class="settings-toggle">
-      <div><b style="font-size:14px">🔊 Sound</b><div style="font-size:11px;color:#94a3b8">Sound Effect</div></div>
-      <div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div>
-    </div>
-    <div class="settings-toggle">
-      <div><b style="font-size:14px">📳 Haptic</b><div style="font-size:11px;color:#94a3b8">တုန်ခါမှု</div></div>
-      <div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div>
-    </div>
-    <div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px">
-      <b style="font-size:14px">🎨 Theme Color</b>
-      <div class="theme-color-row" id="themeColorRow"></div>
-    </div>
-    <button onclick="shareApp()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">📤 Share App</button>
-    <button class="cancel" onclick="closeModal('settingsModal')">Close</button>
-  </div>
-</div>
+
+<div class="modal" id="settingsModal"><div class="modal-box"><h3>⚙️ Settings</h3><div class="settings-toggle"><div><b style="font-size:14px">🔊 Sound</b><div style="font-size:11px;color:#94a3b8">Sound Effect</div></div><div class="toggle-switch" id="soundToggle" onclick="toggleSound()"></div></div><div class="settings-toggle"><div><b style="font-size:14px">📳 Haptic</b><div style="font-size:11px;color:#94a3b8">တုန်ခါမှု</div></div><div class="toggle-switch" id="hapticToggle" onclick="toggleHaptic()"></div></div><div style="padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:8px"><b style="font-size:14px">🎨 Theme Color</b><div class="theme-color-row" id="themeColorRow"></div></div><button onclick="shareApp()" style="background:linear-gradient(135deg,#3b82f6,#8b5cf6)">📤 Share App</button><button class="cancel" onclick="closeModal('settingsModal')">Close</button></div></div>
 </body>
 </html>
