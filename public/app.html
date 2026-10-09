@@ -951,34 +951,45 @@ async function logout(){
 
 
 
+
+
+
+
+
 var _spinCanPlay = true;
 function openSpinWheel(){
   var m = document.getElementById('spinModal');
   if (m) m.classList.add('show');
   var res = document.getElementById('spinResult');
-  if (res) res.textContent = 'Spin နှိပ်ပြီး ကံစမ်းပါ';
+  if (res) { res.innerHTML = 'Spin နှိပ်ပြီး ကံစမ်းပါ'; res.style.color = '#94a3b8'; }
+  var wheel = document.getElementById('spinWheel');
+  if (wheel) wheel.style.transform = 'rotate(0deg)';
   var btn = document.getElementById('spinBtn');
-  if (btn) { btn.textContent = '🎰 Spin!'; btn.onclick = doSpin; }
+  if (btn) { btn.textContent = '🎰 Spin!'; btn.onclick = doSpin; btn.disabled = false; }
+  _spinCanPlay = true;
 }
 async function doSpin(){
   if (!_spinCanPlay) return;
   var btn = document.getElementById('spinBtn');
+  var resEl = document.getElementById('spinResult');
   if (!btn) return;
-  btn.textContent = '⏳ လှည့်နေတယ်...';
   _spinCanPlay = false;
+  btn.textContent = '⏳ လှည့်နေတယ်...';
+  btn.disabled = true;
+  if (resEl) { resEl.innerHTML = '⏳ လှည့်နေတယ်...'; resEl.style.color = '#f59e0b'; }
   var r = Math.floor(Math.random() * 8);
   var rotations = 360 * 5 + (r * 45);
   var wheel = document.getElementById('spinWheel');
   if (wheel) wheel.style.transform = 'rotate(' + rotations + 'deg)';
   await new Promise(function(res){ setTimeout(res, 4200); });
   var d = await api('/api/spin', {method:'POST'});
-  var resEl = document.getElementById('spinResult');
   if (d.success) {
     if (d.reward > 0) {
-      playSound('success'); haptic(100);
-      if (resEl) resEl.innerHTML = '<b style="color:#22c55e;font-size:18px">🎉 +' + d.reward.toLocaleString() + ' Ks!</b>';
+      try { playSound('success'); } catch(e){}
+      try { haptic(100); } catch(e){}
+      if (resEl) { resEl.innerHTML = '🎉 +' + d.reward.toLocaleString() + ' Ks!'; resEl.style.color = '#22c55e'; }
     } else {
-      if (resEl) resEl.innerHTML = '<b style="color:#ef4444">😢 မရပါ</b>';
+      if (resEl) { resEl.innerHTML = '😢 မရပါ'; resEl.style.color = '#ef4444'; }
     }
     if (typeof d.balance !== 'undefined') {
       var balEl = document.getElementById('bal');
@@ -986,19 +997,21 @@ async function doSpin(){
       var pBalEl = document.getElementById('pBal');
       if (pBalEl) pBalEl.textContent = d.balance.toLocaleString() + ' Ks';
     }
-    loadMe();
+    if (typeof loadMe === 'function') loadMe();
   } else {
-    if (resEl) resEl.innerHTML = '<b style="color:#ef4444">' + (d.error || 'Error') + '</b>';
+    if (resEl) { resEl.innerHTML = '❌ ' + (d.error || 'Error'); resEl.style.color = '#ef4444'; }
   }
-  btn.textContent = 'Close';
+  btn.textContent = '✅ ပြီးပါပြီ';
+  btn.disabled = false;
   btn.onclick = function(){ closeModal('spinModal'); _spinCanPlay = true; };
 }
 
 </script>
+
 <div class="modal" id="spinModal"><div class="modal-box">
   <h3>🎰 Lucky Spin</h3>
   <div class="spin-wheel" id="spinWheel"><div class="spin-center">🎁</div></div>
-  <div id="spinResult" style="text-align:center;padding:10px;font-size:14px;color:#94a3b8;margin-top:10px">Spin နှိပ်ပြီး ကံစမ်းပါ</div>
+  <div id="spinResult" style="text-align:center;padding:15px;font-size:16px;color:#94a3b8;margin-top:10px;font-weight:bold">Spin နှိပ်ပြီး ကံစမ်းပါ</div>
   <button onclick="doSpin()" id="spinBtn" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🎰 Spin!</button>
   <button class="cancel" onclick="closeModal('spinModal')">Close</button>
 </div></div>
