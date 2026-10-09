@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="my">
 <head>
+<link rel="manifest" href="/manifest.json">
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <meta name="theme-color" content="#0b1120">
@@ -157,6 +158,7 @@ body.light .faq-item p{color:#334155}
 .profile-box{background:rgba(30,41,59,0.8);padding:24px;border-radius:18px;text-align:center;border:1px solid #334155}
 body.light .profile-box{background:#fff}
 </style>
+<style>/* HIDE_SPIN_SAFE */ .quick-card[data-spin-hidden="true"]{display:none !important}</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -1012,5 +1014,100 @@ async function doSpin(){
   <button onclick="doSpin()" id="spinBtn" style="background:linear-gradient(135deg,#f59e0b,#ef4444)">🎰 Spin!</button>
   <button class="cancel" onclick="closeModal('spinModal')">Close</button>
 </div></div>
+<script>
+/* HIDE_SPIN_SAFE_JS */
+(function(){
+  function hideSpin() {
+    var cards = document.querySelectorAll('.quick-card');
+    for (var i = 0; i < cards.length; i++) {
+      var c = cards[i];
+      if (c.innerHTML.indexOf('🎰') > -1 || c.innerHTML.indexOf('Spin') > -1 || c.innerHTML.indexOf('Lucky') > -1) {
+        c.style.display = 'none';
+        c.setAttribute('data-spin-hidden', 'true');
+      }
+    }
+  }
+  setTimeout(hideSpin, 300);
+  setTimeout(hideSpin, 1500);
+  setTimeout(hideSpin, 3000);
+  if (window.MutationObserver) {
+    new MutationObserver(hideSpin).observe(document.body || document.documentElement, {childList:true, subtree:true});
+  }
+})();
+<script>
+/* PWA_INSTALL_FIX */
+var _deferredInstallPrompt = null;
+window.addEventListener('beforeinstallprompt', function(e) {
+  e.preventDefault();
+  _deferredInstallPrompt = e;
+  console.log('Install prompt ready');
+});
+window.addEventListener('appinstalled', function() {
+  _deferredInstallPrompt = null;
+  if (typeof showToast === 'function') showToast('✅ App installed!', 'success');
+});
+window.installPWA = async function() {
+  if (_deferredInstallPrompt) {
+    try {
+      _deferredInstallPrompt.prompt();
+      var c = await _deferredInstallPrompt.userChoice;
+      if (c && c.outcome === 'accepted' && typeof showToast === 'function') {
+        showToast('✅ App install ပြီးပါပြီ', 'success');
+      }
+      _deferredInstallPrompt = null;
+      return;
+    } catch(e) { console.log('Prompt err:', e.message); }
+  }
+  alert('📱 Install လုပ်နည်း:\n\n1. Chrome ညာဘက်အပေါ် ⋮ menu နှိပ်\n2. "Install app" သို့မဟုတ် "Add to Home screen" ရွေး\n3. "Install" နှိပ်\n\n✅ Home Screen မှာ App လို ပေါ်လာမယ်');
+};
+// Service Worker register
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(function(r){ console.log('SW ready:', r.scope); }).catch(function(e){ console.log('SW err:', e.message); });
+}
+</script>
+<script>
+/* PUSH_FIX_V2 */
+function _urlB64ToUint8(b64) {
+  var pad = '='.repeat((4 - b64.length % 4) % 4);
+  var b = (b64 + pad).replace(/-/g, '+').replace(/_/g, '/');
+  var raw = window.atob(b);
+  var out = new Uint8Array(raw.length);
+  for (var i = 0; i < raw.length; ++i) out[i] = raw.charCodeAt(i);
+  return out;
+}
+window.subscribeToPush = async function() {
+  try {
+    if (!('serviceWorker' in navigator) || !('PushManager' in window)) { console.log('Push not supported'); return false; }
+    var reg = await navigator.serviceWorker.ready;
+    var perm = Notification.permission;
+    if (perm === 'default') perm = await Notification.requestPermission();
+    if (perm !== 'granted') { console.log('Perm denied'); return false; }
+    var vr = await fetch('/api/push/vapid');
+    var vd = await vr.json();
+    if (!vd.publicKey) { console.log('No VAPID'); return false; }
+    var sub = await reg.pushManager.getSubscription();
+    if (!sub) {
+      sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: _urlB64ToUint8(vd.publicKey) });
+      console.log('New subscription');
+    }
+    var r = await api('/api/push/subscribe', { method:'POST', body: JSON.stringify({ subscription: sub.toJSON() }) });
+    if (r && r.success) { console.log('Subscribed:', r.total); return true; }
+    return false;
+  } catch(e) { console.log('Push err:', e.message); return false; }
+};
+window.testPush = async function() {
+  try {
+    if (!('Notification' in window)) return showToast('Push not supported', 'error');
+    var ok = await subscribeToPush();
+    if (!ok) return showToast('❌ Subscribe မလုပ်နိုင်ပါ — Permission ပြန်ပေးပါ', 'error');
+    var r = await api('/api/push/test', { method:'POST' });
+    if (r && r.success) showToast('🔔 Test sent (' + (r.sent||0) + ' device)', 'success');
+    else showToast('❌ Test failed', 'error');
+  } catch(e) { showToast('❌ ' + e.message, 'error'); }
+};
+// App load ရင် အလိုအလျောက် Subscribe
+setTimeout(function() { if (Notification.permission === 'granted') subscribeToPush(); }, 3000);
+</script>
+</script>
 </body>
 </html>
