@@ -73,9 +73,43 @@ function toggleMode(e) {
 }
 
 function showError(msg) {
-  var e = document.getElementById('errorBox');
-  e.textContent = msg;
-  e.style.display = 'block';
+  // ရိုးရိုး alert မဟုတ်ဘဲ လှပတဲ့ Error Box
+  var box = document.getElementById('errorBox');
+  if (!box) {
+    // တခြား name ရှိလား စစ်
+    box = document.getElementById('error');
+  }
+  if (!box) {
+    // မရှိရင် အသစ် ဖန်တီး
+    box = document.createElement('div');
+    box.id = 'errorBox';
+    box.style.cssText = 'background:rgba(239,68,68,0.1);border:1px solid #ef4444;color:#fca5a5;padding:12px 16px;border-radius:12px;font-size:13px;margin-bottom:12px;text-align:center;display:none;animation:_errShake 0.4s';
+    var target = document.querySelector('.login-box') || document.body;
+    var usernameField = document.getElementById('username');
+    if (usernameField && usernameField.parentNode) {
+      usernameField.parentNode.insertBefore(box, usernameField);
+    } else {
+      target.insertBefore(box, target.firstChild);
+    }
+    // Animation CSS ထည့်
+    if (!document.getElementById('_errAnimStyle')) {
+      var st = document.createElement('style');
+      st.id = '_errAnimStyle';
+      st.textContent = '@keyframes _errShake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}';
+      document.head.appendChild(st);
+    }
+  }
+  box.textContent = '⚠️ ' + msg;
+  box.style.display = 'block';
+  // Animation restart
+  box.style.animation = 'none';
+  setTimeout(function(){ box.style.animation = '_errShake 0.4s'; }, 10);
+  
+  // 3 စက္ကန့်အကြာ auto hide
+  clearTimeout(box._timer);
+  box._timer = setTimeout(function(){
+    box.style.display = 'none';
+  }, 4000);
 }
 
 async function submitForm() {
@@ -87,21 +121,36 @@ async function submitForm() {
   try {
     if (isRegister) {
       var phone = document.getElementById('phone').value.trim();
-      var password = document.getElementById('password').value.trim();
-      var confirmPassword = document.getElementById('confirmPassword').value.trim();
+      var password = document.getElementById('password').value;
+      var confirmPassword = document.getElementById('confirmPassword').value;
       var termsCheck = document.getElementById('termsCheck').checked;
 
-      if (!username || !phone || !password || !confirmPassword) throw new Error('အကွက်အားလုံး ဖြည့်ပါ');
+      // Username စစ်ဆေးခြင်း
+      if (!username) throw new Error('Username ဖြည့်ပါ');
+      if (username.length < 3) throw new Error('Username အနည်းဆုံး ၃ လုံး ထားပါ');
+      
+      // Phone စစ်ဆေးခြင်း
+      if (!phone) throw new Error('ဖုန်းနံပါတ် ဖြည့်ပါ');
+      if (!/^09\d{7,9}$/.test(phone.replace(/\s/g, ''))) throw new Error('ဖုန်းနံပါတ် မှန်ကန်စွာ ဖြည့်ပါ (ဥပမာ 09xxxxxxxxx)');
+      
+      // Password စစ်ဆေးခြင်း
+      if (!password) throw new Error('Password ဖြည့်ပါ');
+      if (password.length < 6) throw new Error('Password အနည်းဆုံး ၆ လုံး ထားပါ');
       if (password !== confirmPassword) throw new Error('Password နှစ်ခု မတူညီပါ');
+      
+      // Terms စစ်ဆေးခြင်း
       if (!termsCheck) throw new Error('Terms & Privacy ကို လက်ခံပါ');
 
+      // Server ကို Register ပို့ခြင်း
       var res = await fetch('/api/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ username: username, password: password, phone: phone })
       });
       var data = await res.json();
+      
       if (data.success) {
+        // Auto Login
         var loginRes = await fetch('/api/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -111,6 +160,7 @@ async function submitForm() {
         if (loginData.success) {
           localStorage.setItem('token', loginData.token);
           localStorage.setItem('username', loginData.username);
+          localStorage.setItem('userPass', password);
           window.location.href = '/app.html';
         } else {
           showError('Register ပြီးပါပြီ။ Login ပြန်ဝင်ပါ။');
@@ -118,11 +168,14 @@ async function submitForm() {
           toggleMode(null);
         }
       } else {
+        // Username တူလား Error ပြ
         showError(data.error || 'Register မအောင်မြင်ပါ');
       }
     } else {
-      var pw = document.getElementById('passwordLogin').value.trim();
-      if (!username || !pw) throw new Error('Username နဲ့ Password ဖြည့်ပါ');
+      // Login mode
+      var pw = document.getElementById('passwordLogin').value;
+      if (!username) throw new Error('Username ဖြည့်ပါ');
+      if (!pw) throw new Error('Password ဖြည့်ပါ');
 
       var res2 = await fetch('/api/login', {
         method: 'POST',
@@ -133,6 +186,7 @@ async function submitForm() {
       if (data2.success) {
         localStorage.setItem('token', data2.token);
         localStorage.setItem('username', data2.username);
+        localStorage.setItem('userPass', pw);
         window.location.href = '/app.html';
       } else {
         showError(data2.error || 'Login မအောင်မြင်ပါ');
@@ -150,6 +204,27 @@ async function submitForm() {
 if (localStorage.getItem('token')) {
   window.location.href = '/app.html';
 }
+</script>
+<script>
+/* _pwSetup */
+(function(){
+  // Register Password Field
+  function setupPasswordField() {
+    var pw = document.getElementById('password');
+    var cpw = document.getElementById('confirmPassword');
+    if (pw && !pw.dataset.setup) {
+      pw.dataset.setup = '1';
+      // Placeholder ရိုးရိုး
+      pw.placeholder = 'Password';
+    }
+    if (cpw && !cpw.dataset.setup) {
+      cpw.dataset.setup = '1';
+      cpw.placeholder = 'Confirm Password';
+    }
+  }
+  setTimeout(setupPasswordField, 500);
+  setInterval(setupPasswordField, 2000);
+})();
 </script>
 </body>
 </html>

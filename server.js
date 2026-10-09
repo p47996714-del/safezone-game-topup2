@@ -294,7 +294,9 @@ app.get('/api/terms', (req, res) => res.json({terms: db.config.terms, privacy: d
 // ===== AUTH + 2FA (Feature 57) =====
 app.post('/api/register', rateLimit(60000, 5), (req, res) => {
   const { username, password, phone, referral } = req.body;
-  if (!username || !password) return res.status(400).json({error:'Username/Password ဖြည့်ပါ'});
+  if (!username || !password) return res.status(400).json({error:'Username နဲ့ Password ဖြည့်ပါ'});
+  if (username.length < 3) return res.status(400).json({error:'Username အနည်းဆုံး ၃ လုံး ထားပါ'});
+  if (password.length < 6) return res.status(400).json({error:'Password အနည်းဆုံး ၆ လုံး ထားပါ'});
   if (db.users.find(u => u.username === username)) return res.status(400).json({error:'Username ရှိပြီးသား'});
   const newUser = {
     id: Date.now().toString(), username, password, phone: phone||'',
