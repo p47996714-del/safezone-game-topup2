@@ -887,6 +887,134 @@ body._f20_rtl .bottom-nav { flex-direction: row-reverse; }
 ._uvCat{padding:2px 8px;background:rgba(236,72,153,0.15);color:#ec4899;font-size:9px;font-weight:bold;border-radius:8px;border:1px solid rgba(236,72,153,0.3)}
 ._uvArrow{font-size:16px;color:#64748b;flex-shrink:0}
 </style>
+<style>
+/* FIX_2_STYLE */
+#installNiceModal {
+  position: fixed !important;
+  inset: 0 !important;
+  background: rgba(0,0,0,0.88) !important;
+  z-index: 9999999 !important;
+  display: none !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: 20px !important;
+  backdrop-filter: blur(10px) !important;
+}
+#installNiceModal.show { display: flex !important; }
+
+.inm-box {
+  background: linear-gradient(135deg, #1e293b, #0f172a);
+  border-radius: 24px;
+  width: 100%;
+  max-width: 380px;
+  border: 1px solid rgba(56,189,248,0.3);
+  box-shadow: 0 30px 80px rgba(0,0,0,0.8), 0 0 60px rgba(56,189,248,0.2);
+  overflow: hidden;
+  animation: inmSlide 0.35s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes inmSlide {
+  from { transform: scale(0.85) translateY(30px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+.inm-head {
+  padding: 26px 24px 18px;
+  text-align: center;
+  background: linear-gradient(135deg, rgba(56,189,248,0.12), rgba(168,85,247,0.12));
+}
+.inm-icon {
+  width: 80px; height: 80px;
+  margin: 0 auto 14px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 40px;
+  background: linear-gradient(135deg, #38bdf8, #a855f7);
+  box-shadow: 0 10px 30px rgba(56,189,248,0.5);
+  animation: inmPulse 2s ease-in-out infinite;
+}
+@keyframes inmPulse {
+  0%,100% { box-shadow: 0 10px 30px rgba(56,189,248,0.5); }
+  50% { box-shadow: 0 10px 40px rgba(168,85,247,0.7); }
+}
+.inm-title {
+  font-size: 19px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.inm-sub {
+  font-size: 12px;
+  color: #94a3b8;
+}
+
+.inm-body { padding: 18px 24px 20px; }
+.inm-step {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 14px;
+  background: rgba(15,23,42,0.7);
+  border-radius: 14px;
+  margin-bottom: 8px;
+  border: 1px solid rgba(51,65,85,0.5);
+}
+.inm-step-num {
+  width: 30px; height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #38bdf8, #a855f7);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: bold;
+  font-size: 14px;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(56,189,248,0.4);
+}
+.inm-step-text { flex: 1; padding-top: 3px; }
+.inm-step-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: #fff;
+  margin-bottom: 2px;
+}
+.inm-step-sub {
+  font-size: 11px;
+  color: #94a3b8;
+  line-height: 1.5;
+}
+
+.inm-footer { padding: 0 24px 24px; }
+.inm-btn {
+  width: 100%;
+  padding: 14px;
+  background: linear-gradient(135deg, #38bdf8, #a855f7);
+  color: #fff;
+  border: none;
+  border-radius: 14px;
+  font-weight: bold;
+  font-size: 14px;
+  cursor: pointer;
+  font-family: inherit;
+  box-shadow: 0 8px 25px rgba(56,189,248,0.4);
+}
+.inm-btn:active { transform: scale(0.97); }
+
+.inm-tip {
+  background: rgba(56,189,248,0.08);
+  border: 1px solid #38bdf8;
+  border-radius: 12px;
+  padding: 12px;
+  margin-top: 12px;
+  font-size: 11px;
+  color: #cbd5e1;
+  line-height: 1.6;
+  text-align: center;
+}
+.inm-tip b { color: #fff; }
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -4279,6 +4407,166 @@ window.buyPremiumDirect = async function(productId) {
   console.log('✅ User Videos loaded');
 })();
 </script>
+</script>
+<script>
+/* FIX_2_SCRIPT */
+(function(){
+  'use strict';
+  
+  // ========== INSTALL MODAL ==========
+  function showInstallModal() {
+    var m = document.getElementById('installNiceModal');
+    if (!m) {
+      m = document.createElement('div');
+      m.id = 'installNiceModal';
+      m.innerHTML = 
+        '<div class="inm-box">' +
+          '<div class="inm-head">' +
+            '<div class="inm-icon">📱</div>' +
+            '<div class="inm-title">App Install လုပ်နည်း</div>' +
+            '<div class="inm-sub">Home Screen မှာ App လို သုံးနိုင်တယ်</div>' +
+          '</div>' +
+          '<div class="inm-body">' +
+            '<div class="inm-step">' +
+              '<div class="inm-step-num">1</div>' +
+              '<div class="inm-step-text">' +
+                '<div class="inm-step-title">Chrome Menu ကို နှိပ်ပါ</div>' +
+                '<div class="inm-step-sub">ညာဘက်အပေါ်ထောင့်က ⋮ (အစက်သုံးစက်)</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="inm-step">' +
+              '<div class="inm-step-num">2</div>' +
+              '<div class="inm-step-text">' +
+                '<div class="inm-step-title">"Add to Home screen" ရွေးပါ</div>' +
+                '<div class="inm-step-sub">Menu ထဲမှာ ရှာပါ</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="inm-step">' +
+              '<div class="inm-step-num">3</div>' +
+              '<div class="inm-step-text">' +
+                '<div class="inm-step-title">"Add" ကို နှိပ်ပါ</div>' +
+                '<div class="inm-step-sub">Confirm လုပ်ပါ</div>' +
+              '</div>' +
+            '</div>' +
+            '<div class="inm-tip">' +
+              '✅ <b>ပြီးရင်</b> Home Screen မှာ Safe Zone App ပေါ်လာမယ်<br>' +
+              '⚡ နှိပ်ရင် App လို ဖွင့်လာမယ်' +
+            '</div>' +
+          '</div>' +
+          '<div class="inm-footer">' +
+            '<button class="inm-btn" id="inmCloseBtn">✅ နားလည်ပါပြီ</button>' +
+          '</div>' +
+        '</div>';
+      document.body.appendChild(m);
+      document.getElementById('inmCloseBtn').onclick = function() {
+        m.classList.remove('show');
+      };
+      m.addEventListener('click', function(e) {
+        if (e.target === m) m.classList.remove('show');
+      });
+    }
+    m.classList.add('show');
+  }
+  
+  // installPWA override
+  window.installPWA = function() {
+    // Native prompt ရှိရင် သုံး
+    if (window.deferredPrompt) {
+      try {
+        window.deferredPrompt.prompt();
+        window.deferredPrompt = null;
+        return;
+      } catch(e) {}
+    }
+    // မရရင် Nice Modal
+    showInstallModal();
+  };
+  
+  // ========== FAB BUTTON ==========
+  function setupFab() {
+    var fab = document.getElementById('czFabBtn');
+    var menu = document.getElementById('czFabMenu');
+    if (!fab || !menu) {
+      // FAB မရှိရင် ဖန်တီး
+      if (!fab) {
+        fab = document.createElement('button');
+        fab.id = 'czFabBtn';
+        fab.type = 'button';
+        fab.textContent = '⚡';
+        fab.style.cssText = 'position:fixed;bottom:90px;left:15px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#a855f7);border:none;color:#fff;font-size:22px;cursor:pointer;z-index:99998;box-shadow:0 8px 25px rgba(168,85,247,0.5);display:flex;align-items:center;justify-content:center;padding:0;font-family:inherit';
+        document.body.appendChild(fab);
+      }
+      if (!menu) {
+        menu = document.createElement('div');
+        menu.id = 'czFabMenu';
+        menu.style.cssText = 'position:fixed;bottom:155px;left:15px;display:none;flex-direction:column;gap:10px;z-index:99997';
+        var tabs = [
+          { tab: 'wallet', icon: '💰' },
+          { tab: 'orders', icon: '📦' },
+          { tab: 'chat', icon: '💬' },
+          { tab: 'profile', icon: '👤' }
+        ];
+        tabs.forEach(function(t) {
+          var b = document.createElement('button');
+          b.type = 'button';
+          b.className = 'czFabItem';
+          b.setAttribute('data-tab', t.tab);
+          b.textContent = t.icon;
+          b.style.cssText = 'width:46px;height:46px;border-radius:50%;background:rgba(30,41,59,0.98);border:1px solid #38bdf8;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,0.5);padding:0;font-family:inherit';
+          menu.appendChild(b);
+        });
+        document.body.appendChild(menu);
+      }
+    }
+    
+    // Duplicate handler မဖြစ်စေရန်
+    if (fab.dataset.fabReady === '1') return;
+    fab.dataset.fabReady = '1';
+    
+    fab.onclick = function(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      var isOpen = menu.style.display === 'flex';
+      menu.style.display = isOpen ? 'none' : 'flex';
+    };
+    
+    menu.querySelectorAll('.czFabItem').forEach(function(b) {
+      b.onclick = function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        var tab = this.getAttribute('data-tab');
+        menu.style.display = 'none';
+        try {
+          var idxMap = { home: 0, wallet: 1, orders: 2, chat: 3, profile: 4 };
+          var idx = idxMap[tab] || 0;
+          var navBtns = document.querySelectorAll('.nav-item');
+          if (typeof switchTab === 'function' && navBtns[idx]) {
+            switchTab(tab, navBtns[idx]);
+          }
+        } catch(err) {}
+      };
+    });
+    
+    document.addEventListener('click', function(e) {
+      if (menu && fab && !menu.contains(e.target) && !fab.contains(e.target)) {
+        menu.style.display = 'none';
+      }
+    });
+  }
+  
+  // ========== INIT ==========
+  function init() {
+    setupFab();
+  }
+  
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', init);
+  } else {
+    setTimeout(init, 100);
+  }
+  setTimeout(init, 1500);
+  setTimeout(init, 4000);
+})();
 </script>
 </body>
 </html>
