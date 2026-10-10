@@ -1699,6 +1699,59 @@ body {
 ._banOv,._banOv2,#_banOv,#_banOv2{display:none !important;visibility:hidden !important;opacity:0 !important;pointer-events:none !important}
 *[id*="banOv"],*[id*="_ban"]{display:none !important}
 </style>
+
+<script>
+/* _SW_KILLER_V1_ */
+(function(){
+  console.log("🔥 SW Killer active");
+  // 1. Service Worker Unregister
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.getRegistrations().then(function(regs) {
+      for (var i = 0; i < regs.length; i++) {
+        regs[i].unregister();
+        console.log("✅ SW unregistered:", regs[i].scope);
+      }
+    }).catch(function(e){ console.log("SW err:", e.message); });
+  }
+  // 2. Cache API အားလုံး ဖျက်
+  if (window.caches) {
+    caches.keys().then(function(keys) {
+      for (var i = 0; i < keys.length; i++) {
+        caches.delete(keys[i]);
+        console.log("✅ Cache deleted:", keys[i]);
+      }
+    }).catch(function(e){ console.log("Cache err:", e.message); });
+  }
+  // 3. SessionStorage / LocalStorage ထဲက ban flag ဖျက်
+  try {
+    var keys = Object.keys(localStorage);
+    for (var i = 0; i < keys.length; i++) {
+      var k = keys[i];
+      if (k.toLowerCase().indexOf("ban") > -1 || k.indexOf("_ban") > -1) {
+        localStorage.removeItem(k);
+      }
+    }
+  } catch(e) {}
+  // 4. Ban modal DOM ဖျက်
+  function killBan() {
+    var ids = ["_banOv", "_banOv2"];
+    for (var i = 0; i < ids.length; i++) {
+      var el = document.getElementById(ids[i]);
+      if (el) el.remove();
+    }
+    var all = document.querySelectorAll("[id*=banOv], [id*=BanOv], ._banOv, ._banOv2");
+    for (var j = 0; j < all.length; j++) all[j].remove();
+  }
+  setTimeout(killBan, 100);
+  setTimeout(killBan, 800);
+  setTimeout(killBan, 2000);
+  setInterval(killBan, 1500);
+  if (window.MutationObserver) {
+    try { new MutationObserver(killBan).observe(document.body, {childList:true, subtree:true}); } catch(e){}
+  }
+  console.log("✅ SW Killer done");
+})();
+</script>
 </head>
 <body>
 <div id="toast" class="toast"></div>
