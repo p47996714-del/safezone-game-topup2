@@ -6385,176 +6385,173 @@ console.log('✅ Pretty confirm ready');
 </script>
 
 
+
+
+
 <script>
-/* AUTO_PRICE_REFRESH */
+/* PRICE_WATCHER_V2 */
 (function(){
-  var _priceSnap = {};
-  var _priceInit = false;
-  var _refreshTimer = null;
+  var _snap = {};
+  var _init = false;
+  var _lastCheck = null;
   
-  function loadSnap() {
-    try { _priceSnap = JSON.parse(localStorage.getItem('_priceSnap') || '{}'); } catch(e) { _priceSnap = {}; }
-  }
-  function saveSnap() {
-    try { localStorage.setItem('_priceSnap', JSON.stringify(_priceSnap)); } catch(e) {}
+  try { _snap = JSON.parse(localStorage.getItem('_priceSnapV2') || '{}'); } catch(e) { _snap = {}; }
+  
+  function saveSnap() { try { localStorage.setItem('_priceSnapV2', JSON.stringify(_snap)); } catch(e) {} }
+  
+  function log() {
+    var args = Array.prototype.slice.call(arguments);
+    console.log('%c[PriceWatcher]', 'color:#38bdf8;font-weight:bold', args.join(' '));
   }
   
-  // Sound ဖွင့်
-  function playPriceDropSound() {
+  async function fetchProducts() {
+    try {
+      var r = await fetch('/api/products?t=' + Date.now(), {cache:'no-store'});
+      var data = await r.json();
+      return data;
+    } catch(e) {
+      log('❌ fetch err:', e.message);
+      return null;
+    }
+  }
+  
+  function playDing() {
     try {
       var ctx = new (window.AudioContext || window.webkitAudioContext)();
-      var notes = [880, 1320, 1760];  // Ding ding ding!
-      notes.forEach(function(freq, i) {
+      [880, 1320, 1760].forEach(function(f, i) {
         var o = ctx.createOscillator(), g = ctx.createGain();
         o.connect(g); g.connect(ctx.destination);
-        o.frequency.value = freq;
-        o.type = 'sine';
+        o.frequency.value = f; o.type = 'sine';
         var t = ctx.currentTime + i * 0.15;
         g.gain.setValueAtTime(0, t);
-        g.gain.linearRampToValueAtTime(0.2, t + 0.02);
+        g.gain.linearRampToValueAtTime(0.25, t + 0.02);
         g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
-        o.start(t);
-        o.stop(t + 0.4);
+        o.start(t); o.stop(t + 0.4);
       });
-    } catch(e) {}
+      log('🔊 Ding!');
+    } catch(e) { log('sound err:', e.message); }
   }
   
-  // Notification permission
-  function askNotifPermission() {
-    try {
-      if (!('Notification' in window)) return;
-      if (Notification.permission === 'default') {
-        setTimeout(function() { Notification.requestPermission(); }, 3000);
-      }
-    } catch(e) {}
-  }
-  
-  // System notification
-  function showSystemNotif(game, product, oldP, newP) {
-    try {
-      if (!('Notification' in window) || Notification.permission !== 'granted') return;
-      new Notification('📉 ဈေးကျသွားပါပြီ!', {
-        body: game + ' — ' + product + '\n' + oldP.toLocaleString() + ' → ' + newP.toLocaleString() + ' Ks',
-        icon: 'https://i.imgur.com/iRwIfqs.png',
-        badge: 'https://i.imgur.com/iRwIfqs.png',
-        tag: 'price-drop-' + Date.now(),
-        vibrate: [200, 100, 200, 100, 200]
-      });
-    } catch(e) {}
-  }
-  
-  // Popup
-  function showPriceDropPopup(game, product, oldP, newP) {
+  function showPopup(game, name, oldP, newP) {
+    var old = document.getElementById('_pdPopup');
+    if (old) old.remove();
+    
     var diff = oldP - newP;
     var pct = Math.round((diff / oldP) * 100);
     var m = document.createElement('div');
-    m.id = '_priceDropPopup';
+    m.id = '_pdPopup';
     m.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-200px);z-index:9999999;background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:16px 20px;border-radius:16px;box-shadow:0 15px 40px rgba(16,185,129,0.5);max-width:340px;width:90%;transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);font-family:inherit';
     m.innerHTML = '<div style="display:flex;align-items:center;gap:12px">' +
-      '<div style="font-size:32px;animation:_pdBounce 1s ease infinite">📉</div>' +
+      '<div style="font-size:32px">📉</div>' +
       '<div style="flex:1;min-width:0">' +
         '<div style="font-size:13px;font-weight:bold;margin-bottom:3px">ဈေးကျသွားပါပြီ!</div>' +
-        '<div style="font-size:11px;opacity:0.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (game||'') + ' — ' + (product||'') + '</div>' +
+        '<div style="font-size:11px;opacity:0.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (game||'') + ' — ' + (name||'') + '</div>' +
         '<div style="font-size:12px;margin-top:4px;font-weight:bold">' +
           '<span style="text-decoration:line-through;opacity:0.7">' + oldP.toLocaleString() + '</span> ' +
           '<span>→ ' + newP.toLocaleString() + ' Ks</span> ' +
           '<span style="background:rgba(255,255,255,0.25);padding:2px 8px;border-radius:10px;font-size:10px;margin-left:4px">-' + pct + '%</span>' +
         '</div>' +
       '</div>' +
-      '<button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 4px">✕</button>' +
+      '<button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer">✕</button>' +
     '</div>';
     document.body.appendChild(m);
-    
-    // CSS animation
-    if (!document.getElementById('_pdStyle')) {
-      var st = document.createElement('style');
-      st.id = '_pdStyle';
-      st.textContent = '@keyframes _pdBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}';
-      document.head.appendChild(st);
-    }
-    
-    setTimeout(function() { m.style.transform = 'translateX(-50%) translateY(0)'; }, 100);
-    
-    // Auto close 6s
+    setTimeout(function() { m.style.transform = 'translateX(-50%) translateY(0)'; }, 50);
     setTimeout(function() {
       m.style.transform = 'translateX(-50%) translateY(-200px)';
       setTimeout(function() { if (m.parentNode) m.parentNode.removeChild(m); }, 500);
     }, 6000);
-    
-    // Click → dismiss
-    m.onclick = function(e) {
-      if (e.target.tagName !== 'BUTTON') {
-        m.style.transform = 'translateX(-50%) translateY(-200px)';
-        setTimeout(function() { if (m.parentNode) m.parentNode.removeChild(m); }, 500);
-      }
-    };
   }
   
-  // Check တစ်ခါ
-  async function checkPrices() {
+  function showNotif(game, name, oldP, newP) {
     try {
-      var r = await fetch('/api/products', {cache:'no-store'});
-      var data = await r.json();
-      if (!Array.isArray(data)) return;
-      
-      if (!_priceInit) {
-        // ပထမ load — snapshot ပဲ သိမ်း
-        data.forEach(function(p) {
-          if (!_priceSnap[p.id]) _priceSnap[p.id] = {price: p.price, game: p.game, name: p.name};
-        });
-        saveSnap();
-        _priceInit = true;
-        return;
-      }
-      
-      // ဈေးပြောင်းတာ ရှာပြီး alert
-      var drops = [];
-      data.forEach(function(p) {
-        var old = _priceSnap[p.id];
-        if (old && old.price > p.price) {
-          drops.push({game: p.game, name: p.name, oldP: old.price, newP: p.price, id: p.id});
-        }
-        // Update snapshot
-        _priceSnap[p.id] = {price: p.price, game: p.game, name: p.name};
+      if (!('Notification' in window)) { log('no Notification API'); return; }
+      if (Notification.permission !== 'granted') { log('notif permission:', Notification.permission); return; }
+      new Notification('📉 ဈေးကျသွားပါပြီ!', {
+        body: game + ' — ' + name + '\n' + oldP.toLocaleString() + ' → ' + newP.toLocaleString() + ' Ks',
+        icon: 'https://i.imgur.com/iRwIfqs.png',
+        tag: 'pd-' + Date.now()
+      });
+    } catch(e) { log('notif err:', e.message); }
+  }
+  
+  async function check(manual) {
+    _lastCheck = new Date();
+    log('checking...' + (manual ? ' (manual)' : ''));
+    var data = await fetchProducts();
+    if (!data) return;
+    
+    // Array ဖြစ်အောင် handle
+    var arr = Array.isArray(data) ? data : (Array.isArray(data.products) ? data.products : null);
+    if (!arr) { log('❌ products not array:', typeof data, JSON.stringify(data).substring(0,100)); return; }
+    
+    log('got ' + arr.length + ' products');
+    
+    if (!_init) {
+      arr.forEach(function(p) {
+        _snap[p.id] = {price: Number(p.price), game: p.game, name: p.name};
       });
       saveSnap();
-      
-      // Alert
-      if (drops.length > 0) {
-        playPriceDropSound();
-        try { if (navigator.vibrate) navigator.vibrate([200,100,200,100,200]); } catch(e) {}
-        drops.forEach(function(d, i) {
-          setTimeout(function() { showPriceDropPopup(d.game, d.name, d.oldP, d.newP); }, i * 1500);
-          showSystemNotif(d.game, d.name, d.oldP, d.newP);
-        });
-        
-        // Products refresh
-        if (typeof window.loadProducts === 'function') {
-          window.loadProducts();
-        }
-        if (typeof window.renderGames === 'function') {
-          window.renderGames();
-        }
-      } else if (JSON.stringify(data) !== JSON.stringify(window.products || [])) {
-        // ဈေး တူပေမယ့် list ပြောင်း → refresh
-        window.products = data;
-        if (typeof window.renderGames === 'function') window.renderGames();
+      _init = true;
+      log('✅ snapshot saved (' + arr.length + ' items)');
+      return;
+    }
+    
+    var drops = [];
+    arr.forEach(function(p) {
+      var old = _snap[p.id];
+      if (old && Number(old.price) > Number(p.price)) {
+        drops.push({game: p.game, name: p.name, oldP: Number(old.price), newP: Number(p.price), id: p.id});
       }
-    } catch(e) { console.log('checkPrices err', e.message); }
+      _snap[p.id] = {price: Number(p.price), game: p.game, name: p.name};
+    });
+    saveSnap();
+    
+    if (drops.length > 0) {
+      log('📉 FOUND ' + drops.length + ' drops!');
+      drops.forEach(function(d, i) { log('  ' + d.game + ' ' + d.name + ': ' + d.oldP + ' → ' + d.newP); });
+      playDing();
+      try { if (navigator.vibrate) navigator.vibrate([200,100,200,100,200]); } catch(e) {}
+      drops.forEach(function(d, i) {
+        setTimeout(function() { showPopup(d.game, d.name, d.oldP, d.newP); }, i * 1200);
+        showNotif(d.game, d.name, d.oldP, d.newP);
+      });
+      if (typeof window.loadProducts === 'function') {
+        log('refreshing products list...');
+        setTimeout(function() { window.loadProducts(); }, 500);
+      }
+    } else {
+      log('no change');
+    }
   }
   
-  // INIT
-  loadSnap();
-  askNotifPermission();
-  setTimeout(checkPrices, 2000);
-  _refreshTimer = setInterval(checkPrices, 15000);  // ၁၅ စက္ကန့် တစ်ခါ
+  // Test button
+  window._testPriceWatch = function() {
+    var data = JSON.parse(localStorage.getItem('_priceSnapV2') || '{}');
+    var keys = Object.keys(data);
+    if (keys.length === 0) { alert('❌ Snapshot မရှိသေးပါ — Site ကို refresh လုပ်ပြီး 20 စက္ကန့် စောင့်ပါ'); return; }
+    var first = data[keys[0]];
+    var fakeOld = first.price + 5000;
+    log('MANUAL TEST — showing sample popup');
+    playDing();
+    showPopup(first.game, first.name + ' (TEST)', fakeOld, first.price);
+    alert('✅ Test popup ပြပြီ — အလုပ်လုပ်တယ်!\n\nSnapshot: ' + keys.length + ' items\nLast check: ' + (_lastCheck ? _lastCheck.toLocaleTimeString() : 'never'));
+  };
   
-  // Page ပြန်ဝင်ရင် ချက်ချင်း check
+  // Notif permission
+  setTimeout(function() {
+    if ('Notification' in window && Notification.permission === 'default') {
+      Notification.requestPermission().then(function(p) { log('notif perm: ' + p); });
+    }
+  }, 2000);
+  
+  // Init
+  setTimeout(function() { check(false); }, 3000);
+  setInterval(function() { check(false); }, 15000);
   document.addEventListener('visibilitychange', function() {
-    if (!document.hidden) setTimeout(checkPrices, 500);
+    if (!document.hidden) setTimeout(function() { check(false); }, 500);
   });
   
-  console.log('✅ Auto price refresh ready (15s interval)');
+  log('✅ ready — every 15s — type _testPriceWatch() to test');
 })();
 </script>
 
