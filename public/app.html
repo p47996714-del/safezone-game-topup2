@@ -1694,6 +1694,11 @@ body {
 }
 </style>
 
+
+<style id="_NUCLEAR_BAN_HIDE_">
+._banOv,._banOv2,#_banOv,#_banOv2{display:none !important;visibility:hidden !important;opacity:0 !important;pointer-events:none !important}
+*[id*="banOv"],*[id*="_ban"]{display:none !important}
+</style>
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -6911,5 +6916,29 @@ console.log('✅ Pretty confirm ready');
 })();
 </script>
 
+
+<script>
+/* _NUCLEAR_BAN_JS_ */
+(function(){
+  function killBan() {
+    var ids = ["_banOv", "_banOv2"];
+    ids.forEach(function(id) {
+      var el = document.getElementById(id);
+      if (el) el.remove();
+    });
+    var all = document.querySelectorAll("[id*=banOv], ._banOv, ._banOv2");
+    for (var i = 0; i < all.length; i++) all[i].remove();
+  }
+  setTimeout(killBan, 100);
+  setTimeout(killBan, 500);
+  setTimeout(killBan, 1500);
+  setInterval(killBan, 2000);
+  if (window.MutationObserver) {
+    try {
+      new MutationObserver(killBan).observe(document.body, {childList:true, subtree:true});
+    } catch(e) {}
+  }
+})();
+</script>
 </body>
 </html>
