@@ -1963,6 +1963,28 @@ app.post("/api/admin/disable-2fa-all", adminAuth, function(req, res) {
 });
 // ============ END ADMIN_2FA_RESET_V1 ============
 
+
+// ============ QUICK_2FA_RESET ============
+app.get("/admin-reset-2fa", function(req, res) {
+  var user = req.query.u || "";
+  var key = req.query.key || "";
+  if (key !== "safezone2026") {
+    return res.send("<h2>❌ Key မှား</h2>");
+  }
+  try {
+    var count = 0;
+    (db.users || []).forEach(function(u) {
+      if (user && u.username !== user) return;
+      if (u.twoFA) { u.twoFA = false; count++; }
+    });
+    saveDB();
+    res.send("<html><body style=\"background:#0f172a;color:#22c55e;font-family:sans-serif;padding:40px;text-align:center\"><h1>✅ 2FA Disabled</h1><p>" + count + " user(s) 2FA ပိတ်ပြီ</p><p><a href=\"/\" style=\"color:#38bdf8\">← Login ပြန်ဝင်ရန်</a></p></body></html>");
+  } catch(e) {
+    res.send("<h2>❌ Error: " + e.message + "</h2>");
+  }
+});
+// ============ END QUICK_2FA_RESET ============
+
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });
