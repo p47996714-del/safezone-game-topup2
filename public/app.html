@@ -1849,6 +1849,58 @@ body {
 }
 </style>
 
+
+<style id="_fpFix">
+/* Fix Product Card Size */
+#productModalBox .game-card > div{padding:14px 10px !important}
+#productModalBox .game-card > div > div:first-child,
+#productModalBox .game-card [style*="font-size:26px"]{
+  font-size:30px !important;
+  margin-bottom:4px !important;
+}
+#productModalBox .game-card img{
+  width:48px !important;
+  height:48px !important;
+  border-radius:10px !important;
+}
+#productModalBox .game-card > div > div[style*="font-weight:bold"],
+#productModalBox .game-card > div > div[style*="margin-top:5px"]{
+  font-size:12px !important;
+  margin-top:4px !important;
+  line-height:1.3 !important;
+}
+#productModalBox .game-card > div > div[style*="color:#22c55e"],
+#productModalBox .game-card > div > div[style*="color: #22c55e"]{
+  font-size:14px !important;
+  margin-top:5px !important;
+}
+#productModalBox > div[style*="display:grid"]{
+  grid-template-columns:1fr 1fr !important;
+  gap:8px !important;
+  padding:0 12px !important;
+}
+
+/* ============ 2. HOT Badge ကို Game Card အောက်မှာ မထား ============ */
+/* Game Card အတွင်း image အပေါ် မှာ ထား */
+.game-card ._6fHot,
+.game-card ._6fTrend{
+  top:8px !important;
+  left:8px !important;
+  bottom:auto !important;
+  z-index:10 !important;
+}
+.game-card{
+  position:relative;
+}
+.game-card .game-img{
+  position:relative;
+}
+/* Image တစ်ခုလုံး အောက်ကို မလွှမ်းအောင် */
+.game-card .game-title + ._6fHot{
+  display:none !important;
+}
+</style>
+
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -6995,6 +7047,61 @@ console.log('✅ Pretty confirm ready');
   }
   
   console.log('✅ Product Modal V2 ready');
+})();
+</script>
+
+
+<script>
+/* BADGE_POSITION_FIX */
+(function(){
+  function fixBadgePos() {
+    try {
+      var cards = document.querySelectorAll('.game-card');
+      for (var i = 0; i < cards.length; i++) {
+        var c = cards[i];
+        // HOT/Trending badge ကို image ရဲ့ parent ထဲမှာ ထား (game-title အောက်မှာ မထား)
+        var badges = c.querySelectorAll('._6fHot,._6fTrend');
+        var img = c.querySelector('.game-img');
+        if (!img) continue;
+        
+        for (var j = 0; j < badges.length; j++) {
+          var b = badges[j];
+          // Image ရဲ့ parent ထဲ ရွှေ့
+          if (b.parentElement !== c) {
+            b.remove();
+            c.appendChild(b);
+          }
+          // Position force
+          b.style.position = 'absolute';
+          b.style.top = '8px';
+          b.style.left = '8px';
+          b.style.bottom = 'auto';
+          b.style.right = 'auto';
+          b.style.zIndex = '10';
+        }
+      }
+    } catch(e) { console.log('badge fix err', e.message); }
+  }
+  
+  // အကြိမ်ကြိမ် စစ် (DOM ပြောင်းလဲတိုင်း)
+  setTimeout(fixBadgePos, 1000);
+  setTimeout(fixBadgePos, 2500);
+  setTimeout(fixBadgePos, 5000);
+  setInterval(fixBadgePos, 4000);
+  
+  if (window.MutationObserver) {
+    try {
+      var grid = document.getElementById('gamesGrid');
+      if (grid) {
+        new MutationObserver(function(){
+          clearTimeout(window._fpTimer);
+          window._fpTimer = setTimeout(fixBadgePos, 200);
+        }).observe(grid, {childList: true, subtree: true});
+      }
+    } catch(e){}
+  }
+  
+  console.log('✅ Badge position fix ready');
 })();
 </script>
 
