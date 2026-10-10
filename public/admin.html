@@ -692,7 +692,27 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     </div>
 
     <div class="section">
-      <h3>📢 Broadcast</h3>
+      <div class="section" style="border:2px solid #f59e0b">
+  <h3>📢 Announcement Banner</h3>
+  <p style="font-size:12px;color:#94a3b8;margin-bottom:12px">User Site ရဲ့ အပေါ်ဆုံးမှာ ပြမယ့် စာ</p>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:12px">
+    <div><div style="font-weight:bold;font-size:14px">Banner Status</div><div id="annStatus" style="font-size:12px;color:#94a3b8;margin-top:3px">Checking...</div></div>
+    <button id="annToggle" onclick="toggleAnn()" style="padding:10px 18px;background:#334155;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-family:inherit">...</button>
+  </div>
+  <div class="row"><input id="annText" placeholder="📢 စာ (ဥပမာ: Flash Sale 50% Off!)"></div>
+  <div class="row">
+    <select id="annType" style="flex:1"><option value="info">🔵 Info</option><option value="success">🟢 Success</option><option value="warn">🟡 Warning</option><option value="danger">🔴 Urgent</option></select>
+  </div>
+  <div class="row">
+    <button onclick="saveAnn()">💾 Save</button>
+    <button onclick="clearAnn()" style="background:#ef4444">🗑️ Clear</button>
+  </div>
+  <div style="margin-top:10px;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;border:1px dashed #f59e0b">
+    <div style="font-size:11px;color:#94a3b8;margin-bottom:6px">Preview:</div>
+    <div id="annPreview" style="padding:10px;border-radius:10px;background:linear-gradient(135deg,#38bdf8,#3b82f6);color:#fff;font-size:13px;text-align:center">Banner Text</div>
+  </div>
+</div>
+<h3>📢 Broadcast</h3>
       <div class="row"><textarea id="bcText" placeholder="User အားလုံးဆီ ပို့မယ့် စာ"></textarea></div>
       <div class="row"><button onclick="sendBroadcast()">📢 Broadcast</button></div>
     </div>
@@ -2507,5 +2527,67 @@ setTimeout(loadVideosAdmin, 2000);
 })();
 </script>
 
+<script>
+/* ANNOUNCEMENT_ADMIN_JS */
+(function(){
+  var _ann = { enabled: false, text: "", type: "info" };
+  function upPreview() {
+    var el = document.getElementById("annPreview");
+    var txt = document.getElementById("annText");
+    var typ = document.getElementById("annType");
+    if (!el) return;
+    el.textContent = (txt && txt.value.trim()) || "Banner Text";
+    var colors = { info:"linear-gradient(135deg,#38bdf8,#3b82f6)", success:"linear-gradient(135deg,#22c55e,#059669)", warn:"linear-gradient(135deg,#f59e0b,#d97706)", danger:"linear-gradient(135deg,#ef4444,#dc2626)" };
+    el.style.background = colors[(typ && typ.value) || "info"] || colors.info;
+  }
+  async function loadAnn() {
+    try {
+      var r = await fetch("/api/announcement");
+      var d = await r.json();
+      _ann = { enabled: !!d.enabled, text: d.text || "", type: d.type || "info" };
+      var txt = document.getElementById("annText");
+      var typ = document.getElementById("annType");
+      var st = document.getElementById("annStatus");
+      var btn = document.getElementById("annToggle");
+      if (txt) txt.value = _ann.text;
+      if (typ) typ.value = _ann.type;
+      if (st) st.innerHTML = _ann.enabled ? "<span style=\"color:#22c55e;font-weight:bold\">🟢 ON</span>" : "<span style=\"color:#ef4444;font-weight:bold\">🔴 OFF</span>";
+      if (btn) {
+        if (_ann.enabled) { btn.textContent = "🔴 ပိတ်မည်"; btn.style.background = "#ef4444"; }
+        else { btn.textContent = "🟢 ဖွင့်မည်"; btn.style.background = "#22c55e"; }
+      }
+      upPreview();
+    } catch(e) {}
+  }
+  window.toggleAnn = async function() {
+    _ann.enabled = !_ann.enabled;
+    await api("/api/admin/announcement", {method:"POST", body: JSON.stringify(_ann)});
+    loadAnn();
+    alert(_ann.enabled ? "🟢 Banner ON" : "🔴 Banner OFF");
+  };
+  window.saveAnn = async function() {
+    var txt = document.getElementById("annText").value.trim();
+    var typ = document.getElementById("annType").value;
+    if (!txt) return alert("စာ ဖြည့်ပါ");
+    _ann.text = txt; _ann.type = typ; _ann.enabled = true;
+    var r = await api("/api/admin/announcement", {method:"POST", body: JSON.stringify(_ann)});
+    if (r && r.success) { alert("✅ သိမ်းပြီ"); loadAnn(); }
+    else alert("❌ Failed");
+  };
+  window.clearAnn = async function() {
+    if (!confirm("Banner ဖျက်မလား?")) return;
+    _ann = { enabled: false, text: "", type: "info" };
+    await api("/api/admin/announcement", {method:"POST", body: JSON.stringify(_ann)});
+    loadAnn();
+  };
+  setTimeout(function(){
+    var t = document.getElementById("annText");
+    var y = document.getElementById("annType");
+    if (t) t.addEventListener("input", upPreview);
+    if (y) y.addEventListener("change", upPreview);
+    loadAnn();
+  }, 2000);
+})();
+</script>
 </body>
 </html>

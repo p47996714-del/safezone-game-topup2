@@ -6576,5 +6576,48 @@ console.log('✅ Pretty confirm ready');
 })();
 </script>
 
+<script>
+/* ANNOUNCEMENT_APP */
+(function(){
+  async function loadAnn() {
+    try {
+      var r = await fetch("/api/announcement", {cache:"no-store"});
+      var d = await r.json();
+      var old = document.getElementById("_annBanner");
+      if (old) old.remove();
+      if (!d.enabled || !d.text) return;
+      if (localStorage.getItem("_annDismissed_" + d.updatedAt) === "1") return;
+      var colors = {
+        info:"linear-gradient(135deg,#38bdf8,#3b82f6)",
+        success:"linear-gradient(135deg,#22c55e,#059669)",
+        warn:"linear-gradient(135deg,#f59e0b,#d97706)",
+        danger:"linear-gradient(135deg,#ef4444,#dc2626)"
+      };
+      var b = document.createElement("div");
+      b.id = "_annBanner";
+      b.style.cssText = "position:fixed;top:60px;left:10px;right:10px;z-index:9998;padding:12px 40px 12px 14px;border-radius:12px;color:#fff;font-size:13px;font-weight:bold;text-align:center;background:" + (colors[d.type] || colors.info) + ";box-shadow:0 6px 20px rgba(0,0,0,0.4);animation:_annSlide 0.5s ease";
+      var safeText = String(d.text).replace(/[<>]/g, "");
+      b.innerHTML = "<span style=\"margin-right:6px\">📢</span>" + safeText +
+        "<button onclick=\"window._annDismiss(" + d.updatedAt + ")\" style=\"position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.25);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:14px;line-height:1;padding:0\">✕</button>";
+      document.body.appendChild(b);
+      if (!document.getElementById("_annStyle")) {
+        var st = document.createElement("style");
+        st.id = "_annStyle";
+        st.textContent = "@keyframes _annSlide{from{transform:translateY(-30px);opacity:0}to{transform:translateY(0);opacity:1}}";
+        document.head.appendChild(st);
+      }
+    } catch(e) { console.log("ann err", e.message); }
+  }
+  window._annDismiss = function(ts) {
+    localStorage.setItem("_annDismissed_" + ts, "1");
+    var b = document.getElementById("_annBanner");
+    if (b) { b.style.transition = "all 0.3s"; b.style.opacity = "0"; b.style.transform = "translateY(-30px)"; setTimeout(function(){ b.remove(); }, 300); }
+  };
+  setTimeout(loadAnn, 2000);
+  setInterval(loadAnn, 30000);
+  document.addEventListener("visibilitychange", function(){ if (!document.hidden) setTimeout(loadAnn, 500); });
+  console.log("✅ Announcement ready");
+})();
+</script>
 </body>
 </html>
