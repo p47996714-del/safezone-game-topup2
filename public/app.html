@@ -1678,6 +1678,177 @@ body {
 #safeFabBtn,#safeFabMenu,#_fabBtn,#_fabMenu,#czFabBtn,#czFabMenu{display:none !important;visibility:hidden !important;opacity:0 !important;pointer-events:none !important;position:absolute !important;left:-9999px !important}
 </style>
 
+
+<style>
+/* PRODUCT_MODAL_V2_CSS */
+
+/* Modal Box */
+#productModal .modal-box{
+  background:linear-gradient(160deg,#1e293b 0%,#0f172a 100%) !important;
+  border:1px solid rgba(56,189,248,0.25) !important;
+  border-radius:24px !important;
+  padding:0 !important;
+  overflow:hidden;
+  box-shadow:0 30px 80px rgba(0,0,0,0.9),0 0 60px rgba(56,189,248,0.15) !important;
+  animation:_pmSlide 0.4s cubic-bezier(0.34,1.56,0.64,1);
+}
+@keyframes _pmSlide{from{transform:scale(0.9) translateY(30px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+
+/* Header */
+#productModalBox h3{
+  background:linear-gradient(135deg,#38bdf8 0%,#a855f7 50%,#ec4899 100%);
+  background-size:200% 200%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent !important;
+  padding:22px 20px 16px !important;
+  margin:0 !important;
+  font-size:19px !important;
+  text-align:center;
+  position:relative;
+  animation:_pmGrad 3s ease infinite;
+  border-bottom:1px solid rgba(56,189,248,0.15);
+}
+@keyframes _pmGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+#productModalBox h3::before{
+  content:'';
+  position:absolute;
+  top:0;left:0;right:0;
+  height:3px;
+  background:linear-gradient(90deg,#38bdf8,#a855f7,#ec4899);
+  background-size:200% 100%;
+  animation:_pmGrad 3s ease infinite;
+}
+
+/* Product Grid */
+#productModalBox .game-card{
+  background:linear-gradient(145deg,rgba(30,41,59,0.9),rgba(15,23,42,0.9)) !important;
+  border:1px solid rgba(56,189,248,0.2) !important;
+  border-radius:18px !important;
+  overflow:hidden;
+  position:relative;
+  transition:transform 0.25s cubic-bezier(0.4,0,0.2,1),box-shadow 0.3s,border-color 0.3s;
+  box-shadow:0 4px 20px rgba(0,0,0,0.3);
+}
+#productModalBox .game-card::before{
+  content:'';
+  position:absolute;
+  inset:0;
+  border-radius:inherit;
+  padding:1px;
+  background:linear-gradient(135deg,#38bdf8,#a855f7,#ec4899);
+  -webkit-mask:linear-gradient(#fff 0 0) content-box,linear-gradient(#fff 0 0);
+  -webkit-mask-composite:xor;
+          mask-composite:exclude;
+  opacity:0;
+  transition:opacity 0.3s;
+  pointer-events:none;
+}
+#productModalBox .game-card:hover::before,
+#productModalBox .game-card:active::before{opacity:1}
+#productModalBox .game-card:active{transform:scale(0.96)}
+#productModalBox .game-card:hover{
+  box-shadow:0 8px 30px rgba(56,189,248,0.25),0 0 40px rgba(168,85,247,0.15);
+  transform:translateY(-2px);
+}
+
+/* Product Inner */
+#productModalBox .game-card > div{padding:18px 14px !important}
+
+/* Diamond Icon */
+#productModalBox .game-card > div > div:first-child,
+#productModalBox .game-card [style*="font-size:26px"]{
+  font-size:38px !important;
+  margin-bottom:6px !important;
+  display:inline-block;
+  animation:_pmSparkle 2.5s ease-in-out infinite;
+  filter:drop-shadow(0 4px 12px rgba(56,189,248,0.4));
+}
+@keyframes _pmSparkle{0%,100%{transform:scale(1) rotate(0deg)}50%{transform:scale(1.12) rotate(8deg)}}
+
+/* Product Image */
+#productModalBox .game-card img{
+  width:60px !important;
+  height:60px !important;
+  border-radius:14px !important;
+  border:2px solid rgba(56,189,248,0.3) !important;
+  box-shadow:0 4px 15px rgba(0,0,0,0.4);
+  transition:transform 0.3s;
+}
+#productModalBox .game-card:hover img{transform:scale(1.08)}
+
+/* Product Name */
+#productModalBox .game-card > div > div[style*="font-weight:bold"],
+#productModalBox .game-card > div > div[style*="margin-top:5px"]{
+  font-size:14px !important;
+  color:#fff !important;
+  font-weight:bold !important;
+  margin-top:8px !important;
+  letter-spacing:0.2px;
+}
+
+/* Price */
+#productModalBox .game-card > div > div[style*="color:#22c55e"],
+#productModalBox .game-card > div > div[style*="color: #22c55e"]{
+  font-size:17px !important;
+  font-weight:bold !important;
+  margin-top:8px !important;
+  background:linear-gradient(135deg,#22c55e,#10b981,#059669);
+  background-size:200% 200%;
+  -webkit-background-clip:text;
+  background-clip:text;
+  color:transparent !important;
+  animation:_pmPriceGrad 3s ease infinite;
+  text-shadow:0 0 20px rgba(34,197,94,0.3);
+}
+@keyframes _pmPriceGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* Discount */
+#productModalBox .game-card > div > div[style*="color:#22c55e"] ~ div{
+  background:rgba(34,197,94,0.15);
+  display:inline-block;
+  padding:2px 8px;
+  border-radius:8px;
+  font-size:10px !important;
+  margin-top:4px !important;
+}
+
+/* Close button */
+#productModalBox .cancel,
+#productModalBox > button.cancel{
+  background:rgba(51,65,85,0.8) !important;
+  color:#cbd5e1 !important;
+  border:1px solid rgba(71,85,105,0.6) !important;
+  border-radius:14px !important;
+  padding:14px !important;
+  font-weight:bold;
+  font-size:14px;
+  margin:15px 20px 20px !important;
+  width:calc(100% - 40px) !important;
+  transition:all 0.2s;
+}
+#productModalBox .cancel:hover,
+#productModalBox > button.cancel:hover{
+  background:rgba(71,85,105,0.9) !important;
+  color:#fff !important;
+}
+
+/* Header icon (diamond) */
+#productModalBox h3{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+}
+
+/* Responsive */
+@media (max-width:400px){
+  #productModalBox .game-card > div{padding:14px 10px !important}
+  #productModalBox .game-card > div > div:first-child{font-size:32px !important}
+  #productModalBox .game-card > div > div[style*="color:#22c55e"]{font-size:15px !important}
+}
+</style>
+
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -6778,6 +6949,52 @@ console.log('✅ Pretty confirm ready');
   }
   
   console.log('✅ 3 features ready (13/34/43)');
+})();
+</script>
+
+
+<script>
+/* PRODUCT_MODAL_V2_JS */
+(function(){
+  var _origOpen = window.openGameProducts;
+  if (typeof _origOpen === 'function') {
+    window.openGameProducts = function(game) {
+      try {
+        var m = document.getElementById('productModal');
+        if (m) {
+          m.style.animation = 'none';
+          setTimeout(function() { m.style.animation = ''; }, 10);
+        }
+      } catch(e) {}
+      return _origOpen.apply(this, arguments);
+    };
+    console.log('✅ Product modal animation hooked');
+  }
+  
+  // Product card အသစ် ပေါ်တိုင်း animation
+  function decorate() {
+    try {
+      var cards = document.querySelectorAll('#productModalBox .game-card');
+      for (var i = 0; i < cards.length; i++) {
+        if (cards[i].dataset.pmDec) continue;
+        cards[i].dataset.pmDec = '1';
+        cards[i].style.animation = '_pmSlide 0.4s cubic-bezier(0.34,1.56,0.64,1) ' + (i * 0.05) + 's both';
+      }
+    } catch(e) {}
+  }
+  setTimeout(decorate, 1000);
+  setInterval(decorate, 2000);
+  
+  if (window.MutationObserver) {
+    try {
+      var box = document.getElementById('productModalBox');
+      if (box) {
+        new MutationObserver(function(){ setTimeout(decorate, 100); }).observe(box, {childList: true, subtree: true});
+      }
+    } catch(e) {}
+  }
+  
+  console.log('✅ Product Modal V2 ready');
 })();
 </script>
 
