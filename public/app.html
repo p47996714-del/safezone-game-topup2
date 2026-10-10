@@ -6720,92 +6720,46 @@ console.log('✅ Pretty confirm ready');
 })();
 </script>
 
+
+
+
+
+
+
+
+
 <script>
-/* CHATBOT_USER */
+/* BOT_USER_V3 */
 (function(){
-  var _origSend = window.sendChat;
-  if (typeof _origSend === "function") {
-    window.sendChat = async function() {
-      var inp = document.getElementById("chatInput");
-      if (!inp) return;
-      var text = inp.value.trim();
-      if (!text) return;
-      
-      // User message ပို့
-      await _origSend.apply(this, arguments);
-      
-      // Bot reply စစ် (1 စက္ကန့်အကြာ)
-      setTimeout(async function() {
-        try {
-          var r = await api("/api/chat/bot-check", { method:"POST", body: JSON.stringify({ text: text }) });
-          if (r && r.success) {
-            // Typing indicator ပြ
-            var box = document.getElementById("chatMessages");
-            if (box && typeof typingIndicator === "function") {
-              var typ = document.createElement("div");
-              typ.id = "_botTyping";
-              typ.innerHTML = typingIndicator();
-              box.appendChild(typ);
-              box.scrollTop = box.scrollHeight;
-            }
-            
-            // 1.5 စက္ကန့်အကြာ message ပြ
-            setTimeout(function() {
-              var typ2 = document.getElementById("_botTyping");
-              if (typ2) typ2.remove();
-              if (typeof loadChat === "function") loadChat();
-              if (typeof showToast === "function") showToast("🤖 Bot ပြန်ဖြေပြီ", "info");
-            }, 1500);
-          }
-        } catch(e) { console.log("bot err", e.message); }
-      }, 1000);
-    };
-    console.log("✅ ChatBot user side ready");
+  var _rules = [];
+  var _enabled = true;
+  var _lastText = '', _lastTime = 0;
+  
+  async function loadRules() {
+    try {
+      var r = await fetch('/api/chatbot-rules', { cache: 'no-store' });
+      var d = await r.json();
+      _enabled = d.enabled !== false;
+      _rules = Array.isArray(d.rules) ? d.rules : [];
+    } catch(e) { console.log('rules err', e.message); }
   }
-})();
-</script>
-
-
-
-
-<script>
-/* CHATBOT_FRONTEND_V2 */
-(function(){
-  console.log('🤖 Bot V2 loading...');
   
-  var BOT_RULES = [
-    { keywords: ['hi','hello','hey','မင်္ဂလာပါ','ဟယ်လို','နေကောင်းလား','hai','hlo'], reply: '👋 မင်္ဂလာပါ! Safe Zone မှ ကြိုဆိုပါတယ်။\n\nဘာကူညီပေးရမလဲ?\n💰 ငွေဖြည့် · 📦 Order · 🎁 Promo' },
-    { keywords: ['deposit','ငွေဖြည့်','ဖြည့်','ငွေလွှဲ','topup'], reply: '💰 ငွေဖြည့်နည်း:\n\n1. Wallet tab ဖွင့်ပါ\n2. KBZ/Wave/UAB/AYA ရွေးပါ\n3. Admin နံပါတ်ကို လွှဲပါ\n4. Receipt ပုံ တင်ပါ\n5. ၅-၁၅ မိနစ် အတွင်း approve ဖြစ်မယ် ✅' },
-    { keywords: ['order','မှာတမ်း','ဝယ်','တော့ပ်','ဝယ်ချင်'], reply: '📦 Order တင်နည်း:\n\n1. Home မှာ ဂိမ်း ရွေးပါ\n2. Package ရွေးပါ\n3. Player ID ဖြည့်ပါ\n4. ဝယ်မယ် နှိပ်ပါ\n\n⏱ ၁၀-၃၀ မိနစ်အတွင်း ရမယ်' },
-    { keywords: ['how long','ဘယ်လောက်ကြာ','အချိန်','ကြာမလား','ဘယ်တော့'], reply: '⏱ အချိန်:\n\n💰 Deposit: ၅-၁၅ မိနစ်\n📦 Order: ၁၀-၃၀ မိနစ်\n💬 Chat: ၂၄/၇' },
-    { keywords: ['promo','coupon','ကူပွန်','လျှော့','discount'], reply: '🎁 Promo:\n\n🎟️ Coupon Code ကို Home → Coupon မှာ ရိုက်ထည့်ပါ\n⭐ Points စုပြီး Balance ပြန်လဲလို့ရ' },
-    { keywords: ['contact','ဆက်သွယ်','phone','ဖုန်း','admin'], reply: '📞 ဆက်သွယ်ရန်:\n\n💬 ဒီ Chat ကနေ ရေးလို့ရ\n📱 Profile → Contact Us' },
-    { keywords: ['refund','ငွေပြန်','reject','ပယ်'], reply: '💰 Refund:\n\nOrder Reject ဖြစ်ရင် Balance ကို အလိုအလျောက် ပြန်အမ်းပါတယ်' },
-    { keywords: ['ကျေးဇူး','thanks','thank','thx'], reply: '🙏 ကျေးဇူးတင်ပါတယ်! နောက်ထပ် မေးစရာ ရှိရင် ရေးလို့ရပါတယ် 💙' },
-    { keywords: ['vip','အဆင့်','level'], reply: '⭐ VIP အဆင့်:\n\n🥉 Bronze: 0 Ks\n🥈 Silver: 50K+\n🥇 Gold: 200K+\n💎 Diamond: 500K+' },
-    { keywords: ['problem','error','မရ','failed','bug','ပြဿနာ'], reply: '⚠️ ပြဿနာ ဖြစ်ရင် App ကို refresh လုပ်ပါ၊ Logout → Login ပြန်လုပ်ပါ' }
-  ];
-  
-  function getBotReply(text) {
+  function getReply(text) {
+    if (!_enabled || !_rules.length) return null;
     var lower = String(text || '').toLowerCase().trim();
     if (!lower) return null;
-    for (var i = 0; i < BOT_RULES.length; i++) {
-      var r = BOT_RULES[i];
-      for (var j = 0; j < r.keywords.length; j++) {
-        if (lower.indexOf(String(r.keywords[j]).toLowerCase()) > -1) {
-          return r.reply;
-        }
+    for (var i = 0; i < _rules.length; i++) {
+      var r = _rules[i];
+      var kws = r.keywords || [];
+      for (var j = 0; j < kws.length; j++) {
+        if (lower.indexOf(String(kws[j]).toLowerCase()) > -1) return r.reply;
       }
     }
     return null;
   }
   
-  var _lastBot = { text: '', time: 0 };
   var _origSend = window.sendChat;
-  if (typeof _origSend !== 'function') {
-    console.log('⚠️ sendChat not found');
-    return;
-  }
+  if (typeof _origSend !== 'function') { console.log('⚠️ sendChat not found'); return; }
   
   window.sendChat = async function() {
     var inp = document.getElementById('chatInput');
@@ -6813,58 +6767,55 @@ console.log('✅ Pretty confirm ready');
     var text = inp.value.trim();
     if (!text) return;
     
-    // 1. User message ပို့ (server)
+    // 1. User message ပို့
     await _origSend.apply(this, arguments);
     
-    // 2. Bot reply local ပဲ ပြ (server ကို မပို့)
+    // 2. Bot reply
     var now = Date.now();
-    if (_lastBot.text === text && (now - _lastBot.time) < 5000) return;
-    _lastBot = { text: text, time: now };
+    if (_lastText === text && (now - _lastTime) < 5000) return;
+    _lastText = text; _lastTime = now;
     
-    var reply = getBotReply(text);
+    if (!_rules.length) await loadRules();
+    var reply = getReply(text);
     if (!reply) return;
     
+    // 3. Typing indicator
     setTimeout(function() {
       var box = document.getElementById('chatMessages');
       if (!box) return;
-      
-      // Typing indicator
-      var oldTyp = document.getElementById('_botTyping');
-      if (oldTyp) oldTyp.remove();
-      
+      var old = document.getElementById('_b3Typ'); if (old) old.remove();
       var typ = document.createElement('div');
-      typ.id = '_botTyping';
+      typ.id = '_b3Typ';
       typ.className = 'chat-bubble admin';
       typ.style.cssText = 'display:flex;gap:4px;align-items:center;padding:12px 16px;max-width:75px';
-      typ.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_bt 1.4s infinite"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_bt 1.4s infinite .2s"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_bt 1.4s infinite .4s"></span>';
+      typ.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b3t 1.4s infinite"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b3t 1.4s infinite .2s"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b3t 1.4s infinite .4s"></span>';
       box.appendChild(typ);
       box.scrollTop = box.scrollHeight;
       
-      setTimeout(function() {
-        var t = document.getElementById('_botTyping');
-        if (t) t.remove();
-        
-        // Admin bubble (ဘယ်ဘက်)
-        var botMsg = document.createElement('div');
-        botMsg.className = 'chat-bubble admin';
-        botMsg.style.cssText = 'background:linear-gradient(135deg,#1e293b,#334155);border:1px solid #22c55e;position:relative;max-width:80%';
-        botMsg.innerHTML = '<div style="position:absolute;top:-8px;left:8px;background:linear-gradient(135deg,#22c55e,#059669);color:#fff;font-size:9px;padding:2px 8px;border-radius:10px;font-weight:bold;box-shadow:0 2px 6px rgba(34,197,94,0.4)">🤖 BOT</div><div style="margin-top:4px">' + String(reply).replace(/\n/g, '<br>') + '</div>';
-        box.appendChild(botMsg);
-        box.scrollTop = box.scrollHeight;
-        
-        if (typeof showToast === 'function') showToast('🤖 Bot ပြန်ဖြေပြီ', 'info');
-      }, 1500);
-    }, 600);
+      // 4. Reply ကို server မှာ သိမ်း
+      setTimeout(async function() {
+        var t = document.getElementById('_b3Typ'); if (t) t.remove();
+        try {
+          await api('/api/chat/bot-reply', {
+            method: 'POST',
+            body: JSON.stringify({ text: reply })
+          });
+          if (typeof loadChat === 'function') await loadChat();
+        } catch(e) { console.log('save err', e.message); }
+      }, 1200);
+    }, 500);
   };
   
-  if (!document.getElementById('_btStyle')) {
+  if (!document.getElementById('_b3Style')) {
     var st = document.createElement('style');
-    st.id = '_btStyle';
-    st.textContent = '@keyframes _bt{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}';
+    st.id = '_b3Style';
+    st.textContent = '@keyframes _b3t{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}';
     document.head.appendChild(st);
   }
   
-  console.log('✅ Bot V2 ready (local only)');
+  setTimeout(loadRules, 2000);
+  setInterval(loadRules, 30000);
+  console.log('✅ Bot V3 ready (admin rules)');
 })();
 </script>
 

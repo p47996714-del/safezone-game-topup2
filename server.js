@@ -1365,6 +1365,79 @@ app.post('/api/admin/chatbot-test', adminAuth, function(req, res) {
 
 // ============ END CHATBOT_SYSTEM ============
 
+
+// ============ BOT_PERSIST_ROUTES ============
+// Rules config သေချာ ရှိအောင်
+if (!db.config) db.config = {};
+if (!db.config.chatBot) {
+  db.config.chatBot = { enabled: true, rules: [] };
+  if (typeof saveDB === 'function') saveDB();
+}
+
+// Public: Rules ရယူ
+app.get('/api/chatbot-rules', (req, res) => {
+  var cfg = (db.config && db.config.chatBot) || { enabled: true, rules: [] };
+  res.json({
+    enabled: cfg.enabled !== false,
+    rules: Array.isArray(cfg.rules) ? cfg.rules : []
+  });
+});
+
+// Auth: Bot reply ကို history မှာ သိမ်း
+app.post('/api/chat/bot-reply', auth, (req, res) => {
+  try {
+    var text = String((req.body || {}).text || '').trim();
+    if (!text) return res.json({ success: false, error: 'Empty' });
+    var userId = req.user.id;
+    if (!db.chats) db.chats = {};
+    if (!db.chats[userId]) db.chats[userId] = [];
+    
+    // နောက်ဆုံး 5 မှာ တူတူ bot reply ရှိပြီးလား?
+    var recent = db.chats[userId].slice(-5);
+    var dup = recent.some(function(m) {
+      return m.from === 'admin' && m.bot && m.text === text;
+    });
+    if (dup) return res.json({ success: false, duplicate: true });
+    
+    var msg = {
+      id: 'bot_' + Date.now(),
+      from: 'admin',
+      text: text,
+      bot: true,
+      read: false,
+      createdAt: new Date().toISOString()
+    };
+    db.chats[userId].push(msg);
+    if (typeof saveDB === 'function') saveDB();
+    res.json({ success: true, message: msg });
+  } catch(e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
+// Admin: Rules သိမ်း (ရှိပြီးသား route မရှိရင်)
+if (typeof app._botAdminRoute === 'undefined') {
+  app._botAdminRoute = true;
+  try {
+    app.post('/api/admin/chatbot-rules', adminAuth, (req, res) => {
+      try {
+        var body = req.body || {};
+        if (!db.config.chatBot) db.config.chatBot = { enabled: true, rules: [] };
+        if (typeof body.enabled === 'boolean') db.config.chatBot.enabled = body.enabled;
+        if (Array.isArray(body.rules)) db.config.chatBot.rules = body.rules;
+        if (typeof saveDB === 'function') saveDB();
+        res.json({ success: true });
+      } catch(e) { res.json({ success: false, error: e.message }); }
+    });
+    app.get('/api/admin/chatbot-rules', adminAuth, (req, res) => {
+      var cfg = (db.config && db.config.chatBot) || { enabled: true, rules: [] };
+      res.json(cfg);
+    });
+  } catch(e) {}
+}
+
+// ============ END BOT_PERSIST_ROUTES ============
+
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });

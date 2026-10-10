@@ -745,7 +745,31 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
 <h3>📢 Broadcast</h3>
       <div class="row"><textarea id="bcText" placeholder="User အားလုံးဆီ ပို့မယ့် စာ"></textarea></div>
       <div class="row"><button onclick="sendBroadcast()">📢 Broadcast</button></div>
+    
+<div class="section" style="border:2px solid #22c55e">
+  <h3>🤖 Chat Bot — Auto Reply</h3>
+  <p style="font-size:12px;color:#94a3b8;margin-bottom:12px">User က စာ ရေးရင် Admin မှတ်ထားတဲ့ စာ ပြန်ပို့မယ်</p>
+  <div style="display:flex;justify-content:space-between;align-items:center;padding:12px;background:rgba(15,23,42,0.6);border-radius:12px;margin-bottom:12px">
+    <div><div style="font-weight:bold;font-size:14px">Bot Status</div><div id="b3Status" style="font-size:12px;color:#94a3b8;margin-top:3px">Loading...</div></div>
+    <button id="b3Toggle" onclick="b3Toggle()" style="padding:10px 18px;background:#334155;color:#fff;border:none;border-radius:10px;font-weight:bold;cursor:pointer;font-family:inherit">...</button>
+  </div>
+  <h4 style="color:#38bdf8;font-size:13px;margin-bottom:10px">📋 Admin မှတ်ထားတဲ့ စာများ</h4>
+  <div id="b3RulesList"></div>
+  <div style="background:rgba(15,23,42,0.6);padding:14px;border-radius:12px;margin-top:12px">
+    <div style="font-size:12px;color:#94a3b8;margin-bottom:8px">➕ စာ အသစ် ထည့်</div>
+    <div class="row">
+      <input id="b3Keywords" placeholder="Keywords (comma): hi,hello,မင်္ဂလာပါ" style="flex:1">
     </div>
+    <div class="row">
+      <textarea id="b3Reply" placeholder="Reply (\n = new line)" style="flex:1;min-height:80px"></textarea>
+    </div>
+    <div class="row">
+      <button onclick="b3Add()">➕ Add</button>
+    </div>
+  </div>
+</div>
+
+</div>
   </div>
 </div>
 
@@ -2713,5 +2737,110 @@ setTimeout(loadVideosAdmin, 2000);
   console.log("✅ Chatbot admin ready");
 })();
 </script>
+
+<script>
+/* BOT_ADMIN_V3 */
+(function(){
+  var _b3 = { enabled: true, rules: [] };
+  function esc(s) { return String(s||'').replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  
+  async function b3Load() {
+    try {
+      var r = await fetch('/api/admin/chatbot-rules', {
+        headers: { 'x-admin-user': au, 'x-admin-pass': ap }
+      });
+      var d = await r.json();
+      _b3 = d || { enabled: true, rules: [] };
+      if (!Array.isArray(_b3.rules)) _b3.rules = [];
+      b3Render();
+    } catch(e) { console.log('b3 load err', e.message); }
+  }
+  
+  function b3Render() {
+    var st = document.getElementById('b3Status');
+    var btn = document.getElementById('b3Toggle');
+    if (st && btn) {
+      if (_b3.enabled !== false) {
+        st.innerHTML = '<span style="color:#22c55e;font-weight:bold">🟢 ဖွင့်ထားသည်</span>';
+        btn.textContent = '🔴 ပိတ်မည်';
+        btn.style.background = '#ef4444';
+      } else {
+        st.innerHTML = '<span style="color:#ef4444;font-weight:bold">🔴 ပိတ်ထားသည်</span>';
+        btn.textContent = '🟢 ဖွင့်မည်';
+        btn.style.background = '#22c55e';
+      }
+    }
+    var box = document.getElementById('b3RulesList');
+    if (!box) return;
+    if (!_b3.rules.length) {
+      box.innerHTML = '<p class="empty" style="font-size:12px;padding:15px">စာ မရှိသေးပါ — အောက်မှာ ထည့်ပါ</p>';
+      return;
+    }
+    box.innerHTML = _b3.rules.map(function(r, i) {
+      var kws = (r.keywords || []).join(', ');
+      return '<div class="admin-item" style="flex-direction:column;align-items:stretch;gap:6px;padding:12px">' +
+        '<div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">' +
+          '<div style="flex:1;min-width:0">' +
+            '<div style="font-size:12px;color:#38bdf8;font-weight:bold">🔑 ' + esc(kws) + '</div>' +
+            '<div style="font-size:11px;color:#94a3b8;margin-top:4px;white-space:pre-wrap;word-break:break-word">' + esc(String(r.reply || '').substring(0, 100)) + (String(r.reply || '').length > 100 ? '...' : '') + '</div>' +
+          '</div>' +
+          '<button class="btn red" style="margin:0;padding:6px 12px;font-size:11px;flex-shrink:0" onclick="b3Del(' + i + ')">✕</button>' +
+        '</div>' +
+      '</div>';
+    }).join('');
+  }
+  
+  async function b3Save() {
+    try {
+      var r = await fetch('/api/admin/chatbot-rules', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-admin-user': au, 'x-admin-pass': ap },
+        body: JSON.stringify(_b3)
+      });
+      var d = await r.json();
+      return d && d.success;
+    } catch(e) { return false; }
+  }
+  
+  window.b3Toggle = async function() {
+    _b3.enabled = !_b3.enabled;
+    if (await b3Save()) { b3Render(); alert(_b3.enabled ? '🟢 Bot ON' : '🔴 Bot OFF'); }
+    else alert('❌ Failed');
+  };
+  
+  window.b3Add = async function() {
+    var kwInp = document.getElementById('b3Keywords');
+    var rpInp = document.getElementById('b3Reply');
+    var kws = kwInp.value.split(',').map(function(s){ return s.trim(); }).filter(Boolean);
+    var reply = rpInp.value.trim().replace(/\\n/g, '\n');
+    if (!kws.length || !reply) return alert('Keywords + Reply ဖြည့်ပါ');
+    _b3.rules.push({ keywords: kws, reply: reply });
+    if (await b3Save()) {
+      kwInp.value = '';
+      rpInp.value = '';
+      b3Render();
+      alert('✅ စာ ထည့်ပြီ');
+    } else alert('❌ Save failed');
+  };
+  
+  window.b3Del = async function(i) {
+    if (!await _prettyConfirm('စာ ဖျက်မှာလား?')) return;
+    _b3.rules.splice(i, 1);
+    if (await b3Save()) b3Render();
+  };
+  
+  setTimeout(b3Load, 2500);
+  
+  var _origTab = window.tab;
+  if (typeof _origTab === 'function') {
+    window.tab = function(name, btn) {
+      _origTab(name, btn);
+      if (name === 'settings') setTimeout(b3Load, 400);
+    };
+  }
+  console.log('✅ Bot Admin V3 ready');
+})();
+</script>
+
 </body>
 </html>
