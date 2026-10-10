@@ -6746,47 +6746,33 @@ console.log('✅ Pretty confirm ready');
 
 
 
+
+
+
 <script>
-/* BOT_V11_LOCAL */
+/* BOT_V12_FALLBACK */
 (function(){
-  console.log('🤖 Bot V11 (localStorage persist) loading...');
+  console.log('🤖 Bot V12 (with fallback) loading...');
   
   var STORAGE_KEY = '_botChatHistory';
+  var FALLBACK_MSG = '📩 သင့်စာကို Admin ဆီ ပို့ပြီးပါပြီ။\n\n⏱ ၁၅ မိနစ်အတွင်း ပြန်ဖြေပါမယ်။\n\nအရေးကြီးရင် Profile → Contact Us မှာ ဆက်သွယ်ပါ 🙏';
   var _rules = [], _busy = false, _last = '', _lastTime = 0;
   
-  // ===== localStorage helpers =====
   function getHistory() {
-    try {
-      var raw = localStorage.getItem(STORAGE_KEY);
-      return raw ? JSON.parse(raw) : [];
-    } catch(e) { return []; }
+    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]'); } catch(e) { return []; }
   }
-  
-  function saveHistory(arr) {
+  function saveHistory(a) {
     try {
-      // Limit 50 messages
-      if (arr.length > 50) arr = arr.slice(-50);
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+      if (a.length > 50) a = a.slice(-50);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(a));
     } catch(e) {}
   }
-  
-  function addToHistory(from, text, bot) {
+  function addHistory(from, text, bot) {
     var h = getHistory();
-    h.push({
-      id: 'local_' + Date.now() + '_' + Math.random(),
-      from: from,
-      text: text,
-      bot: !!bot,
-      createdAt: new Date().toISOString()
-    });
+    h.push({ id: 'loc_' + Date.now() + '_' + Math.random(), from: from, text: text, bot: !!bot, createdAt: new Date().toISOString() });
     saveHistory(h);
   }
   
-  function clearHistory() {
-    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
-  }
-  
-  // ===== Rules load =====
   async function loadRules() {
     try {
       var r = await fetch('/api/bot/rules', { cache: 'no-store' });
@@ -6808,57 +6794,43 @@ console.log('✅ Pretty confirm ready');
     return null;
   }
   
-  // ===== DOM render =====
-  function renderBotMessage(reply) {
+  function renderMsg(text, isFallback) {
     var box = document.getElementById('chatMessages');
     if (!box) return;
     var el = document.createElement('div');
     el.className = 'chat-bubble admin';
-    el.style.cssText = 'background:linear-gradient(135deg,#1e293b,#334155);border:1px solid #22c55e;position:relative;max-width:80%;animation:_b11In 0.3s ease';
-    var safe = String(reply).replace(/[<>]/g, '');
-    el.innerHTML = '<div style="position:absolute;top:-8px;left:8px;background:linear-gradient(135deg,#22c55e,#059669);color:#fff;font-size:9px;padding:2px 8px;border-radius:10px;font-weight:bold;box-shadow:0 2px 6px rgba(34,197,94,0.4)">🤖 BOT</div><div style="margin-top:4px">' + safe.replace(/\n/g, '<br>') + '</div>';
+    el.style.cssText = 'background:linear-gradient(135deg,#1e293b,#334155);border:1px solid ' + (isFallback ? '#f59e0b' : '#22c55e') + ';position:relative;max-width:80%;animation:_b12In 0.3s ease';
+    var badge = isFallback ? '📩 AUTO' : '🤖 BOT';
+    var badgeColor = isFallback ? '#f59e0b' : '#22c55e';
+    var safe = String(text).replace(/[<>]/g, '');
+    el.innerHTML = '<div style="position:absolute;top:-8px;left:8px;background:linear-gradient(135deg,' + badgeColor + ',#' + (isFallback ? 'd97706' : '059669') + ');color:#fff;font-size:9px;padding:2px 8px;border-radius:10px;font-weight:bold">' + badge + '</div><div style="margin-top:4px">' + safe.replace(/\n/g, '<br>') + '</div>';
     box.appendChild(el);
     box.scrollTop = box.scrollHeight;
   }
   
-  // ===== Restore from localStorage when chat opens =====
   function restoreLocal() {
     var box = document.getElementById('chatMessages');
     if (!box) return;
+    if (box.querySelectorAll('.chat-bubble').length > 0) return;
     var h = getHistory();
-    if (!h.length) return;
-    
-    // Server messages ရှိပြီးသား? 
-    var existing = box.querySelectorAll('.chat-bubble').length;
-    if (existing > 0) return;
-    
-    // Bot messages ပဲ ပြ
     h.forEach(function(m) {
-      if (m.from === 'admin' && m.bot) {
-        renderBotMessage(m.text);
-      }
+      if (m.from === 'admin') renderMsg(m.text, m.fallback);
     });
-    console.log('📦 Restored ' + h.length + ' from localStorage');
   }
   
-  // ===== Hook loadChat =====
   var _origLoad = window.loadChat;
   if (typeof _origLoad === 'function') {
     window.loadChat = async function() {
       await _origLoad.apply(this, arguments);
       setTimeout(function() {
-        // Server messages မရှိရင် localStorage ကနေ ပြ
         var box = document.getElementById('chatMessages');
-        if (!box) return;
-        var hasBubbles = box.querySelectorAll('.chat-bubble').length > 0;
-        if (!hasBubbles) restoreLocal();
+        if (box && box.querySelectorAll('.chat-bubble').length === 0) restoreLocal();
       }, 100);
     };
   }
   
-  // ===== Hook sendChat =====
   var _origSend = window.sendChat;
-  if (typeof _origSend !== 'function') { console.log('⚠️ sendChat missing'); return; }
+  if (typeof _origSend !== 'function') { console.log('⚠️ no sendChat'); return; }
   
   window.sendChat = async function() {
     var inp = document.getElementById('chatInput');
@@ -6866,11 +6838,9 @@ console.log('✅ Pretty confirm ready');
     var text = inp.value.trim();
     if (!text) return;
     
-    // User message ပို့ + localStorage
     await _origSend.apply(this, arguments);
-    addToHistory('user', text, false);
+    addHistory('user', text, false);
     
-    // Duplicate guard
     var now = Date.now();
     if (_last === text && (now - _lastTime) < 3000) return;
     _last = text; _lastTime = now;
@@ -6880,78 +6850,64 @@ console.log('✅ Pretty confirm ready');
     try {
       if (!_rules.length) await loadRules();
       var reply = findReply(text);
-      if (!reply) { _busy = false; return; }
+      var isFallback = !reply;
+      if (!reply) reply = FALLBACK_MSG;
       
-      console.log('🤖 Reply:', reply.substring(0, 30));
-      
-      // Typing ပြ
       var box = document.getElementById('chatMessages');
       var typ = null;
       if (box) {
-        var old = document.getElementById('_b11T'); if (old) old.remove();
+        var old = document.getElementById('_b12T'); if (old) old.remove();
         typ = document.createElement('div');
-        typ.id = '_b11T';
+        typ.id = '_b12T';
         typ.className = 'chat-bubble admin';
         typ.style.cssText = 'display:flex;gap:4px;align-items:center;padding:12px 16px;max-width:75px';
-        typ.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b11t 1.4s infinite"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b11t 1.4s infinite .2s"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b11t 1.4s infinite .4s"></span>';
+        typ.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b12t 1.4s infinite"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b12t 1.4s infinite .2s"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b12t 1.4s infinite .4s"></span>';
         box.appendChild(typ);
         box.scrollTop = box.scrollHeight;
       }
       
-      // 1s စောင့်
-      await new Promise(function(r){ setTimeout(r, 1000); });
+      await new Promise(function(r){ setTimeout(r, isFallback ? 700 : 1000); });
       if (typ) typ.remove();
       
-      // localStorage မှာ သိမ်း
-      addToHistory('admin', reply, true);
+      addHistory('admin', reply, true);
       
-      // Server ကို save (background - fail ဖြစ်လည်း ပြဿနာ မရှိ)
       api('/api/bot/save-reply', {
         method: 'POST',
         body: JSON.stringify({ text: reply })
-      }).then(function(r) {
-        console.log('💾 Server save:', r);
-      }).catch(function(e) {
-        console.log('💾 Server err:', e.message);
-      });
+      }).catch(function(){});
       
-      // DOM မှာ ပြ
-      renderBotMessage(reply);
-      if (typeof showToast === 'function') showToast('🤖 Bot ပြန်ဖြေပြီ', 'info');
+      renderMsg(reply, isFallback);
+      if (typeof showToast === 'function') {
+        showToast(isFallback ? '📩 Auto reply' : '🤖 Bot ပြန်ဖြေပြီ', 'info');
+      }
       
+      console.log(isFallback ? '📩 Fallback sent' : '🤖 Bot reply sent');
     } catch(e) {
       console.log('Bot err:', e.message);
-      var t = document.getElementById('_b11T'); if (t) t.remove();
+      var t = document.getElementById('_b12T'); if (t) t.remove();
     }
     _busy = false;
   };
   
-  // ===== CSS =====
-  if (!document.getElementById('_b11s')) {
+  if (!document.getElementById('_b12s')) {
     var st = document.createElement('style');
-    st.id = '_b11s';
-    st.textContent = '@keyframes _b11t{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}@keyframes _b11In{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}';
+    st.id = '_b12s';
+    st.textContent = '@keyframes _b12t{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}@keyframes _b12In{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}';
     document.head.appendChild(st);
   }
   
-  // ===== Init =====
   setTimeout(loadRules, 1000);
-  setTimeout(restoreLocal, 2000);
   setInterval(loadRules, 30000);
   
-  // Chat tab ဖွင့်တိုင်း
   var _ot = window.switchTab;
   if (typeof _ot === 'function') {
     window.switchTab = function(n, b) {
       _ot(n, b);
-      if (n === 'chat') {
-        setTimeout(loadRules, 300);
-        setTimeout(restoreLocal, 800);
-      }
+      if (n === 'chat') setTimeout(loadRules, 300);
     };
   }
   
-  console.log('✅ Bot V11 ready');
+  console.log('✅ Bot V12 ready (with fallback)');
 })();
 </script>
 

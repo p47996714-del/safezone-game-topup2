@@ -2926,5 +2926,146 @@ window.runBotDebug = async function() {
 };
 </script>
 
+
+<script>
+/* ADMIN_F4513 */
+(function(){
+  console.log('🎯 Admin 4/5/13 loading...');
+  
+  // ===== FEATURE 4: Order Status Auto-Chat =====
+  var _origUpdateOrd = window.updateOrd;
+  if (typeof _origUpdateOrd === 'function' && !window._f4Hooked) {
+    window._f4Hooked = true;
+    window.updateOrd = async function(id, status) {
+      // Find order
+      var order = (window.allOrders || []).find(function(o){ return o.id === id; });
+      if (!order) return _origUpdateOrd.apply(this, arguments);
+      
+      var res = await _origUpdateOrd.apply(this, arguments);
+      
+      // Auto chat message
+      try {
+        var msg = '';
+        var icon = '';
+        if (status === 'processing') {
+          icon = '⚙️';
+          msg = '⚙️ Order Processing\n\n📦 ' + order.game + ' — ' + order.product + '\n💰 ' + order.price.toLocaleString() + ' Ks\n\nလုပ်ဆောင်နေပါတယ်... ခဏစောင့်ပါ';
+        } else if (status === 'completed') {
+          icon = '✅';
+          msg = '✅ Order Completed!\n\n📦 ' + order.game + ' — ' + order.product + '\n💰 ' + order.price.toLocaleString() + ' Ks\n\nကျေးဇူးတင်ပါတယ်! 🎉';
+        } else if (status === 'rejected') {
+          icon = '❌';
+          msg = '❌ Order Rejected\n\n📦 ' + order.game + ' — ' + order.product + '\n💰 ' + order.price.toLocaleString() + ' Ks ပြန်အမ်းပြီ\n\nBalance မှာ စစ်ပါ';
+        }
+        if (msg) {
+          await api('/api/admin/chat', {
+            method: 'POST',
+            body: JSON.stringify({ userId: order.userId || order.username, text: msg })
+          });
+          console.log('✅ Auto-chat sent:', status);
+        }
+      } catch(e) { console.log('Auto-chat err:', e.message); }
+      
+      return res;
+    };
+    console.log('✅ Feature 4: Order auto-chat hooked');
+  } else if (typeof _origUpdateOrd !== 'function') {
+    setTimeout(function(){ if (typeof window.updateOrd === 'function' && !window._f4Hooked) location.reload(); }, 2000);
+  }
+  
+  // ===== FEATURE 13: Live Dashboard Chart =====
+  function enhanceDashboard() {
+    var dash = document.getElementById('dash');
+    if (!dash) return;
+    
+    // Today vs Yesterday card ထည့် (မရှိရင်)
+    if (!document.getElementById('_f13Compare')) {
+      var statsGrid = document.getElementById('statsGrid');
+      if (statsGrid) {
+        var box = document.createElement('div');
+        box.id = '_f13Compare';
+        box.style.cssText = 'background:linear-gradient(135deg,#1e293b,#334155);padding:15px;border-radius:14px;border:1px solid #334155;margin-top:12px';
+        box.innerHTML = '<div style="font-size:13px;color:#38bdf8;font-weight:bold;margin-bottom:10px">📊 Today vs Yesterday</div>' +
+          '<div id="_f13Chart" style="display:grid;grid-template-columns:1fr 1fr;gap:12px">' +
+            '<div style="text-align:center;padding:12px;background:rgba(34,197,94,0.1);border-radius:10px">' +
+              '<div style="font-size:11px;color:#94a3b8">Today</div>' +
+              '<div id="_f13Today" style="font-size:20px;font-weight:bold;color:#22c55e;margin-top:4px">-</div>' +
+            '</div>' +
+            '<div style="text-align:center;padding:12px;background:rgba(56,189,248,0.1);border-radius:10px">' +
+              '<div style="font-size:11px;color:#94a3b8">Yesterday</div>' +
+              '<div id="_f13Yest" style="font-size:20px;font-weight:bold;color:#38bdf8;margin-top:4px">-</div>' +
+            '</div>' +
+          '</div>' +
+          '<div id="_f13Growth" style="margin-top:10px;text-align:center;font-size:12px;color:#94a3b8">-</div>';
+        statsGrid.parentNode.insertBefore(box, statsGrid.nextSibling);
+      }
+    }
+  }
+  
+  // Live update - stats ကို auto refresh
+  async function updateLiveStats() {
+    try {
+      var d = await api('/api/admin/stats');
+      if (!d) return;
+      
+      // Today
+      var todayEl = document.getElementById('_f13Today');
+      if (todayEl) todayEl.textContent = (d.todayRevenue || 0).toLocaleString() + ' Ks';
+      
+      // Yesterday — chart data ကနေ
+      var yestVal = 0;
+      if (Array.isArray(d.chart) && d.chart.length >= 2) {
+        yestVal = d.chart[d.chart.length - 2].value || 0;
+      }
+      var yestEl = document.getElementById('_f13Yest');
+      if (yestEl) yestEl.textContent = yestVal.toLocaleString() + ' Ks';
+      
+      // Growth
+      var grEl = document.getElementById('_f13Growth');
+      if (grEl) {
+        var today = d.todayRevenue || 0;
+        if (yestVal > 0) {
+          var pct = Math.round(((today - yestVal) / yestVal) * 100);
+          var color = pct >= 0 ? '#22c55e' : '#ef4444';
+          var arrow = pct >= 0 ? '📈' : '📉';
+          grEl.innerHTML = '<span style="color:' + color + ';font-weight:bold">' + arrow + ' ' + (pct >= 0 ? '+' : '') + pct + '%</span> yesterday နဲ့ နှိုင်းယှဉ်';
+        } else {
+          grEl.textContent = '📊 Yesterday data မရှိ';
+        }
+      }
+      
+      // Stats Grid live update
+      var sg = document.getElementById('statsGrid');
+      if (sg && sg.children.length) {
+        // Update existing cards
+      }
+    } catch(e) { console.log('Live stats err:', e.message); }
+  }
+  
+  // Interval — 10s ခါတစ်ခါ
+  setTimeout(enhanceDashboard, 2500);
+  setTimeout(updateLiveStats, 3000);
+  setInterval(function() {
+    if (document.getElementById('dash').classList.contains('active')) {
+      updateLiveStats();
+    }
+  }, 10000);
+  
+  // Tab switch
+  var _origTab = window.tab;
+  if (typeof _origTab === 'function') {
+    window.tab = function(name, btn) {
+      _origTab(name, btn);
+      if (name === 'dash') {
+        setTimeout(enhanceDashboard, 400);
+        setTimeout(updateLiveStats, 500);
+      }
+    };
+  }
+  
+  console.log('✅ Admin 4/5/13 ready');
+})();
+</script>
+
 </body>
 </html>
