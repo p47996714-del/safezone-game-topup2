@@ -1260,6 +1260,111 @@ app.post('/api/admin/announcement', adminAuth, (req, res) => {
     res.json({ success: true });
   } catch(e) { res.json({ success: false, error: e.message }); }
 });
+
+// ============ CHATBOT_SYSTEM ============
+if (!db.config) db.config = {};
+if (!db.config.chatBot) {
+  db.config.chatBot = {
+    enabled: true,
+    rules: [
+      { keywords: ['hi','hello','hey','မင်္ဂလာပါ','ဟယ်လို'], reply: '👋 မင်္ဂလာပါ! Safe Zone မှ ကြိုဆိုပါတယ်။\n\nဘာကူညီပေးရမလဲ?\n💰 ငွေဖြည့် · 📦 Order · 🎁 Promo' },
+      { keywords: ['deposit','ငွေဖြည့်','ဖြည့်','ငွေလွှဲ'], reply: '💰 ငွေဖြည့်နည်း:\n\n1. Wallet tab ဖွင့်ပါ\n2. KBZ/Wave/UAB/AYA ရွေးပါ\n3. Admin နံပါတ်ကို လွှဲပါ\n4. Receipt ပုံ တင်ပါ\n5. ၅-၁၅ မိနစ် အတွင်း approve ဖြစ်မယ် ✅' },
+      { keywords: ['order','မှာတမ်း','ဝယ်','topup','တော့ပ်'], reply: '📦 Order တင်နည်း:\n\n1. Home မှာ ဂိမ်း ရွေးပါ\n2. Package ရွေးပါ\n3. Player ID (နဲ့ Server ID) ဖြည့်ပါ\n4. ဝယ်မယ် နှိပ်ပါ\n\n⏱ ၁၀-၃၀ မိနစ်အတွင်း ရမယ်' },
+      { keywords: ['how long','ဘယ်လောက်ကြာ','အချိန်','ကြာမလား'], reply: '⏱ အချိန်:\n\n💰 Deposit: ၅-၁၅ မိနစ်\n📦 Order: ၁၀-၃၀ မိနစ်\n💬 Chat: ၂၄/၇\n\nရုံးချိန် မဟုတ်ရင် ခဏ ကြာနိုင်တယ် 🙏' },
+      { keywords: ['promo','coupon','ကူပွန်','လျှော့','discount'], reply: '🎁 လက်ရှိ Promo:\n\n🎟️ Coupon Code ကို Home → Coupon မှာ ရိုက်ထည့်ပါ\n⭐ Points စုပြီး Balance ပြန်လဲလို့ရ\n🔥 Flash Sale များအတွက် စောင့်ပါ' },
+      { keywords: ['contact','ဆက်သွယ်','phone','ဖုန်း','admin'], reply: '📞 ဆက်သွယ်ရန်:\n\n💬 ဒီ Chat ကနေ ရေးလို့ရ\n📱 Profile → Contact Us\n\nAdmin မြန်မြန် ပြန်ပါမယ် 🙏' },
+      { keywords: ['refund','ငွေပြန်','reject','ပယ်'], reply: '💰 Refund:\n\nOrder Reject ဖြစ်ရင် Balance ကို အလိုအလျောက် ပြန်အမ်းပါတယ်။\n\nမိနစ် ၃၀ အတွင်း မရရင် Admin ကို ပြောပါ 📞' },
+      { keywords: ['ကျေးဇူး','thanks','thank','thx'], reply: '🙏 ကျေးဇူးတင်ပါတယ်! Safe Zone ကို ရွေးချယ်တဲ့အတွက် ဝမ်းသာပါတယ်။\n\nနောက်ထပ် မေးစရာ ရှိရင် ရေးလို့ရပါတယ် 💙' },
+      { keywords: ['vip','အဆင့်','level'], reply: '⭐ VIP အဆင့်:\n\n🥉 Bronze: 0 Ks\n🥈 Silver: 50K+\n🥇 Gold: 200K+\n💎 Diamond: 500K+\n\nVIP မြင့်လေ Discount ပိုရ 💰' },
+      { keywords: ['problem','error','မရ','failed','bug'], reply: '⚠️ ပြဿနာ ဖြစ်ရင်:\n\n1. App ကို refresh လုပ်ပါ\n2. Logout → Login ပြန်\n3. ဖြစ်နေသေးရင် ဒီ Chat မှာ detail ရေးပါ\n\nAdmin ကြည့်ပေးပါမယ် 🙏' }
+    ]
+  };
+  if (typeof saveDB === 'function') saveDB();
+}
+
+// ===== BOT REPLY LOGIC =====
+function getBotReply(text) {
+  try {
+    var cfg = db.config.chatBot || {};
+    if (!cfg.enabled) return null;
+    var lower = String(text || '').toLowerCase().trim();
+    if (!lower) return null;
+    var rules = cfg.rules || [];
+    for (var i = 0; i < rules.length; i++) {
+      var r = rules[i];
+      var kws = r.keywords || [];
+      for (var j = 0; j < kws.length; j++) {
+        if (lower.indexOf(String(kws[j]).toLowerCase()) > -1) {
+          return r.reply;
+        }
+      }
+    }
+    return null;
+  } catch(e) { return null; }
+}
+
+// ===== AUTO REPLY ROUTE =====
+app.post('/api/chat/bot-check', auth, function(req, res) {
+  try {
+    var text = String((req.body || {}).text || '');
+    var reply = getBotReply(text);
+    if (!reply) return res.json({ success: false, noReply: true });
+    
+    // Chat history ထဲ bot reply ထည့်
+    var userId = req.user.id;
+    if (!db.chats) db.chats = {};
+    if (!db.chats[userId]) db.chats[userId] = [];
+    
+    // User message ကို mark ပြီးသား ဖြစ်ရင် ထပ်ထည့်ဖို့ မလို
+    var botMsg = {
+      id: 'bot_' + Date.now(),
+      from: 'admin',
+      text: reply,
+      bot: true,
+      read: false,
+      createdAt: new Date().toISOString()
+    };
+    db.chats[userId].push(botMsg);
+    if (typeof saveDB === 'function') saveDB();
+    
+    // Notification
+    if (req.user.telegramId && db.config.telegramBotToken) {
+      // Optional: Telegram notification
+    }
+    
+    res.json({ success: true, reply: reply, message: botMsg });
+  } catch(e) {
+    res.json({ success: false, error: e.message });
+  }
+});
+
+// ===== ADMIN: GET BOT CONFIG =====
+app.get('/api/admin/chatbot-config', adminAuth, function(req, res) {
+  var cfg = db.config.chatBot || { enabled: true, rules: [] };
+  res.json(cfg);
+});
+
+// ===== ADMIN: SAVE BOT CONFIG =====
+app.post('/api/admin/chatbot-config', adminAuth, function(req, res) {
+  try {
+    var body = req.body || {};
+    if (!db.config.chatBot) db.config.chatBot = { enabled: true, rules: [] };
+    if (typeof body.enabled === 'boolean') db.config.chatBot.enabled = body.enabled;
+    if (Array.isArray(body.rules)) db.config.chatBot.rules = body.rules;
+    if (typeof saveDB === 'function') saveDB();
+    res.json({ success: true });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// ===== ADMIN: TEST BOT =====
+app.post('/api/admin/chatbot-test', adminAuth, function(req, res) {
+  var text = String((req.body || {}).text || '');
+  var reply = getBotReply(text);
+  res.json({ success: !!reply, reply: reply || 'Bot reply မတွေ့ပါ' });
+});
+
+// ============ END CHATBOT_SYSTEM ============
+
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });

@@ -6720,5 +6720,49 @@ console.log('✅ Pretty confirm ready');
 })();
 </script>
 
+<script>
+/* CHATBOT_USER */
+(function(){
+  var _origSend = window.sendChat;
+  if (typeof _origSend === "function") {
+    window.sendChat = async function() {
+      var inp = document.getElementById("chatInput");
+      if (!inp) return;
+      var text = inp.value.trim();
+      if (!text) return;
+      
+      // User message ပို့
+      await _origSend.apply(this, arguments);
+      
+      // Bot reply စစ် (1 စက္ကန့်အကြာ)
+      setTimeout(async function() {
+        try {
+          var r = await api("/api/chat/bot-check", { method:"POST", body: JSON.stringify({ text: text }) });
+          if (r && r.success) {
+            // Typing indicator ပြ
+            var box = document.getElementById("chatMessages");
+            if (box && typeof typingIndicator === "function") {
+              var typ = document.createElement("div");
+              typ.id = "_botTyping";
+              typ.innerHTML = typingIndicator();
+              box.appendChild(typ);
+              box.scrollTop = box.scrollHeight;
+            }
+            
+            // 1.5 စက္ကန့်အကြာ message ပြ
+            setTimeout(function() {
+              var typ2 = document.getElementById("_botTyping");
+              if (typ2) typ2.remove();
+              if (typeof loadChat === "function") loadChat();
+              if (typeof showToast === "function") showToast("🤖 Bot ပြန်ဖြေပြီ", "info");
+            }, 1500);
+          }
+        } catch(e) { console.log("bot err", e.message); }
+      }, 1000);
+    };
+    console.log("✅ ChatBot user side ready");
+  }
+})();
+</script>
 </body>
 </html>
