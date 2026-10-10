@@ -203,12 +203,12 @@ div[onclick*="openSpin"] { display: none !important; }
 .balance-card{background:linear-gradient(135deg,#3b82f6,#8b5cf6,#ec4899,#3b82f6) !important;background-size:300% 300% !important;animation:_bgShift 8s ease infinite}
 
 /* ===== 4. Floating Action Button ===== */
-._fab{position:fixed;bottom:90px;left:15px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#a855f7);border:none;color:#fff;font-size:22px;cursor:pointer;z-index:98;box-shadow:0 8px 25px rgba(168,85,247,0.5);display:flex;align-items:center;justify-content:center;transition:transform 0.3s}
-._fab:active{transform:scale(0.9) rotate(90deg)}
-._fabMenu{position:fixed;bottom:150px;left:15px;display:none;flex-direction:column;gap:10px;z-index:98}
-._fabMenu.show{display:flex;animation:_fabIn 0.3s ease}
+
+
+
+
 @keyframes _fabIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-._fabItem{width:46px;height:46px;border-radius:50%;background:rgba(30,41,59,0.95);border:1px solid #38bdf8;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 15px rgba(0,0,0,0.5);backdrop-filter:blur(10px)}
+
 
 /* ===== 5. Card Hover ===== */
 .quick-card,.game-card{transition:transform 0.2s cubic-bezier(0.4,0,0.2,1),box-shadow 0.2s}
@@ -1016,7 +1016,7 @@ body._f20_rtl .bottom-nav { flex-direction: row-reverse; }
 .inm-tip b { color: #fff; }
 </style>
 <style>
-/* FAB_CLEAN_FINAL */
+/* FAB_DISABLED */
 #safeFabBtn {
   position: fixed !important;
   bottom: 90px !important;
@@ -1671,6 +1671,11 @@ body {
 ._pcBtn.cancel{background:rgba(51,65,85,0.7);color:#cbd5e1;border:1px solid rgba(71,85,105,0.5)}
 ._pcBtn.ok{background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;box-shadow:0 8px 25px rgba(56,189,248,0.4)}
 ._pcBtn.danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 8px 25px rgba(239,68,68,0.4)}
+</style>
+
+
+<style id="_fabHide">
+#safeFabBtn,#safeFabMenu,#_fabBtn,#_fabMenu,#czFabBtn,#czFabMenu{display:none !important;visibility:hidden !important;opacity:0 !important;pointer-events:none !important;position:absolute !important;left:-9999px !important}
 </style>
 
 </head>
@@ -3248,13 +3253,8 @@ setTimeout(function() { if (Notification.permission === 'granted') subscribeToPu
 
 </script>
 <!-- EPIC_FEATURES_HTML -->
-<button class="_fab" id="_fabBtn" onclick="toggleFab()">⚡</button>
-<div class="_fabMenu" id="_fabMenu">
-  <button class="_fabItem" onclick="switchTab('wallet',document.querySelectorAll('.nav-item')[1])" title="Wallet">💰</button>
-  <button class="_fabItem" onclick="switchTab('orders',document.querySelectorAll('.nav-item')[2])" title="Orders">📦</button>
-  <button class="_fabItem" onclick="switchTab('chat',document.querySelectorAll('.nav-item')[3])" title="Chat">💬</button>
-  <button class="_fabItem" onclick="switchTab('home',document.querySelectorAll('.nav-item')[0]);setTimeout(function(){var s=document.getElementById('searchInput');if(s)s.focus();},300)" title="Search">🔍</button>
-</div>
+
+
 <!-- END_EPIC -->
 
 <script>
@@ -5141,19 +5141,7 @@ window.buyPremiumDirect = async function(productId) {
   };
   
   // ========== FAB BUTTON ==========
-  function setupFab() {
-    var fab = document.getElementById('czFabBtn');
-    var menu = document.getElementById('czFabMenu');
-    if (!fab || !menu) {
-      // FAB မရှိရင် ဖန်တီး
-      if (!fab) {
-        fab = document.createElement('button');
-        fab.id = 'czFabBtn';
-        fab.type = 'button';
-        fab.textContent = '⚡';
-        fab.style.cssText = 'position:fixed;bottom:90px;left:15px;width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,#38bdf8,#a855f7);border:none;color:#fff;font-size:22px;cursor:pointer;z-index:99998;box-shadow:0 8px 25px rgba(168,85,247,0.5);display:flex;align-items:center;justify-content:center;padding:0;font-family:inherit';
-        document.body.appendChild(fab);
-      }
+  function setupFab(){}
       if (!menu) {
         menu = document.createElement('div');
         menu.id = 'czFabMenu';
@@ -5229,168 +5217,10 @@ window.buyPremiumDirect = async function(productId) {
 
 
 <!-- SAFE_FAB_START -->
-<button id="safeFabBtn" type="button">⚡</button>
-<div id="safeFabMenu">
-  <button type="button" class="safeFabItem" data-tab="wallet">💰</button>
-  <button type="button" class="safeFabItem" data-tab="orders">📦</button>
-  <button type="button" class="safeFabItem" data-tab="chat">💬</button>
-  <button type="button" class="safeFabItem" data-tab="profile">👤</button>
-</div>
+
+
 <!-- SAFE_FAB_END -->
 <script>
-/* SAFE_FAB_JS */
-(function(){
-  'use strict';
-  
-  var initialized = false;
-  
-  function initFab() {
-    if (initialized) return;
-    var btn = document.getElementById('safeFabBtn');
-    var menu = document.getElementById('safeFabMenu');
-    if (!btn || !menu) return;
-    initialized = true;
-    
-    // === Saved position ===
-    var saved = localStorage.getItem('safeFabPos');
-    if (saved) {
-      try {
-        var p = JSON.parse(saved);
-        btn.style.bottom = 'auto';
-        btn.style.left = 'auto';
-        btn.style.top = p.top + 'px';
-        btn.style.right = p.right + 'px';
-      } catch(e){}
-    }
-    
-    // === Drag logic ===
-    var startX = 0, startY = 0;
-    var startTop = 0, startRight = 0;
-    var isDragging = false;
-    var moved = false;
-    
-    function getXY(e) {
-      if (e.touches && e.touches.length) return { x: e.touches[0].clientX, y: e.touches[0].clientY };
-      return { x: e.clientX, y: e.clientY };
-    }
-    
-    function onDown(e) {
-      var c = getXY(e);
-      var rect = btn.getBoundingClientRect();
-      startX = c.x;
-      startY = c.y;
-      startTop = rect.top;
-      startRight = window.innerWidth - rect.right;
-      isDragging = true;
-      moved = false;
-      btn.style.transition = 'none';
-    }
-    
-    function onMove(e) {
-      if (!isDragging) return;
-      var c = getXY(e);
-      var dx = c.x - startX;
-      var dy = c.y - startY;
-      if (Math.abs(dx) > 5 || Math.abs(dy) > 5) {
-        moved = true;
-        if (e.cancelable) e.preventDefault();
-      }
-      
-      var newTop = startTop + dy;
-      var newRight = startRight - dx;
-      
-      // Bounds
-      if (newTop < 10) newTop = 10;
-      if (newTop > window.innerHeight - 62) newTop = window.innerHeight - 62;
-      if (newRight < 10) newRight = 10;
-      if (newRight > window.innerWidth - 62) newRight = window.innerWidth - 62;
-      
-      btn.style.bottom = 'auto';
-      btn.style.left = 'auto';
-      btn.style.top = newTop + 'px';
-      btn.style.right = newRight + 'px';
-      
-      // Menu ကို FAB အနီး ထား
-      menu.style.top = (newTop - 4*46 - 3*10 - 15) + 'px';
-      menu.style.left = 'auto';
-      menu.style.bottom = 'auto';
-      menu.style.right = (newRight + 3) + 'px';
-    }
-    
-    function onUp() {
-      if (!isDragging) return;
-      isDragging = false;
-      btn.style.transition = '';
-      
-      if (!moved) {
-        // Tap - Menu toggle
-        var isOpen = menu.classList.contains('safeShow');
-        if (isOpen) {
-          menu.classList.remove('safeShow');
-        } else {
-          // Position menu near FAB
-          var rect = btn.getBoundingClientRect();
-          var menuTop = rect.top - 4*46 - 3*10 - 15;
-          if (menuTop < 10) menuTop = rect.bottom + 15;
-          menu.style.top = menuTop + 'px';
-          menu.style.left = 'auto';
-          menu.style.bottom = 'auto';
-          menu.style.right = (window.innerWidth - rect.right + 3) + 'px';
-          menu.classList.add('safeShow');
-        }
-        return;
-      }
-      
-      // Snap save
-      var rect = btn.getBoundingClientRect();
-      var newTop = rect.top;
-      var newRight = window.innerWidth - rect.right;
-      localStorage.setItem('safeFabPos', JSON.stringify({ top: newTop, right: newRight }));
-    }
-    
-    btn.addEventListener('touchstart', onDown, { passive: true });
-    btn.addEventListener('touchmove', onMove, { passive: false });
-    btn.addEventListener('touchend', onUp);
-    btn.addEventListener('touchcancel', onUp);
-    btn.addEventListener('mousedown', onDown);
-    document.addEventListener('mousemove', onMove);
-    document.addEventListener('mouseup', onUp);
-    
-    // Menu items
-    var items = menu.querySelectorAll('.safeFabItem');
-    for (var i = 0; i < items.length; i++) {
-      items[i].addEventListener('click', function(e) {
-        e.stopPropagation();
-        var tab = this.getAttribute('data-tab');
-        menu.classList.remove('safeShow');
-        try {
-          var idxMap = { home: 0, wallet: 1, orders: 2, chat: 3, profile: 4 };
-          var navBtns = document.querySelectorAll('.nav-item');
-          if (typeof switchTab === 'function' && navBtns[idxMap[tab]]) {
-            switchTab(tab, navBtns[idxMap[tab]]);
-          }
-        } catch(err) {}
-      });
-    }
-    
-    // Click outside - close menu
-    document.addEventListener('click', function(e) {
-      if (!menu.contains(e.target) && !btn.contains(e.target)) {
-        menu.classList.remove('safeShow');
-      }
-    });
-    
-    console.log('✅ Safe FAB ready');
-  }
-  
-  if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', initFab);
-  } else {
-    setTimeout(initFab, 100);
-  }
-  setTimeout(initFab, 1000);
-  setTimeout(initFab, 2500);
-})();
 </script>
 <script>
 /* HIDE_STICKERS_VOICE */
