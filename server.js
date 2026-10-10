@@ -1756,6 +1756,125 @@ app.post("/api/admin/restore", adminAuth, async function(req, res) {
 });
 // ============ END SAFE_BACKUP_V1 ============
 
+
+// ============ TWO_FA_LOGIN_V1 ============
+if (!global._otpSessions) global._otpSessions = {};
+
+function sendTgMsg(chatId, text) {
+  return new Promise(function(resolve, reject) {
+    var tkn = (db.config || {}).telegramBotToken;
+    if (!tkn) return reject(new Error("Bot token မရှိ"));
+    var payload = JSON.stringify({ chat_id: chatId, text: text, parse_mode: "HTML" });
+    var opt = {
+      method: "POST",
+      hostname: "api.telegram.org",
+      path: "/bot" + tkn + "/sendMessage",
+      headers: { "Content-Type": "application/json", "Content-Length": Buffer.byteLength(payload) }
+    };
+    var req = require("https").request(opt, function(r) {
+      var raw = "";
+      r.on("data", function(ch) { raw += ch; });
+      r.on("end", function() {
+        try { resolve(JSON.parse(raw)); } catch(e) { reject(e); }
+      });
+    });
+    req.on("error", reject);
+    req.write(payload);
+    req.end();
+  });
+}
+
+app.post("/api/auth/login-step1", function(req, res) {
+  try {
+    var b = req.body || {};
+    var un = String(b.username || "").trim();
+    var pw = String(b.password || "");
+    if (!un || !pw) return res.json({ success: false, error: "ဖြည့်ပါ" });
+    var users = db.users || [];
+    var u = users.find(function(x) { return x.username === un; });
+    if (!u || u.password !== pw) return res.json({ success: false, error: "Username သို့ Password မှား" });
+    if (u.banned) return res.json({ success: false, error: "Account ပိတ်ထားသည်" });
+    if (u.twoFA && u.telegramId) {
+      var otp = String(Math.floor(100000 + Math.random() * 900000));
+      var sid = "sid_" + Date.now() + "_" + Math.random().toString(36).slice(2, 8);
+      global._otpSessions[sid] = {
+        userId: u.id, username: u.username, otp: otp,
+        expires: Date.now() + 300000, attempts: 0, lastSend: Date.now()
+      };
+      sendTgMsg(u.telegramId, "🔐 <b>Safe Zone Login Code</b>\n\n<code>" + otp + "</code>\n\n⏱ ၅ မိနစ်အတွင်း ထည့်ပါ\n⚠️ ဘယ်သူမှ မမျှဝေပါ").catch(function(e) {
+        console.log("[2FA] TG err: " + e.message);
+      });
+      console.log("[2FA] OTP sent: " + u.username);
+      return res.json({ success: true, needOTP: true, sessionId: sid });
+    }
+    var tkn = "tok_" + Date.now() + "_" + Math.random().toString(36).slice(2, 12);
+    if (!db.sessions) db.sessions = {};
+    db.sessions[tkn] = { userId: u.id, username: u.username, createdAt: Date.now() };
+    if (typeof saveDB === "function") saveDB();
+    return res.json({ success: true, token: tkn, username: u.username });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+app.post("/api/auth/login-step2", function(req, res) {
+  try {
+    var b = req.body || {};
+    var sid = String(b.sessionId || "");
+    var otp = String(b.otp || "").trim();
+    if (!sid || !otp) return res.json({ success: false, error: "ဖြည့်ပါ" });
+    var s = global._otpSessions[sid];
+    if (!s) return res.json({ success: false, error: "Session သက်တမ်းကုန်ပြီ" });
+    if (Date.now() > s.expires) {
+      delete global._otpSessions[sid];
+      return res.json({ success: false, error: "Code သက်တမ်းကုန်ပြီ" });
+    }
+    s.attempts++;
+    if (s.attempts > 5) {
+      delete global._otpSessions[sid];
+      return res.json({ success: false, error: "အကြိမ်များလွန်းပြီ — ပြန်စပါ" });
+    }
+    if (otp !== s.otp) {
+      return res.json({ success: false, error: "Code မှား (" + (5 - s.attempts) + " ခါ ကျန်)" });
+    }
+    var users = db.users || [];
+    var u = users.find(function(x) { return x.id === s.userId; });
+    if (!u) {
+      delete global._otpSessions[sid];
+      return res.json({ success: false, error: "User မတွေ့" });
+    }
+    var tkn = "tok_" + Date.now() + "_" + Math.random().toString(36).slice(2, 12);
+    if (!db.sessions) db.sessions = {};
+    db.sessions[tkn] = { userId: u.id, username: u.username, createdAt: Date.now() };
+    if (typeof saveDB === "function") saveDB();
+    delete global._otpSessions[sid];
+    console.log("[2FA] Login OK: " + u.username);
+    return res.json({ success: true, token: tkn, username: u.username });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+app.post("/api/auth/resend-otp", function(req, res) {
+  try {
+    var b = req.body || {};
+    var sid = String(b.sessionId || "");
+    var s = global._otpSessions[sid];
+    if (!s) return res.json({ success: false, error: "Session မရှိ" });
+    if (s.lastSend && Date.now() - s.lastSend < 30000) {
+      var wait = Math.ceil((30000 - (Date.now() - s.lastSend)) / 1000);
+      return res.json({ success: false, error: wait + " စက္ကန့် စောင့်ပါ" });
+    }
+    var users = db.users || [];
+    var u = users.find(function(x) { return x.id === s.userId; });
+    if (!u || !u.telegramId) return res.json({ success: false, error: "TG မချိတ်ထား" });
+    var newOtp = String(Math.floor(100000 + Math.random() * 900000));
+    s.otp = newOtp;
+    s.lastSend = Date.now();
+    s.expires = Date.now() + 300000;
+    s.attempts = 0;
+    sendTgMsg(u.telegramId, "🔐 <b>Safe Zone Login Code (ပြန်)</b>\n\n<code>" + newOtp + "</code>\n\n⏱ ၅ မိနစ်").catch(function(){});
+    return res.json({ success: true });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+// ============ END TWO_FA_LOGIN_V1 ============
+
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });
