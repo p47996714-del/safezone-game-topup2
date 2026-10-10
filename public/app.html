@@ -1673,6 +1673,27 @@ body {
 ._pcBtn.danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 8px 25px rgba(239,68,68,0.4)}
 </style>
 
+
+<style id="HIDE_FAB_ONLY">
+/* FAB button ဖျောက် — ကျန်တာ မထိ */
+#safeFabBtn,
+#safeFabMenu,
+#_fabBtn,
+#_fabMenu,
+#czFabBtn,
+#czFabMenu {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+</style>
+
 </head>
 <body>
 <div id="toast" class="toast"></div>
