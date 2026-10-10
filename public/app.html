@@ -6576,48 +6576,131 @@ console.log('✅ Pretty confirm ready');
 })();
 </script>
 
+
+
+<style id="ANNOUNCEMENT_MARQUEE_CSS">
+/* Marquee Announcement - ပြေးနေတဲ့ စာ */
+#_annMarquee{
+  position:fixed;
+  top:0;
+  left:0;
+  right:0;
+  height:32px;
+  background:linear-gradient(90deg,#38bdf8,#a855f7,#ec4899);
+  background-size:200% 100%;
+  animation:_mqGrad 4s ease infinite;
+  color:#fff;
+  font-size:13px;
+  font-weight:bold;
+  z-index:9998;
+  display:flex;
+  align-items:center;
+  overflow:hidden;
+  box-shadow:0 2px 10px rgba(56,189,248,0.4);
+  transform:translateY(-100%);
+  transition:transform 0.4s ease;
+}
+#_annMarquee.show{transform:translateY(0)}
+#_annMarquee ._mqIcon{
+  flex-shrink:0;
+  padding:0 10px;
+  background:rgba(0,0,0,0.2);
+  height:100%;
+  display:flex;
+  align-items:center;
+  font-size:14px;
+  animation:_mqPulse 1.5s ease-in-out infinite;
+}
+@keyframes _mqPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.15)}}
+#_annMarquee ._mqScroll{
+  flex:1;
+  overflow:hidden;
+  height:100%;
+  position:relative;
+  display:flex;
+  align-items:center;
+}
+#_annMarquee ._mqText{
+  display:inline-block;
+  white-space:nowrap;
+  padding-left:100%;
+  animation:_mqScroll 20s linear infinite;
+  will-change:transform;
+}
+@keyframes _mqScroll{
+  0%{transform:translateX(0)}
+  100%{transform:translateX(-100%)}
+}
+#_annMarquee ._mqClose{
+  flex-shrink:0;
+  background:rgba(0,0,0,0.25);
+  border:none;
+  color:#fff;
+  width:32px;
+  height:100%;
+  cursor:pointer;
+  font-size:14px;
+  font-family:inherit;
+  padding:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+}
+#_annMarquee ._mqClose:active{background:rgba(0,0,0,0.4)}
+@keyframes _mqGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* Header ကို marquee အောက် ရွှေ့ */
+body.has-ann-marquee .header{padding-top:44px !important}
+</style>
+
 <script>
-/* ANNOUNCEMENT_APP */
+/* ANNOUNCEMENT_MARQUEE */
 (function(){
-  async function loadAnn() {
+  async function loadMarquee() {
     try {
       var r = await fetch("/api/announcement", {cache:"no-store"});
       var d = await r.json();
-      var old = document.getElementById("_annBanner");
+      
+      var old = document.getElementById("_annMarquee");
       if (old) old.remove();
+      document.body.classList.remove("has-ann-marquee");
+      
       if (!d.enabled || !d.text) return;
-      if (localStorage.getItem("_annDismissed_" + d.updatedAt) === "1") return;
-      var colors = {
-        info:"linear-gradient(135deg,#38bdf8,#3b82f6)",
-        success:"linear-gradient(135deg,#22c55e,#059669)",
-        warn:"linear-gradient(135deg,#f59e0b,#d97706)",
-        danger:"linear-gradient(135deg,#ef4444,#dc2626)"
-      };
-      var b = document.createElement("div");
-      b.id = "_annBanner";
-      b.style.cssText = "position:fixed;top:60px;left:10px;right:10px;z-index:9998;padding:12px 40px 12px 14px;border-radius:12px;color:#fff;font-size:13px;font-weight:bold;text-align:center;background:" + (colors[d.type] || colors.info) + ";box-shadow:0 6px 20px rgba(0,0,0,0.4);animation:_annSlide 0.5s ease";
+      if (localStorage.getItem("_annMQDismissed_" + d.updatedAt) === "1") return;
+      
+      var el = document.createElement("div");
+      el.id = "_annMarquee";
       var safeText = String(d.text).replace(/[<>]/g, "");
-      b.innerHTML = "<span style=\"margin-right:6px\">📢</span>" + safeText +
-        "<button onclick=\"window._annDismiss(" + d.updatedAt + ")\" style=\"position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.25);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:14px;line-height:1;padding:0\">✕</button>";
-      document.body.appendChild(b);
-      if (!document.getElementById("_annStyle")) {
-        var st = document.createElement("style");
-        st.id = "_annStyle";
-        st.textContent = "@keyframes _annSlide{from{transform:translateY(-30px);opacity:0}to{transform:translateY(0);opacity:1}}";
-        document.head.appendChild(st);
-      }
-    } catch(e) { console.log("ann err", e.message); }
+      el.innerHTML = 
+        '<div class="_mqIcon">📢</div>' +
+        '<div class="_mqScroll"><div class="_mqText">' + safeText + ' &nbsp;&nbsp;&nbsp;&nbsp; ⭐ &nbsp;&nbsp;&nbsp;&nbsp; ' + safeText + '</div></div>' +
+        '<button class="_mqClose" onclick="window._mqDismiss(' + d.updatedAt + ')">✕</button>';
+      
+      document.body.insertBefore(el, document.body.firstChild);
+      document.body.classList.add("has-ann-marquee");
+      
+      setTimeout(function(){ el.classList.add("show"); }, 100);
+      console.log("✅ Marquee shown");
+    } catch(e) { console.log("mq err", e.message); }
   }
-  window._annDismiss = function(ts) {
-    localStorage.setItem("_annDismissed_" + ts, "1");
-    var b = document.getElementById("_annBanner");
-    if (b) { b.style.transition = "all 0.3s"; b.style.opacity = "0"; b.style.transform = "translateY(-30px)"; setTimeout(function(){ b.remove(); }, 300); }
+  
+  window._mqDismiss = function(ts) {
+    localStorage.setItem("_annMQDismissed_" + ts, "1");
+    var el = document.getElementById("_annMarquee");
+    if (el) {
+      el.classList.remove("show");
+      document.body.classList.remove("has-ann-marquee");
+      setTimeout(function(){ if (el.parentNode) el.parentNode.removeChild(el); }, 400);
+    }
   };
-  setTimeout(loadAnn, 2000);
-  setInterval(loadAnn, 30000);
-  document.addEventListener("visibilitychange", function(){ if (!document.hidden) setTimeout(loadAnn, 500); });
-  console.log("✅ Announcement ready");
+  
+  setTimeout(loadMarquee, 2000);
+  setInterval(loadMarquee, 30000);
+  document.addEventListener("visibilitychange", function(){ if (!document.hidden) setTimeout(loadMarquee, 500); });
+  
+  console.log("✅ Marquee ready");
 })();
 </script>
+
 </body>
 </html>
