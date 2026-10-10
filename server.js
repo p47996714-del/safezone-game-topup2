@@ -1212,6 +1212,35 @@ async function sendPushToAll(title, body, data) {
 }
 
 const PORT = process.env.PORT || 3000;
+
+// ============ REDEEM POINTS ============
+app.post('/api/redeem-points', auth, (req, res) => {
+  try {
+    const pts = Number((req.body || {}).points) || 0;
+    if (pts < 100) return res.json({ success: false, error: '100 Points အနည်းဆုံး လိုတယ်' });
+    if (pts % 100 !== 0) return res.json({ success: false, error: '100 ရဲ့ ဆတိုး ဖြစ်ရမယ်' });
+    const cfg = db.config || {};
+    const rate = Number(cfg.pointsRedeemRate) || 10;
+    const amount = pts * rate;
+    const u = req.user;
+    if (!u) return res.json({ success: false, error: 'User မတွေ့' });
+    if ((u.points || 0) < pts) return res.json({ success: false, error: 'Points မလုံလောက်ပါ' });
+    u.points = (u.points || 0) - pts;
+    u.balance = (u.balance || 0) + amount;
+    if (!db.redeems) db.redeems = [];
+    db.redeems.push({
+      id: 'R' + Date.now(),
+      username: u.username,
+      points: pts,
+      amount: amount,
+      rate: rate,
+      createdAt: new Date().toISOString()
+    });
+    saveDB();
+    res.json({ success: true, amount: amount, points: u.points, balance: u.balance });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });
