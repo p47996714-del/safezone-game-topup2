@@ -6384,5 +6384,179 @@ console.log('✅ Pretty confirm ready');
 })();
 </script>
 
+
+<script>
+/* AUTO_PRICE_REFRESH */
+(function(){
+  var _priceSnap = {};
+  var _priceInit = false;
+  var _refreshTimer = null;
+  
+  function loadSnap() {
+    try { _priceSnap = JSON.parse(localStorage.getItem('_priceSnap') || '{}'); } catch(e) { _priceSnap = {}; }
+  }
+  function saveSnap() {
+    try { localStorage.setItem('_priceSnap', JSON.stringify(_priceSnap)); } catch(e) {}
+  }
+  
+  // Sound ဖွင့်
+  function playPriceDropSound() {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      var notes = [880, 1320, 1760];  // Ding ding ding!
+      notes.forEach(function(freq, i) {
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = freq;
+        o.type = 'sine';
+        var t = ctx.currentTime + i * 0.15;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.2, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.4);
+        o.start(t);
+        o.stop(t + 0.4);
+      });
+    } catch(e) {}
+  }
+  
+  // Notification permission
+  function askNotifPermission() {
+    try {
+      if (!('Notification' in window)) return;
+      if (Notification.permission === 'default') {
+        setTimeout(function() { Notification.requestPermission(); }, 3000);
+      }
+    } catch(e) {}
+  }
+  
+  // System notification
+  function showSystemNotif(game, product, oldP, newP) {
+    try {
+      if (!('Notification' in window) || Notification.permission !== 'granted') return;
+      new Notification('📉 ဈေးကျသွားပါပြီ!', {
+        body: game + ' — ' + product + '\n' + oldP.toLocaleString() + ' → ' + newP.toLocaleString() + ' Ks',
+        icon: 'https://i.imgur.com/iRwIfqs.png',
+        badge: 'https://i.imgur.com/iRwIfqs.png',
+        tag: 'price-drop-' + Date.now(),
+        vibrate: [200, 100, 200, 100, 200]
+      });
+    } catch(e) {}
+  }
+  
+  // Popup
+  function showPriceDropPopup(game, product, oldP, newP) {
+    var diff = oldP - newP;
+    var pct = Math.round((diff / oldP) * 100);
+    var m = document.createElement('div');
+    m.id = '_priceDropPopup';
+    m.style.cssText = 'position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-200px);z-index:9999999;background:linear-gradient(135deg,#10b981,#059669);color:#fff;padding:16px 20px;border-radius:16px;box-shadow:0 15px 40px rgba(16,185,129,0.5);max-width:340px;width:90%;transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);font-family:inherit';
+    m.innerHTML = '<div style="display:flex;align-items:center;gap:12px">' +
+      '<div style="font-size:32px;animation:_pdBounce 1s ease infinite">📉</div>' +
+      '<div style="flex:1;min-width:0">' +
+        '<div style="font-size:13px;font-weight:bold;margin-bottom:3px">ဈေးကျသွားပါပြီ!</div>' +
+        '<div style="font-size:11px;opacity:0.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + (game||'') + ' — ' + (product||'') + '</div>' +
+        '<div style="font-size:12px;margin-top:4px;font-weight:bold">' +
+          '<span style="text-decoration:line-through;opacity:0.7">' + oldP.toLocaleString() + '</span> ' +
+          '<span>→ ' + newP.toLocaleString() + ' Ks</span> ' +
+          '<span style="background:rgba(255,255,255,0.25);padding:2px 8px;border-radius:10px;font-size:10px;margin-left:4px">-' + pct + '%</span>' +
+        '</div>' +
+      '</div>' +
+      '<button onclick="this.parentElement.parentElement.remove()" style="background:none;border:none;color:#fff;font-size:20px;cursor:pointer;padding:0 4px">✕</button>' +
+    '</div>';
+    document.body.appendChild(m);
+    
+    // CSS animation
+    if (!document.getElementById('_pdStyle')) {
+      var st = document.createElement('style');
+      st.id = '_pdStyle';
+      st.textContent = '@keyframes _pdBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-8px)}}';
+      document.head.appendChild(st);
+    }
+    
+    setTimeout(function() { m.style.transform = 'translateX(-50%) translateY(0)'; }, 100);
+    
+    // Auto close 6s
+    setTimeout(function() {
+      m.style.transform = 'translateX(-50%) translateY(-200px)';
+      setTimeout(function() { if (m.parentNode) m.parentNode.removeChild(m); }, 500);
+    }, 6000);
+    
+    // Click → dismiss
+    m.onclick = function(e) {
+      if (e.target.tagName !== 'BUTTON') {
+        m.style.transform = 'translateX(-50%) translateY(-200px)';
+        setTimeout(function() { if (m.parentNode) m.parentNode.removeChild(m); }, 500);
+      }
+    };
+  }
+  
+  // Check တစ်ခါ
+  async function checkPrices() {
+    try {
+      var r = await fetch('/api/products', {cache:'no-store'});
+      var data = await r.json();
+      if (!Array.isArray(data)) return;
+      
+      if (!_priceInit) {
+        // ပထမ load — snapshot ပဲ သိမ်း
+        data.forEach(function(p) {
+          if (!_priceSnap[p.id]) _priceSnap[p.id] = {price: p.price, game: p.game, name: p.name};
+        });
+        saveSnap();
+        _priceInit = true;
+        return;
+      }
+      
+      // ဈေးပြောင်းတာ ရှာပြီး alert
+      var drops = [];
+      data.forEach(function(p) {
+        var old = _priceSnap[p.id];
+        if (old && old.price > p.price) {
+          drops.push({game: p.game, name: p.name, oldP: old.price, newP: p.price, id: p.id});
+        }
+        // Update snapshot
+        _priceSnap[p.id] = {price: p.price, game: p.game, name: p.name};
+      });
+      saveSnap();
+      
+      // Alert
+      if (drops.length > 0) {
+        playPriceDropSound();
+        try { if (navigator.vibrate) navigator.vibrate([200,100,200,100,200]); } catch(e) {}
+        drops.forEach(function(d, i) {
+          setTimeout(function() { showPriceDropPopup(d.game, d.name, d.oldP, d.newP); }, i * 1500);
+          showSystemNotif(d.game, d.name, d.oldP, d.newP);
+        });
+        
+        // Products refresh
+        if (typeof window.loadProducts === 'function') {
+          window.loadProducts();
+        }
+        if (typeof window.renderGames === 'function') {
+          window.renderGames();
+        }
+      } else if (JSON.stringify(data) !== JSON.stringify(window.products || [])) {
+        // ဈေး တူပေမယ့် list ပြောင်း → refresh
+        window.products = data;
+        if (typeof window.renderGames === 'function') window.renderGames();
+      }
+    } catch(e) { console.log('checkPrices err', e.message); }
+  }
+  
+  // INIT
+  loadSnap();
+  askNotifPermission();
+  setTimeout(checkPrices, 2000);
+  _refreshTimer = setInterval(checkPrices, 15000);  // ၁၅ စက္ကန့် တစ်ခါ
+  
+  // Page ပြန်ဝင်ရင် ချက်ချင်း check
+  document.addEventListener('visibilitychange', function() {
+    if (!document.hidden) setTimeout(checkPrices, 500);
+  });
+  
+  console.log('✅ Auto price refresh ready (15s interval)');
+})();
+</script>
+
 </body>
 </html>
