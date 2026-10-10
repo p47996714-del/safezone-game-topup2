@@ -6743,56 +6743,122 @@ console.log('✅ Pretty confirm ready');
 
 
 
+
+
+
 <script>
-/* BOT_V9_PERSIST */
+/* BOT_V11_LOCAL */
 (function(){
-  console.log('🤖 Bot V9 loading...');
+  console.log('🤖 Bot V11 (localStorage persist) loading...');
   
-  var _rules = [], _enabled = true, _busy = false;
-  var _lastTxt = '', _lastTime = 0;
+  var STORAGE_KEY = '_botChatHistory';
+  var _rules = [], _busy = false, _last = '', _lastTime = 0;
   
+  // ===== localStorage helpers =====
+  function getHistory() {
+    try {
+      var raw = localStorage.getItem(STORAGE_KEY);
+      return raw ? JSON.parse(raw) : [];
+    } catch(e) { return []; }
+  }
+  
+  function saveHistory(arr) {
+    try {
+      // Limit 50 messages
+      if (arr.length > 50) arr = arr.slice(-50);
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(arr));
+    } catch(e) {}
+  }
+  
+  function addToHistory(from, text, bot) {
+    var h = getHistory();
+    h.push({
+      id: 'local_' + Date.now() + '_' + Math.random(),
+      from: from,
+      text: text,
+      bot: !!bot,
+      createdAt: new Date().toISOString()
+    });
+    saveHistory(h);
+  }
+  
+  function clearHistory() {
+    try { localStorage.removeItem(STORAGE_KEY); } catch(e) {}
+  }
+  
+  // ===== Rules load =====
   async function loadRules() {
     try {
       var r = await fetch('/api/bot/rules', { cache: 'no-store' });
       var d = await r.json();
-      _enabled = d.enabled !== false;
       _rules = Array.isArray(d.rules) ? d.rules : [];
       console.log('📋 Rules:', _rules.length);
     } catch(e) { console.log('Rules err:', e.message); }
   }
   
   function findReply(text) {
-    if (!_enabled || !_rules.length) return null;
-    var lower = String(text || '').toLowerCase().trim();
-    if (!lower) return null;
+    if (!_rules.length) return null;
+    var low = String(text || '').toLowerCase().trim();
     for (var i = 0; i < _rules.length; i++) {
       var r = _rules[i], kws = r.keywords || [];
       for (var j = 0; j < kws.length; j++) {
-        if (lower.indexOf(String(kws[j]).toLowerCase()) > -1) return r.reply;
+        if (low.indexOf(String(kws[j]).toLowerCase()) > -1) return r.reply;
       }
     }
     return null;
   }
   
-  function showTyping() {
+  // ===== DOM render =====
+  function renderBotMessage(reply) {
     var box = document.getElementById('chatMessages');
     if (!box) return;
-    var o = document.getElementById('_b9T'); if (o) o.remove();
     var el = document.createElement('div');
-    el.id = '_b9T';
     el.className = 'chat-bubble admin';
-    el.style.cssText = 'display:flex;gap:4px;align-items:center;padding:12px 16px;max-width:75px';
-    el.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b9t 1.4s infinite"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b9t 1.4s infinite .2s"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b9t 1.4s infinite .4s"></span>';
+    el.style.cssText = 'background:linear-gradient(135deg,#1e293b,#334155);border:1px solid #22c55e;position:relative;max-width:80%;animation:_b11In 0.3s ease';
+    var safe = String(reply).replace(/[<>]/g, '');
+    el.innerHTML = '<div style="position:absolute;top:-8px;left:8px;background:linear-gradient(135deg,#22c55e,#059669);color:#fff;font-size:9px;padding:2px 8px;border-radius:10px;font-weight:bold;box-shadow:0 2px 6px rgba(34,197,94,0.4)">🤖 BOT</div><div style="margin-top:4px">' + safe.replace(/\n/g, '<br>') + '</div>';
     box.appendChild(el);
     box.scrollTop = box.scrollHeight;
   }
   
-  function removeTyping() {
-    var t = document.getElementById('_b9T'); if (t) t.remove();
+  // ===== Restore from localStorage when chat opens =====
+  function restoreLocal() {
+    var box = document.getElementById('chatMessages');
+    if (!box) return;
+    var h = getHistory();
+    if (!h.length) return;
+    
+    // Server messages ရှိပြီးသား? 
+    var existing = box.querySelectorAll('.chat-bubble').length;
+    if (existing > 0) return;
+    
+    // Bot messages ပဲ ပြ
+    h.forEach(function(m) {
+      if (m.from === 'admin' && m.bot) {
+        renderBotMessage(m.text);
+      }
+    });
+    console.log('📦 Restored ' + h.length + ' from localStorage');
   }
   
+  // ===== Hook loadChat =====
+  var _origLoad = window.loadChat;
+  if (typeof _origLoad === 'function') {
+    window.loadChat = async function() {
+      await _origLoad.apply(this, arguments);
+      setTimeout(function() {
+        // Server messages မရှိရင် localStorage ကနေ ပြ
+        var box = document.getElementById('chatMessages');
+        if (!box) return;
+        var hasBubbles = box.querySelectorAll('.chat-bubble').length > 0;
+        if (!hasBubbles) restoreLocal();
+      }, 100);
+    };
+  }
+  
+  // ===== Hook sendChat =====
   var _origSend = window.sendChat;
-  if (typeof _origSend !== 'function') { console.log('⚠️ no sendChat'); return; }
+  if (typeof _origSend !== 'function') { console.log('⚠️ sendChat missing'); return; }
   
   window.sendChat = async function() {
     var inp = document.getElementById('chatInput');
@@ -6800,12 +6866,14 @@ console.log('✅ Pretty confirm ready');
     var text = inp.value.trim();
     if (!text) return;
     
+    // User message ပို့ + localStorage
     await _origSend.apply(this, arguments);
+    addToHistory('user', text, false);
     
+    // Duplicate guard
     var now = Date.now();
-    if (_lastTxt === text && (now - _lastTime) < 3000) return;
-    _lastTxt = text; _lastTime = now;
-    
+    if (_last === text && (now - _lastTime) < 3000) return;
+    _last = text; _lastTime = now;
     if (_busy) return;
     _busy = true;
     
@@ -6815,59 +6883,75 @@ console.log('✅ Pretty confirm ready');
       if (!reply) { _busy = false; return; }
       
       console.log('🤖 Reply:', reply.substring(0, 30));
-      showTyping();
-      await new Promise(function(r){ setTimeout(r, 1000); });
-      removeTyping();
       
-      // Server ကို save — အောင်မြင်မှ DOM မှာ ပြ
-      var saveRes = await api('/api/bot/save-reply', {
+      // Typing ပြ
+      var box = document.getElementById('chatMessages');
+      var typ = null;
+      if (box) {
+        var old = document.getElementById('_b11T'); if (old) old.remove();
+        typ = document.createElement('div');
+        typ.id = '_b11T';
+        typ.className = 'chat-bubble admin';
+        typ.style.cssText = 'display:flex;gap:4px;align-items:center;padding:12px 16px;max-width:75px';
+        typ.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b11t 1.4s infinite"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b11t 1.4s infinite .2s"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b11t 1.4s infinite .4s"></span>';
+        box.appendChild(typ);
+        box.scrollTop = box.scrollHeight;
+      }
+      
+      // 1s စောင့်
+      await new Promise(function(r){ setTimeout(r, 1000); });
+      if (typ) typ.remove();
+      
+      // localStorage မှာ သိမ်း
+      addToHistory('admin', reply, true);
+      
+      // Server ကို save (background - fail ဖြစ်လည်း ပြဿနာ မရှိ)
+      api('/api/bot/save-reply', {
         method: 'POST',
         body: JSON.stringify({ text: reply })
+      }).then(function(r) {
+        console.log('💾 Server save:', r);
+      }).catch(function(e) {
+        console.log('💾 Server err:', e.message);
       });
       
-      console.log('Save result:', saveRes);
+      // DOM မှာ ပြ
+      renderBotMessage(reply);
+      if (typeof showToast === 'function') showToast('🤖 Bot ပြန်ဖြေပြီ', 'info');
       
-      if (saveRes && saveRes.success) {
-        if (typeof loadChat === 'function') await loadChat();
-        if (typeof showToast === 'function') showToast('🤖 Bot ပြန်ဖြေပြီ', 'info');
-      } else {
-        // Save မဖြစ်ရင် DOM မှာပဲ ပြ (temporary)
-        var box = document.getElementById('chatMessages');
-        if (box) {
-          var el = document.createElement('div');
-          el.className = 'chat-bubble admin';
-          el.style.cssText = 'background:linear-gradient(135deg,#1e293b,#334155);border:1px solid #ef4444;position:relative;max-width:80%';
-          var safe = String(reply).replace(/[<>]/g, '');
-          el.innerHTML = '<div style="position:absolute;top:-8px;left:8px;background:#ef4444;color:#fff;font-size:9px;padding:2px 8px;border-radius:10px;font-weight:bold">⚠️ NOT SAVED</div><div style="margin-top:4px">' + safe.replace(/\n/g, '<br>') + '</div>';
-          box.appendChild(el);
-          box.scrollTop = box.scrollHeight;
-        }
-        if (typeof showToast === 'function') showToast('⚠️ Save failed: ' + JSON.stringify(saveRes), 'error');
-      }
     } catch(e) {
       console.log('Bot err:', e.message);
-      removeTyping();
-      if (typeof showToast === 'function') showToast('❌ ' + e.message, 'error');
+      var t = document.getElementById('_b11T'); if (t) t.remove();
     }
     _busy = false;
   };
   
-  if (!document.getElementById('_b9s')) {
+  // ===== CSS =====
+  if (!document.getElementById('_b11s')) {
     var st = document.createElement('style');
-    st.id = '_b9s';
-    st.textContent = '@keyframes _b9t{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}';
+    st.id = '_b11s';
+    st.textContent = '@keyframes _b11t{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}@keyframes _b11In{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}';
     document.head.appendChild(st);
   }
   
+  // ===== Init =====
   setTimeout(loadRules, 1000);
+  setTimeout(restoreLocal, 2000);
   setInterval(loadRules, 30000);
   
+  // Chat tab ဖွင့်တိုင်း
   var _ot = window.switchTab;
   if (typeof _ot === 'function') {
-    window.switchTab = function(n, b) { _ot(n, b); if (n === 'chat') setTimeout(loadRules, 400); };
+    window.switchTab = function(n, b) {
+      _ot(n, b);
+      if (n === 'chat') {
+        setTimeout(loadRules, 300);
+        setTimeout(restoreLocal, 800);
+      }
+    };
   }
   
-  console.log('✅ Bot V9 ready (persist-first)');
+  console.log('✅ Bot V11 ready');
 })();
 </script>
 
