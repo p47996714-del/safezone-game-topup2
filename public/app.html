@@ -6764,5 +6764,151 @@ console.log('✅ Pretty confirm ready');
   }
 })();
 </script>
+
+<script>
+/* CHATBOT_FRONTEND_V1 */
+(function(){
+  console.log('🤖 Bot loading...');
+  
+  // ===== Bot Rules =====
+  var BOT_RULES = [
+    { 
+      keywords: ['hi','hello','hey','မင်္ဂလာပါ','ဟယ်လို','နေကောင်းလား','hai','hlo'],
+      reply: '👋 မင်္ဂလာပါ! Safe Zone မှ ကြိုဆိုပါတယ်။\n\nဘာကူညီပေးရမလဲ?\n💰 ငွေဖြည့် · 📦 Order · 🎁 Promo'
+    },
+    {
+      keywords: ['deposit','ငွေဖြည့်','ဖြည့်','ငွေလွှဲ','topup'],
+      reply: '💰 ငွေဖြည့်နည်း:\n\n1. Wallet tab ဖွင့်ပါ\n2. KBZ/Wave/UAB/AYA ရွေးပါ\n3. Admin နံပါတ်ကို လွှဲပါ\n4. Receipt ပုံ တင်ပါ\n5. ၅-၁၅ မိနစ် အတွင်း approve ဖြစ်မယ် ✅'
+    },
+    {
+      keywords: ['order','မှာတမ်း','ဝယ်','topup','တော့ပ်','ဝယ်ချင်'],
+      reply: '📦 Order တင်နည်း:\n\n1. Home မှာ ဂိမ်း ရွေးပါ\n2. Package ရွေးပါ\n3. Player ID ဖြည့်ပါ\n4. ဝယ်မယ် နှိပ်ပါ\n\n⏱ ၁၀-၃၀ မိနစ်အတွင်း ရမယ်'
+    },
+    {
+      keywords: ['how long','ဘယ်လောက်ကြာ','အချိန်','ကြာမလား','ဘယ်တော့'],
+      reply: '⏱ အချိန်:\n\n💰 Deposit: ၅-၁၅ မိနစ်\n📦 Order: ၁၀-၃၀ မိနစ်\n💬 Chat: ၂၄/၇\n\nရုံးချိန် မဟုတ်ရင် ခဏ ကြာနိုင်တယ် 🙏'
+    },
+    {
+      keywords: ['promo','coupon','ကူပွန်','လျှော့','discount','ဖျာ'],
+      reply: '🎁 လက်ရှိ Promo:\n\n🎟️ Coupon Code ကို Home → Coupon မှာ ရိုက်ထည့်ပါ\n⭐ Points စုပြီး Balance ပြန်လဲလို့ရ\n🔥 Flash Sale များအတွက် စောင့်ပါ'
+    },
+    {
+      keywords: ['contact','ဆက်သွယ်','phone','ဖုန်း','admin'],
+      reply: '📞 ဆက်သွယ်ရန်:\n\n💬 ဒီ Chat ကနေ ရေးလို့ရ\n📱 Profile → Contact Us\n\nAdmin မြန်မြန် ပြန်ပါမယ် 🙏'
+    },
+    {
+      keywords: ['refund','ငွေပြန်','reject','ပယ်','ပြန်အမ်း'],
+      reply: '💰 Refund:\n\nOrder Reject ဖြစ်ရင် Balance ကို အလိုအလျောက် ပြန်အမ်းပါတယ်။\n\nမိနစ် ၃၀ အတွင်း မရရင် Admin ကို ပြောပါ 📞'
+    },
+    {
+      keywords: ['ကျေးဇူး','thanks','thank','thx','တင်ပါ'],
+      reply: '🙏 ကျေးဇူးတင်ပါတယ်! Safe Zone ကို ရွေးချယ်တဲ့အတွက် ဝမ်းသာပါတယ်။\n\nနောက်ထပ် မေးစရာ ရှိရင် ရေးလို့ရပါတယ် 💙'
+    },
+    {
+      keywords: ['vip','အဆင့်','level','အဆင့်'],
+      reply: '⭐ VIP အဆင့်:\n\n🥉 Bronze: 0 Ks\n🥈 Silver: 50K+\n🥇 Gold: 200K+\n💎 Diamond: 500K+\n\nVIP မြင့်လေ Discount ပိုရ 💰'
+    },
+    {
+      keywords: ['problem','error','မရ','failed','bug','ပြဿနာ'],
+      reply: '⚠️ ပြဿနာ ဖြစ်ရင်:\n\n1. App ကို refresh လုပ်ပါ\n2. Logout → Login ပြန်\n3. ဖြစ်နေသေးရင် ဒီ Chat မှာ detail ရေးပါ\n\nAdmin ကြည့်ပေးပါမယ် 🙏'
+    }
+  ];
+  
+  // ===== Get Bot Reply =====
+  function getBotReply(text) {
+    var lower = String(text || '').toLowerCase().trim();
+    if (!lower) return null;
+    for (var i = 0; i < BOT_RULES.length; i++) {
+      var r = BOT_RULES[i];
+      for (var j = 0; j < r.keywords.length; j++) {
+        var kw = String(r.keywords[j]).toLowerCase();
+        if (lower === kw || lower.indexOf(kw) > -1) {
+          return r.reply;
+        }
+      }
+    }
+    return null;
+  }
+  
+  // ===== Check duplicate =====
+  var _lastBot = { text: '', time: 0 };
+  
+  // ===== Hook sendChat =====
+  var _origSend = window.sendChat;
+  if (typeof _origSend !== 'function') {
+    console.log('⚠️ sendChat not found');
+    return;
+  }
+  
+  window.sendChat = async function() {
+    var inp = document.getElementById('chatInput');
+    if (!inp) return _origSend.apply(this, arguments);
+    var text = inp.value.trim();
+    if (!text) return;
+    
+    // User message ပို့
+    await _origSend.apply(this, arguments);
+    
+    // Bot reply စစ်
+    var now = Date.now();
+    if (_lastBot.text === text && (now - _lastBot.time) < 5000) return;
+    _lastBot = { text: text, time: now };
+    
+    var reply = getBotReply(text);
+    if (!reply) return;
+    
+    // Typing indicator ပြ
+    setTimeout(function() {
+      var box = document.getElementById('chatMessages');
+      if (!box) return;
+      
+      // ရှိပြီးသား typing ဖျက်
+      var oldTyp = document.getElementById('_botTyping');
+      if (oldTyp) oldTyp.remove();
+      
+      var typ = document.createElement('div');
+      typ.id = '_botTyping';
+      typ.className = 'chat-bubble admin';
+      typ.style.cssText = 'display:flex;gap:4px;align-items:center;padding:12px 16px';
+      typ.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_botTyping 1.4s infinite"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_botTyping 1.4s infinite .2s"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_botTyping 1.4s infinite .4s"></span>';
+      box.appendChild(typ);
+      box.scrollTop = box.scrollHeight;
+      
+      // 1.5s အကြာ reply ပြ
+      setTimeout(function() {
+        var t = document.getElementById('_botTyping');
+        if (t) t.remove();
+        
+        var botMsg = document.createElement('div');
+        botMsg.className = 'chat-bubble admin';
+        botMsg.style.cssText = 'background:linear-gradient(135deg,#1e293b,#334155);border:1px solid #22c55e;position:relative';
+        botMsg.innerHTML = '<div style="position:absolute;top:-8px;right:8px;background:#22c55e;color:#fff;font-size:9px;padding:2px 6px;border-radius:8px;font-weight:bold">🤖 BOT</div>' + String(reply).replace(/\n/g, '<br>');
+        box.appendChild(botMsg);
+        box.scrollTop = box.scrollHeight;
+        
+        // Chat history မှာ သိမ်း (server ကို user text အနေနဲ့ ပို့)
+        if (typeof api === 'function') {
+          try {
+            api('/api/chat', { method:'POST', body: JSON.stringify({ text: '[BOT] ' + reply }) }).catch(function(){});
+          } catch(e) {}
+        }
+        
+        if (typeof showToast === 'function') showToast('🤖 Bot ပြန်ဖြေပြီ', 'info');
+      }, 1500);
+    }, 600);
+  };
+  
+  // CSS animation
+  if (!document.getElementById('_botTypingStyle')) {
+    var st = document.createElement('style');
+    st.id = '_botTypingStyle';
+    st.textContent = '@keyframes _botTyping{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}';
+    document.head.appendChild(st);
+  }
+  
+  console.log('✅ Bot ready — ' + BOT_RULES.length + ' rules');
+})();
+</script>
+
 </body>
 </html>
