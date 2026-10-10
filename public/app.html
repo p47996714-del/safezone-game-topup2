@@ -1645,6 +1645,34 @@ body {
   box-shadow: 0 8px 25px rgba(239,68,68,0.4);
 }
 </style>
+
+<style>
+/* PRETTY_CONFIRM_CSS */
+._pcOv{position:fixed;inset:0;background:rgba(0,0,0,0.88);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);z-index:9999999;display:none;align-items:center;justify-content:center;padding:20px}
+._pcOv.show{display:flex;animation:_pcFade 0.3s}
+@keyframes _pcFade{from{opacity:0}to{opacity:1}}
+._pcBox{background:linear-gradient(160deg,#1e293b,#0f172a);border-radius:26px;width:100%;max-width:400px;border:1px solid rgba(56,189,248,0.3);box-shadow:0 30px 80px rgba(0,0,0,0.9),0 0 80px rgba(56,189,248,0.15),inset 0 1px 0 rgba(255,255,255,0.05);animation:_pcSlide 0.4s cubic-bezier(0.34,1.56,0.64,1);overflow:hidden;position:relative}
+@keyframes _pcSlide{from{transform:scale(0.75) translateY(40px);opacity:0}to{transform:scale(1) translateY(0);opacity:1}}
+._pcBox::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#38bdf8,#a855f7,#ec4899);background-size:200% 100%;animation:_pcGrad 3s ease infinite}
+@keyframes _pcGrad{0%,100%{background-position:0 50%}50%{background-position:100% 50%}}
+._pcHead{padding:30px 24px 18px;text-align:center;background:linear-gradient(180deg,rgba(56,189,248,0.1),transparent)}
+._pcIcon{width:80px;height:80px;margin:0 auto 16px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:38px;background:linear-gradient(135deg,#38bdf8,#a855f7);box-shadow:0 12px 40px rgba(56,189,248,0.5),0 0 0 6px rgba(56,189,248,0.1);animation:_pcIconPulse 2s ease-in-out infinite}
+@keyframes _pcIconPulse{0%,100%{box-shadow:0 12px 40px rgba(56,189,248,0.5),0 0 0 6px rgba(56,189,248,0.1)}50%{box-shadow:0 12px 50px rgba(168,85,247,0.6),0 0 0 10px rgba(168,85,247,0.08)}}
+._pcIcon.cart{background:linear-gradient(135deg,#ec4899,#a855f7);box-shadow:0 12px 40px rgba(236,72,153,0.5),0 0 0 6px rgba(236,72,153,0.1)}
+._pcIcon.star{background:linear-gradient(135deg,#f59e0b,#eab308);box-shadow:0 12px 40px rgba(245,158,11,0.5),0 0 0 6px rgba(245,158,11,0.1)}
+._pcIcon.warn{background:linear-gradient(135deg,#ef4444,#dc2626);box-shadow:0 12px 40px rgba(239,68,68,0.5),0 0 0 6px rgba(239,68,68,0.1)}
+._pcTitle{font-size:19px;font-weight:bold;color:#fff;margin-bottom:4px;letter-spacing:0.5px}
+._pcSub{font-size:11px;color:#64748b;letter-spacing:2px;text-transform:uppercase}
+._pcMsg{font-size:14px;color:#cbd5e1;line-height:1.75;padding:14px 26px 22px;text-align:center;white-space:pre-line;word-break:break-word}
+._pcMsg b{color:#38bdf8}
+._pcActions{display:flex;gap:10px;padding:0 22px 22px}
+._pcBtn{flex:1;padding:15px;border-radius:14px;border:none;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit;transition:all 0.2s;letter-spacing:0.3px}
+._pcBtn:active{transform:scale(0.96)}
+._pcBtn.cancel{background:rgba(51,65,85,0.7);color:#cbd5e1;border:1px solid rgba(71,85,105,0.5)}
+._pcBtn.ok{background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;box-shadow:0 8px 25px rgba(56,189,248,0.4)}
+._pcBtn.danger{background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 8px 25px rgba(239,68,68,0.4)}
+</style>
+
 </head>
 <body>
 <div id="toast" class="toast"></div>
@@ -2281,7 +2309,7 @@ async function submitOrder(){
   if (!pid) return showToast('Player ID ဖြည့်ပါ', 'error');
   if (sf && sf.style.display !== 'none' && !sid) return showToast('Server ID ဖြည့်ပါ', 'error');
   if ((userData.balance || 0) < selected.price) return showToast('❌ Balance မလုံလောက်ပါ', 'error');
-  if (!confirm('✅ Order တင်မလား?\n\n' + selected.game + ' - ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks')) return;
+  if (!await _prettyConfirm('✅ Order တင်မလား?\n\n' + selected.game + ' - ' + selected.name + '\n💵 ' + selected.price.toLocaleString() + ' Ks')) return;
   var d = await api('/api/order', {method:'POST', body: JSON.stringify({productId:selected.id, playerId:pid, serverId:sid})});
   if (!d.success) { playSound('error'); return showToast('❌ ' + d.error, 'error'); }
   playSound('success'); haptic(100);
@@ -2491,7 +2519,7 @@ async function testPush(){
 
 /* ===== LOGOUT ===== */
 async function logout(){
-  if (!confirm('Logout လုပ်မှာသေချာလား?')) return;
+  if (!await _prettyConfirm('Logout လုပ်မှာသေချာလား?')) return;
   await api('/api/logout', {method:'POST'});
   localStorage.clear();
   location.href = '/';
@@ -2825,8 +2853,8 @@ setTimeout(function() { if (Notification.permission === 'granted') subscribeToPu
     }
   }
   
-  function quickReorder(orderId) {
-    if (!confirm('⚡ Order ကို ပြန်မှာမလား?')) return;
+  async function quickReorder(orderId) {
+    if (!await _prettyConfirm('⚡ Order ကို ပြန်မှာမလား?')) return;
     if (typeof api !== 'function') { alert('API not ready'); return; }
     api('/api/reorder', {method:'POST', body: JSON.stringify({orderId: orderId})}).then(function(d) {
       if (d && d.success) {
@@ -3243,7 +3271,7 @@ async function buyPremiumDirect(productId) {
       return;
     }
     
-    var ok = confirm('📱 App Premium ဝယ်မယ်\n\n🎁 ' + p.name + '\n💵 ' + p.price.toLocaleString() + ' Ks\n\nBalance ဖြတ်ပြီး Admin ဆီ ပို့မယ်\n\nOK နှိပ်ရင် အတည်ပြုမယ်');
+    var ok = await _prettyConfirm('📱 App Premium ဝယ်မယ်\n\n🎁 ' + p.name + '\n💵 ' + p.price.toLocaleString() + ' Ks\n\nBalance ဖြတ်ပြီး Admin ဆီ ပို့မယ်\n\nOK နှိပ်ရင် အတည်ပြုမယ်');
     if (!ok) return;
     
     showToast('⏳ Order တင်နေတယ်...', 'info');
@@ -3792,7 +3820,7 @@ window.buyPremiumDirect = async function(productId) {
   
   window._pDo = async function(pts) {
     try {
-      if (!confirm('⭐ ' + pts + ' Points ကို Balance လဲမလား?')) return;
+      if (!await _prettyConfirm('⭐ ' + pts + ' Points ကို Balance လဲမလား?')) return;
       showToast('⏳ လဲနေတယ်...', 'info');
       var d = await api('/api/redeem-points', { method: 'POST', body: JSON.stringify({ points: pts }) });
       if (d && d.success) {
@@ -6174,5 +6202,67 @@ window.buyPremiumDirect = async function(productId) {
   console.log('✅ Nice logout ready');
 })();
 </script>
+
+<!-- PRETTY_CONFIRM_HTML -->
+<div class="_pcOv" id="_pcOv">
+  <div class="_pcBox">
+    <div class="_pcHead">
+      <div class="_pcIcon" id="_pcIcon">❓</div>
+      <div class="_pcTitle" id="_pcTitle">အတည်ပြုပါ</div>
+      <div class="_pcSub" id="_pcSub">SAFE ZONE</div>
+    </div>
+    <div class="_pcMsg" id="_pcMsg"></div>
+    <div class="_pcActions">
+      <button class="_pcBtn cancel" id="_pcNo">မလုပ်တော့ဘူး</button>
+      <button class="_pcBtn ok" id="_pcYes">OK</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* PRETTY_CONFIRM_JS */
+window._prettyConfirm = function(msg, opts) {
+  opts = opts || {};
+  return new Promise(function(resolve) {
+    var ov = document.getElementById('_pcOv');
+    if (!ov) { resolve(window.confirm ? window.confirm(msg) : false); return; }
+    var txt = String(msg || '');
+    var isDanger = opts.danger || /ဖျက်|delete|reject|ပယ်|ban|restore/i.test(txt);
+    var isCart = opts.cart || /ဝယ်|buy|order|topup|ရယူ/i.test(txt) || txt.indexOf('Ks') > -1;
+    var isStar = opts.star || /Points|⭐/i.test(txt);
+    var isWarn = opts.warn || /logout|ထွက်/i.test(txt);
+    var icon, iconCls, title, okText, okCls;
+    if (isDanger) { icon='⚠️'; iconCls='warn'; title='သေချာပါသလား?'; okText='အတည်ပြု'; okCls='danger'; }
+    else if (isCart) { icon='🛒'; iconCls='cart'; title='အတည်ပြုပါ'; okText='ဝယ်မည်'; okCls='ok'; }
+    else if (isStar) { icon='⭐'; iconCls='star'; title='အတည်ပြုပါ'; okText='လဲမည်'; okCls='ok'; }
+    else if (isWarn) { icon='👋'; iconCls='warn'; title='သေချာပါသလား?'; okText='Logout'; okCls='danger'; }
+    else { icon='❓'; iconCls=''; title='အတည်ပြုပါ'; okText='OK'; okCls='ok'; }
+    document.getElementById('_pcIcon').textContent = icon;
+    document.getElementById('_pcIcon').className = '_pcIcon ' + iconCls;
+    document.getElementById('_pcTitle').textContent = opts.title || title;
+    document.getElementById('_pcSub').textContent = opts.sub || 'SAFE ZONE';
+    document.getElementById('_pcMsg').innerHTML = txt.replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }).replace(/\n/g, '<br>');
+    document.getElementById('_pcYes').textContent = opts.yesText || okText;
+    document.getElementById('_pcYes').className = '_pcBtn ' + okCls;
+    document.getElementById('_pcNo').textContent = opts.noText || 'မလုပ်တော့ဘူး';
+    ov.classList.add('show');
+    function done(v) {
+      ov.classList.remove('show');
+      document.getElementById('_pcYes').onclick = null;
+      document.getElementById('_pcNo').onclick = null;
+      resolve(v);
+    }
+    document.getElementById('_pcYes').onclick = function() { done(true); };
+    document.getElementById('_pcNo').onclick = function() { done(false); };
+    var kh = function(e) {
+      if (e.key === 'Enter') { done(true); document.removeEventListener('keydown', kh); }
+      if (e.key === 'Escape') { done(false); document.removeEventListener('keydown', kh); }
+    };
+    setTimeout(function() { document.addEventListener('keydown', kh); }, 100);
+  });
+};
+console.log('✅ Pretty confirm ready');
+</script>
+
 </body>
 </html>
