@@ -6620,25 +6620,25 @@ console.log('✅ Pretty confirm ready');
 
 
 <style>
-/* 6FEAT_PACK_CSS */
+/* 3FEAT_PACK_CSS (13/34/43) */
 
 /* 14. NEON GLOW CARDS */
 .game-card,.quick-card{position:relative;transition:transform 0.2s,box-shadow 0.3s}
-.game-card::before,.quick-card::before{content:'';position:absolute;inset:-1px;border-radius:inherit;background:linear-gradient(135deg,#38bdf8,#a855f7,#ec4899,#38bdf8);background-size:300% 300%;opacity:0;z-index:-1;animation:_6fGrad 3s ease infinite;filter:blur(8px);transition:opacity 0.3s}
-.game-card:hover::before,.quick-card:hover::before{opacity:0.7}
-@keyframes _6fGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+
+50%{background-position:100% 50%}}
 
 /* 15. GRADIENT SHIFT TEXT */
-.section-title,h2,#view-profile h2{background:linear-gradient(90deg,#38bdf8,#a855f7,#ec4899,#f59e0b,#38bdf8);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:_6fGradText 6s linear infinite;font-weight:bold}
-@keyframes _6fGradText{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+
+100%{background-position:300% 50%}}
 
 /* 13. LIQUID RIPPLE */
 ._6fRipple{position:absolute;border-radius:50%;transform:scale(0);animation:_6fRippleAnim 0.6s ease-out;background:rgba(56,189,248,0.4);pointer-events:none}
 @keyframes _6fRippleAnim{to{transform:scale(4);opacity:0}}
 
 /* 12. PARTICLE CURSOR */
-._6fCursorParticle{position:fixed;pointer-events:none;border-radius:50%;z-index:999999;animation:_6fFloat 0.8s ease-out forwards;box-shadow:0 0 10px currentColor}
-@keyframes _6fFloat{0%{transform:scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
+
+100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
 
 /* 34/43. HOT BADGES */
 ._6fHot{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:bold;padding:3px 8px;border-radius:8px;z-index:5;animation:_6fPulse 1.5s ease-in-out infinite;box-shadow:0 2px 8px rgba(245,158,11,0.5);text-transform:uppercase;letter-spacing:0.5px}
@@ -6648,46 +6648,9 @@ console.log('✅ Pretty confirm ready');
 </style>
 
 <script>
-/* 6FEAT_PACK_V1 */
+/* 3FEAT_PACK_V1 */
 (function(){
-  console.log('✨ 6 features loading...');
-  
-  /* ============ 12. PARTICLE CURSOR ============ */
-  var cursorColors = ['#38bdf8','#a855f7','#ec4899','#f59e0b','#22c55e','#3b82f6'];
-  var lastParticle = 0;
-  function spawnParticle(x, y) {
-    var now = Date.now();
-    if (now - lastParticle < 60) return;
-    lastParticle = now;
-    try {
-      var p = document.createElement('div');
-      p.className = '_6fCursorParticle';
-      var size = 4 + Math.random() * 6;
-      var color = cursorColors[Math.floor(Math.random() * cursorColors.length)];
-      p.style.left = (x - size/2) + 'px';
-      p.style.top = (y - size/2) + 'px';
-      p.style.width = size + 'px';
-      p.style.height = size + 'px';
-      p.style.background = color;
-      p.style.color = color;
-      p.style.setProperty('--dx', (Math.random() * 60 - 30) + 'px');
-      p.style.setProperty('--dy', (Math.random() * 60 - 30) + 'px');
-      document.body.appendChild(p);
-      setTimeout(function() { if (p.parentNode) p.parentNode.removeChild(p); }, 900);
-    } catch(e) {}
-  }
-  document.addEventListener('touchstart', function(e) {
-    if (e.touches[0]) {
-      for (var i = 0; i < 5; i++) {
-        setTimeout((function(t){ return function(){ spawnParticle(t.clientX + Math.random()*20-10, t.clientY + Math.random()*20-10); }; })(e.touches[0]), i * 40);
-      }
-    }
-  }, {passive: true});
-  document.addEventListener('click', function(e) {
-    for (var i = 0; i < 4; i++) {
-      setTimeout(function(){ spawnParticle(e.clientX, e.clientY); }, i * 40);
-    }
-  });
+  console.log('✨ 3 features loading (13/34/43)...');
   
   /* ============ 13. LIQUID RIPPLE ============ */
   function addRipple(e) {
@@ -6814,7 +6777,7 @@ console.log('✅ Pretty confirm ready');
     };
   }
   
-  console.log('✅ 6 features ready (12/13/14/15/34/43)');
+  console.log('✅ 3 features ready (13/34/43)');
 })();
 </script>
 
