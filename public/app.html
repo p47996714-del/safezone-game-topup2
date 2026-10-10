@@ -6847,5 +6847,168 @@ console.log('✅ Pretty confirm ready');
 })();
 </script>
 
+
+<script>
+/* BOT_V7_HOOK */
+(function(){
+  console.log('🤖 Bot V7 loading...');
+  
+  var _rules = [];
+  var _enabled = true;
+  var _busy = false;
+  var _lastTxt = '';
+  var _lastTime = 0;
+  
+  async function loadRules() {
+    try {
+      var r = await fetch('/api/bot/rules', { cache: 'no-store' });
+      var d = await r.json();
+      _enabled = d.enabled !== false;
+      _rules = Array.isArray(d.rules) ? d.rules : [];
+      console.log('📋 Bot rules: ' + _rules.length + ', enabled: ' + _enabled);
+    } catch(e) {
+      console.log('Rules err:', e.message);
+    }
+  }
+  
+  function findReply(text) {
+    if (!_enabled || !_rules.length) return null;
+    var lower = String(text || '').toLowerCase().trim();
+    if (!lower) return null;
+    for (var i = 0; i < _rules.length; i++) {
+      var r = _rules[i];
+      var kws = r.keywords || [];
+      for (var j = 0; j < kws.length; j++) {
+        var kw = String(kws[j] || '').toLowerCase();
+        if (kw && lower.indexOf(kw) > -1) return r.reply;
+      }
+    }
+    return null;
+  }
+  
+  // [BOT] prefix messages ဖျောက်
+  function hideBot() {
+    try {
+      var box = document.getElementById('chatMessages');
+      if (!box) return;
+      var bubs = box.querySelectorAll('.chat-bubble');
+      for (var i = 0; i < bubs.length; i++) {
+        if ((bubs[i].textContent || '').indexOf('[BOT]') === 0) {
+          bubs[i].style.display = 'none';
+        }
+      }
+    } catch(e) {}
+  }
+  
+  // Hook loadChat
+  var _origLoadChat = window.loadChat;
+  if (typeof _origLoadChat === 'function') {
+    window.loadChat = async function() {
+      await _origLoadChat.apply(this, arguments);
+      hideBot();
+    };
+  }
+  
+  // Hook sendChat
+  var _origSend = window.sendChat;
+  if (typeof _origSend !== 'function') {
+    console.log('⚠️  sendChat not found');
+    return;
+  }
+  
+  window.sendChat = async function() {
+    var inp = document.getElementById('chatInput');
+    if (!inp) return _origSend.apply(this, arguments);
+    var text = inp.value.trim();
+    if (!text) return;
+    
+    // 1. User message ပို့
+    await _origSend.apply(this, arguments);
+    
+    // 2. Duplicate guard
+    var now = Date.now();
+    if (_lastTxt === text && (now - _lastTime) < 3000) return;
+    _lastTxt = text; _lastTime = now;
+    
+    if (_busy) return;
+    _busy = true;
+    
+    try {
+      // 3. Rules load
+      if (!_rules.length) await loadRules();
+      
+      // 4. Reply ရှာ
+      var reply = findReply(text);
+      if (!reply) { _busy = false; return; }
+      
+      console.log('🤖 Bot reply found');
+      
+      // 5. Typing indicator
+      var box = document.getElementById('chatMessages');
+      var typ = null;
+      if (box) {
+        var old = document.getElementById('_b7Typ');
+        if (old) old.remove();
+        typ = document.createElement('div');
+        typ.id = '_b7Typ';
+        typ.className = 'chat-bubble admin';
+        typ.style.cssText = 'display:flex;gap:4px;align-items:center;padding:12px 16px;max-width:75px;opacity:0.9';
+        typ.innerHTML = '<span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b7t 1.4s infinite"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b7t 1.4s infinite .2s"></span><span style="width:6px;height:6px;border-radius:50%;background:#94a3b8;animation:_b7t 1.4s infinite .4s"></span>';
+        box.appendChild(typ);
+        box.scrollTop = box.scrollHeight;
+      }
+      
+      // 6. 1.2s စောင့်
+      await new Promise(function(res){ setTimeout(res, 1200); });
+      
+      // 7. Server ကို save
+      if (typ) typ.remove();
+      
+      var r = await api('/api/bot/save-reply', {
+        method: 'POST',
+        body: JSON.stringify({ text: reply })
+      });
+      
+      if (r && r.success) {
+        console.log('✅ Bot saved');
+        if (typeof loadChat === 'function') await loadChat();
+        if (typeof showToast === 'function') showToast('🤖 Bot ပြန်ဖြေပြီ', 'info');
+      } else {
+        console.log('Save result:', r);
+      }
+    } catch(e) {
+      console.log('Bot err:', e.message);
+      var t = document.getElementById('_b7Typ');
+      if (t) t.remove();
+    }
+    
+    _busy = false;
+  };
+  
+  // CSS animation
+  if (!document.getElementById('_b7Style')) {
+    var st = document.createElement('style');
+    st.id = '_b7Style';
+    st.textContent = '@keyframes _b7t{0%,60%,100%{transform:translateY(0);opacity:0.4}30%{transform:translateY(-6px);opacity:1}}';
+    document.head.appendChild(st);
+  }
+  
+  // Initial load
+  setTimeout(loadRules, 1500);
+  setInterval(loadRules, 30000);
+  
+  // Chat tab ဖွင့်တိုင်း refresh
+  var _origTab = window.switchTab;
+  if (typeof _origTab === 'function') {
+    window.switchTab = function(name, btn) {
+      _origTab(name, btn);
+      if (name === 'chat') setTimeout(loadRules, 400);
+    };
+  }
+  
+  console.log('✅ Bot V7 ready');
+})();
+</script>
+
 </body>
 </html>

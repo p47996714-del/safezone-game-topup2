@@ -1438,6 +1438,89 @@ if (typeof app._botAdminRoute === 'undefined') {
 
 // ============ END BOT_PERSIST_ROUTES ============
 
+
+// ============ BOT V7 ROUTES ============
+if (!db.config) db.config = {};
+if (!db.config.chatBot) db.config.chatBot = { enabled: true, rules: [] };
+
+// Rules — Public
+app.get("/api/bot/rules", function(req, res) {
+  try {
+    if (!db.config.chatBot) db.config.chatBot = { enabled: true, rules: [] };
+    res.json({
+      enabled: db.config.chatBot.enabled !== false,
+      rules: Array.isArray(db.config.chatBot.rules) ? db.config.chatBot.rules : []
+    });
+  } catch(e) { res.json({ enabled: false, rules: [] }); }
+});
+
+// Save bot reply — Auth
+app.post("/api/bot/save-reply", auth, function(req, res) {
+  try {
+    var text = String((req.body || {}).text || "").trim();
+    if (!text) return res.json({ success: false, error: "empty" });
+    var userId = req.user.id;
+    if (!db.chats) db.chats = {};
+    if (!db.chats[userId]) db.chats[userId] = [];
+    // Duplicate guard
+    var recent = db.chats[userId].slice(-5);
+    for (var i = 0; i < recent.length; i++) {
+      if (recent[i].from === "admin" && recent[i].bot && recent[i].text === text) {
+        return res.json({ success: false, duplicate: true });
+      }
+    }
+    var msg = {
+      id: "bot_" + Date.now(),
+      from: "admin",
+      text: text,
+      bot: true,
+      read: false,
+      createdAt: new Date().toISOString()
+    };
+    db.chats[userId].push(msg);
+    if (typeof saveDB === "function") saveDB();
+    res.json({ success: true, message: msg });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// Admin — Rules
+app.get("/api/admin/bot/rules", adminAuth, function(req, res) {
+  try {
+    var cfg = db.config.chatBot || { enabled: true, rules: [] };
+    res.json(cfg);
+  } catch(e) { res.json({ enabled: false, rules: [] }); }
+});
+
+app.post("/api/admin/bot/rules", adminAuth, function(req, res) {
+  try {
+    var body = req.body || {};
+    if (!db.config.chatBot) db.config.chatBot = { enabled: true, rules: [] };
+    if (typeof body.enabled === "boolean") db.config.chatBot.enabled = body.enabled;
+    if (Array.isArray(body.rules)) db.config.chatBot.rules = body.rules;
+    if (typeof saveDB === "function") saveDB();
+    res.json({ success: true });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// Clean [BOT] old messages
+app.post("/api/admin/bot/clean", adminAuth, function(req, res) {
+  try {
+    var removed = 0;
+    if (db.chats) {
+      Object.keys(db.chats).forEach(function(uid) {
+        var before = db.chats[uid].length;
+        db.chats[uid] = db.chats[uid].filter(function(m) {
+          return String(m.text || "").indexOf("[BOT]") === -1;
+        });
+        removed += (before - db.chats[uid].length);
+      });
+    }
+    if (typeof saveDB === "function") saveDB();
+    res.json({ success: true, removed: removed });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+// ============ END BOT V7 ============
+
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });
