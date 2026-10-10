@@ -323,6 +323,18 @@ h1{color:#38bdf8;text-align:center;margin-bottom:20px;font-size:22px}
     </div>
     <div class="upload-preview" id="musicPreview">
       <audio id="musicPreviewPlayer" controls style="width:100%;margin-top:8px"></audio>
+
+    <div id="musicPlaylistBox" style="margin-top:12px;padding:12px;background:rgba(168,85,247,0.08);border:1px solid #a855f755;border-radius:12px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:8px">
+        <b style="color:#a855f7;font-size:13px">🎵 Music Playlist (<span id="musicCount">0</span> ပုဒ်)</b>
+        <button class="upload-btn green" style="padding:6px 12px;font-size:11px" onclick="pickMusicMulti()">📤 ၅ ပုဒ် တစ်ခါထဲ ရွေး</button>
+      </div>
+      <div id="musicPlaylistList" style="max-height:320px;overflow-y:auto"></div>
+      <div style="display:flex;gap:6px;margin-top:10px">
+        <button class="upload-btn" style="flex:1" onclick="saveMusicPlaylist()">💾 Save</button>
+        <button class="upload-btn red" style="flex:1" onclick="clearMusicPlaylist()">🗑️ Clear All</button>
+      </div>
+    </div>
     </div>
     <div class="row">
       <input id="ws_themePrimary" placeholder="Primary color (#38bdf8)">
@@ -2372,5 +2384,128 @@ setTimeout(loadVideosAdmin, 2000);
 })();
 
 </script>
+
+<script>
+/* MULTI_MUSIC_ADMIN */
+(function(){
+  var _musicPlaylist = [];
+  var _musicMultiInput = null;
+  function esc(s){ return String(s||'').replace(/[&<>"']/g, function(c){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]; }); }
+  
+  async function loadMusicPlaylist() {
+    try {
+      var c = await api('/api/admin/config');
+      _musicPlaylist = Array.isArray(c.musicList) ? c.musicList.slice() : (c.musicUrl ? [{name:'Track 1', url:c.musicUrl}] : []);
+      renderMusicPlaylist();
+    } catch(e) { console.log('load err', e.message); }
+  }
+  
+  function renderMusicPlaylist() {
+    var box = document.getElementById('musicPlaylistList');
+    var cnt = document.getElementById('musicCount');
+    if (cnt) cnt.textContent = _musicPlaylist.length;
+    if (!box) return;
+    if (!_musicPlaylist.length) {
+      box.innerHTML = '<p style="font-size:12px;color:#64748b;text-align:center;padding:12px">သီချင်း မရှိသေးပါ</p>';
+      return;
+    }
+    box.innerHTML = _musicPlaylist.map(function(m, i) {
+      return '<div style="display:flex;gap:6px;align-items:center;background:rgba(15,23,42,0.7);padding:8px;border-radius:10px;margin-bottom:6px;border:1px solid #334155">' +
+        '<span style="font-size:16px">🎵</span>' +
+        '<div style="flex:1;min-width:0;font-size:12px;color:#38bdf8;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(m.name || ('Track '+(i+1))) + '</div>' +
+        '<audio controls src="' + m.url + '" style="height:28px;width:110px"></audio>' +
+        (i>0 ? '<button onclick="window._mmv(' + i + ',-1)" style="background:#334155;color:#fff;border:none;padding:5px 7px;border-radius:6px;font-size:10px;cursor:pointer;font-family:inherit">⬆️</button>' : '') +
+        (i<_musicPlaylist.length-1 ? '<button onclick="window._mmv(' + i + ',1)" style="background:#334155;color:#fff;border:none;padding:5px 7px;border-radius:6px;font-size:10px;cursor:pointer;font-family:inherit">⬇️</button>' : '') +
+        '<button onclick="window._mmd(' + i + ')" style="background:#ef4444;color:#fff;border:none;padding:5px 9px;border-radius:6px;font-size:11px;cursor:pointer;font-family:inherit">✕</button>' +
+      '</div>';
+    }).join('');
+  }
+  
+  async function saveMusicPlaylist() {
+    var d = await api('/api/admin/config/section', {method:'POST', body: JSON.stringify({section:'musicList', value: _musicPlaylist})});
+    return d && d.success;
+  }
+  
+  window._mmv = function(i, dir) {
+    var j = i + dir;
+    if (j < 0 || j >= _musicPlaylist.length) return;
+    var t = _musicPlaylist[i]; _musicPlaylist[i] = _musicPlaylist[j]; _musicPlaylist[j] = t;
+    renderMusicPlaylist(); saveMusicPlaylist();
+  };
+  
+  window._mmd = async function(i) {
+    if (!await _prettyConfirm('🎵 ဒီသီချင်း ဖျက်မှာလား?')) return;
+    var m = _musicPlaylist[i];
+    if (m && m.url && m.url.indexOf('/uploads/') === 0) {
+      try { await api('/api/admin/delete-file', {method:'POST', body: JSON.stringify({url: m.url})}); } catch(e) {}
+    }
+    _musicPlaylist.splice(i, 1);
+    renderMusicPlaylist(); saveMusicPlaylist();
+    alert('✅ ဖျက်ပြီ');
+  };
+  
+  window.saveMusicPlaylist = async function() {
+    if (await saveMusicPlaylist()) alert('✅ သိမ်းပြီ (' + _musicPlaylist.length + ' ပုဒ်)');
+  };
+  
+  window.clearMusicPlaylist = async function() {
+    if (!_musicPlaylist.length) return alert('မရှိပါ');
+    if (!await _prettyConfirm('အားလုံး ဖျက်မှာလား?')) return;
+    _musicPlaylist = [];
+    renderMusicPlaylist();
+    await saveMusicPlaylist();
+    alert('✅ အားလုံး ဖျက်ပြီ');
+  };
+  
+  window.pickMusicMulti = function() {
+    if (!_musicMultiInput) {
+      _musicMultiInput = document.createElement('input');
+      _musicMultiInput.type = 'file';
+      _musicMultiInput.accept = 'audio/mpeg,audio/mp3,audio/*';
+      _musicMultiInput.multiple = true;
+      _musicMultiInput.style.display = 'none';
+      _musicMultiInput.addEventListener('change', handleMusicMultiPick);
+      document.body.appendChild(_musicMultiInput);
+    }
+    _musicMultiInput.value = '';
+    _musicMultiInput.click();
+  };
+  
+  async function handleMusicMultiPick(e) {
+    var files = Array.from(e.target.files || []);
+    if (!files.length) return;
+    var ok = 0;
+    for (var k = 0; k < files.length; k++) {
+      var file = files[k];
+      if (file.size > 5 * 1024 * 1024) { alert('❌ ' + file.name + ' — 5MB အောက်သာ'); continue; }
+      try {
+        var dataUrl = await new Promise(function(res, rej) {
+          var r = new FileReader();
+          r.onload = function(ev) { res(ev.target.result); };
+          r.onerror = rej;
+          r.readAsDataURL(file);
+        });
+        var r2 = await api('/api/admin/upload', {method:'POST', body: JSON.stringify({dataUrl: dataUrl})});
+        if (r2 && r2.success) {
+          _musicPlaylist.push({name: file.name.replace(/\.[^.]+$/, ''), url: r2.url});
+          ok++;
+        }
+      } catch(err) { console.log('upload err', err.message); }
+    }
+    renderMusicPlaylist();
+    await saveMusicPlaylist();
+    alert('✅ ' + ok + ' / ' + files.length + ' ပုဒ် တင်ပြီ (စုစုပေါင်း ' + _musicPlaylist.length + ')');
+  }
+  
+  var _origTab = window.tab;
+  window.tab = function(name, btn) {
+    if (typeof _origTab === 'function') _origTab(name, btn);
+    if (name === 'site') setTimeout(loadMusicPlaylist, 500);
+  };
+  setTimeout(loadMusicPlaylist, 2500);
+  console.log('✅ Multi music admin ready');
+})();
+</script>
+
 </body>
 </html>

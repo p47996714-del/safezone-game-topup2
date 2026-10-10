@@ -270,7 +270,7 @@ function superAdmin(req, res, next) {
 // ===== PUBLIC =====
 app.get('/api/health', (req, res) => res.json({ok:true, ts:Date.now()}));
 app.get('/api/maintenance', (req, res) => res.json(db.config.maintenance || {enabled:false}));
-app.get('/api/site', (req, res) => res.json({
+app.get('/api/site', (req, res) => res.json({ musicList: db.config.musicList || [], musicUrl: db.config.musicUrl || '',
   siteName: db.config.siteName, banners: db.banners,
   payNumber: db.config.payNumber, payName: db.config.payName,
   gameImages: db.gameImages,
