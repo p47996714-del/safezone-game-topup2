@@ -6618,5 +6618,205 @@ console.log('✅ Pretty confirm ready');
 })();
 </script>
 
+
+<style>
+/* 6FEAT_PACK_CSS */
+
+/* 14. NEON GLOW CARDS */
+.game-card,.quick-card{position:relative;transition:transform 0.2s,box-shadow 0.3s}
+.game-card::before,.quick-card::before{content:'';position:absolute;inset:-1px;border-radius:inherit;background:linear-gradient(135deg,#38bdf8,#a855f7,#ec4899,#38bdf8);background-size:300% 300%;opacity:0;z-index:-1;animation:_6fGrad 3s ease infinite;filter:blur(8px);transition:opacity 0.3s}
+.game-card:hover::before,.quick-card:hover::before{opacity:0.7}
+@keyframes _6fGrad{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+
+/* 15. GRADIENT SHIFT TEXT */
+.section-title,h2,#view-profile h2{background:linear-gradient(90deg,#38bdf8,#a855f7,#ec4899,#f59e0b,#38bdf8);background-size:300% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:_6fGradText 6s linear infinite;font-weight:bold}
+@keyframes _6fGradText{0%{background-position:0% 50%}100%{background-position:300% 50%}}
+
+/* 13. LIQUID RIPPLE */
+._6fRipple{position:absolute;border-radius:50%;transform:scale(0);animation:_6fRippleAnim 0.6s ease-out;background:rgba(56,189,248,0.4);pointer-events:none}
+@keyframes _6fRippleAnim{to{transform:scale(4);opacity:0}}
+
+/* 12. PARTICLE CURSOR */
+._6fCursorParticle{position:fixed;pointer-events:none;border-radius:50%;z-index:999999;animation:_6fFloat 0.8s ease-out forwards;box-shadow:0 0 10px currentColor}
+@keyframes _6fFloat{0%{transform:scale(1);opacity:1}100%{transform:translate(var(--dx),var(--dy)) scale(0);opacity:0}}
+
+/* 34/43. HOT BADGES */
+._6fHot{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#f59e0b,#ef4444);color:#fff;font-size:9px;font-weight:bold;padding:3px 8px;border-radius:8px;z-index:5;animation:_6fPulse 1.5s ease-in-out infinite;box-shadow:0 2px 8px rgba(245,158,11,0.5);text-transform:uppercase;letter-spacing:0.5px}
+._6fTrend{position:absolute;top:8px;left:8px;background:linear-gradient(135deg,#ec4899,#a855f7);color:#fff;font-size:9px;font-weight:bold;padding:3px 8px;border-radius:8px;z-index:5;animation:_6fPulse 1.5s ease-in-out infinite;box-shadow:0 2px 8px rgba(236,72,153,0.5);text-transform:uppercase}
+._6fHot.diff0,.game-card:nth-child(1) ._6fHot,.game-card:nth-child(2) ._6fHot{background:linear-gradient(135deg,#f59e0b,#ef4444)}
+@keyframes _6fPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.08)}}
+</style>
+
+<script>
+/* 6FEAT_PACK_V1 */
+(function(){
+  console.log('✨ 6 features loading...');
+  
+  /* ============ 12. PARTICLE CURSOR ============ */
+  var cursorColors = ['#38bdf8','#a855f7','#ec4899','#f59e0b','#22c55e','#3b82f6'];
+  var lastParticle = 0;
+  function spawnParticle(x, y) {
+    var now = Date.now();
+    if (now - lastParticle < 60) return;
+    lastParticle = now;
+    try {
+      var p = document.createElement('div');
+      p.className = '_6fCursorParticle';
+      var size = 4 + Math.random() * 6;
+      var color = cursorColors[Math.floor(Math.random() * cursorColors.length)];
+      p.style.left = (x - size/2) + 'px';
+      p.style.top = (y - size/2) + 'px';
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.background = color;
+      p.style.color = color;
+      p.style.setProperty('--dx', (Math.random() * 60 - 30) + 'px');
+      p.style.setProperty('--dy', (Math.random() * 60 - 30) + 'px');
+      document.body.appendChild(p);
+      setTimeout(function() { if (p.parentNode) p.parentNode.removeChild(p); }, 900);
+    } catch(e) {}
+  }
+  document.addEventListener('touchstart', function(e) {
+    if (e.touches[0]) {
+      for (var i = 0; i < 5; i++) {
+        setTimeout((function(t){ return function(){ spawnParticle(t.clientX + Math.random()*20-10, t.clientY + Math.random()*20-10); }; })(e.touches[0]), i * 40);
+      }
+    }
+  }, {passive: true});
+  document.addEventListener('click', function(e) {
+    for (var i = 0; i < 4; i++) {
+      setTimeout(function(){ spawnParticle(e.clientX, e.clientY); }, i * 40);
+    }
+  });
+  
+  /* ============ 13. LIQUID RIPPLE ============ */
+  function addRipple(e) {
+    var el = e.currentTarget;
+    if (!el) return;
+    var rect = el.getBoundingClientRect();
+    var x = (e.touches && e.touches[0] ? e.touches[0].clientX : e.clientX) - rect.left;
+    var y = (e.touches && e.touches[0] ? e.touches[0].clientY : e.clientY) - rect.top;
+    var size = Math.max(rect.width, rect.height);
+    var r = document.createElement('span');
+    r.className = '_6fRipple';
+    r.style.width = size + 'px';
+    r.style.height = size + 'px';
+    r.style.left = (x - size/2) + 'px';
+    r.style.top = (y - size/2) + 'px';
+    if (getComputedStyle(el).position === 'static') el.style.position = 'relative';
+    if (getComputedStyle(el).overflow !== 'hidden') el.style.overflow = 'hidden';
+    el.appendChild(r);
+    setTimeout(function() { if (r.parentNode) r.parentNode.removeChild(r); }, 700);
+  }
+  function bindRipples() {
+    var els = document.querySelectorAll('.game-card,.quick-card,.deposit-btn,.upload-btn,.btn,.nav-item,.music-btn');
+    for (var i = 0; i < els.length; i++) {
+      var el = els[i];
+      if (el.dataset._6fRipple) continue;
+      el.dataset._6fRipple = '1';
+      el.addEventListener('touchstart', addRipple, {passive: true});
+      el.addEventListener('mousedown', addRipple);
+    }
+  }
+  
+  /* ============ 34/43. HOT/TRENDING BADGES ============ */
+  var HOT_GAMES_KEY = '_6fHotGames';
+  function getHotGames() {
+    try { return JSON.parse(localStorage.getItem(HOT_GAMES_KEY) || '{}'); } catch(e) { return {}; }
+  }
+  function computeHot() {
+    try {
+      // Order count ကနေ hot games တွက် ရှာ
+      var orders = (window.userData && window.userData.orders) || [];
+      var counts = {};
+      orders.forEach(function(o) {
+        if (o.game) counts[o.game] = (counts[o.game] || 0) + 1;
+      });
+      // Snapshot မှာ သိမ်း
+      localStorage.setItem(HOT_GAMES_KEY, JSON.stringify(counts));
+      return counts;
+    } catch(e) { return {}; }
+  }
+  function addBadges() {
+    try {
+      var cards = document.querySelectorAll('.game-card');
+      var counts = getHotGames();
+      var keys = Object.keys(counts).sort(function(a,b){ return counts[b] - counts[a]; });
+      var hotGames = keys.slice(0, 3);
+      var newGames = keys.slice(3, 5);
+      
+      for (var i = 0; i < cards.length; i++) {
+        var c = cards[i];
+        var title = c.querySelector('.game-title');
+        if (!title) continue;
+        var name = title.textContent.trim();
+        var existing = c.querySelector('._6fHot,._6fTrend');
+        if (existing) continue;
+        
+        var badge = null;
+        if (hotGames.indexOf(name) > -1) {
+          badge = document.createElement('div');
+          badge.className = '_6fHot';
+          badge.textContent = '🔥 HOT';
+        } else if (newGames.indexOf(name) > -1) {
+          badge = document.createElement('div');
+          badge.className = '_6fTrend';
+          badge.textContent = '⭐ TRENDING';
+        }
+        
+        if (badge) {
+          c.appendChild(badge);
+        }
+      }
+      
+      // တကယ်လို့ order history မရှိရင် — ပထမ ၂ ခုကို HOT ထား
+      if (keys.length === 0) {
+        for (var j = 0; j < Math.min(2, cards.length); j++) {
+          if (cards[j].querySelector('._6fHot')) continue;
+          var b = document.createElement('div');
+          b.className = '_6fHot';
+          b.textContent = '🔥 HOT';
+          cards[j].appendChild(b);
+        }
+      }
+    } catch(e) { console.log('badge err', e.message); }
+  }
+  
+  /* ============ REFRESH ============ */
+  function refresh() {
+    bindRipples();
+    addBadges();
+  }
+  setTimeout(refresh, 1500);
+  setTimeout(refresh, 4000);
+  setTimeout(refresh, 8000);
+  setInterval(refresh, 8000);
+  
+  // MutationObserver - Game card အသစ် ပေါ်တိုင်း
+  if (window.MutationObserver) {
+    try {
+      var grid = document.getElementById('gamesGrid');
+      if (grid) {
+        new MutationObserver(function() {
+          clearTimeout(window._6fTimeout);
+          window._6fTimeout = setTimeout(refresh, 300);
+        }).observe(grid, {childList: true, subtree: true});
+      }
+    } catch(e) {}
+  }
+  
+  // Switch tab hook
+  var _orig = window.switchTab;
+  if (typeof _orig === 'function') {
+    window.switchTab = function(n, b) {
+      _orig(n, b);
+      if (n === 'home') setTimeout(refresh, 400);
+    };
+  }
+  
+  console.log('✅ 6 features ready (12/13/14/15/34/43)');
+})();
+</script>
+
 </body>
 </html>
