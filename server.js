@@ -1515,6 +1515,247 @@ app.post("/api/bot/save-reply", auth, function(req, res) {
 });
 // ============ END BOT_SAVE_ARRAY_V12 ============
 
+
+// ============ SAFE_BACKUP_V1 ============
+const https = require("https");
+
+// Backup config
+if (!db.config) db.config = {};
+if (!db.config.githubBackup) {
+  db.config.githubBackup = {
+    enabled: false,
+    token: "",
+    owner: "",
+    repo: "",
+    branch: "main",
+    intervalMin: 5,
+    lastBackup: 0,
+    lastRestore: 0
+  };
+  saveDB();
+}
+
+// === GitHub API helper ===
+function ghReq(method, path, token, body) {
+  return new Promise(function(resolve, reject) {
+    var data = body ? JSON.stringify(body) : null;
+    var opts = {
+      method: method,
+      hostname: "api.github.com",
+      path: path,
+      headers: {
+        "User-Agent": "SafeZone",
+        "Authorization": "token " + token,
+        "Accept": "application/vnd.github.v3+json"
+      }
+    };
+    if (data) {
+      opts.headers["Content-Type"] = "application/json";
+      opts.headers["Content-Length"] = Buffer.byteLength(data);
+    }
+    var req = https.request(opts, function(res) {
+      var raw = "";
+      res.on("data", function(ch) { raw += ch; });
+      res.on("end", function() {
+        try {
+          var p = raw ? JSON.parse(raw) : {};
+          if (res.statusCode >= 200 && res.statusCode < 300) resolve(p);
+          else reject(new Error("HTTP " + res.statusCode + ": " + (p.message || raw)));
+        } catch(e) { reject(e); }
+      });
+    });
+    req.on("error", reject);
+    if (data) req.write(data);
+    req.end();
+  });
+}
+
+// === Backup payload (SAFE — sessions မပါ) ===
+function buildPayload() {
+  var backup = {
+    version: 2,
+    timestamp: Date.now(),
+    db: {}
+  };
+  // SAFE: sessions + temp မပါ
+  var safeKeys = ["users", "orders", "deposits", "products", "config", "chats", "coupons", "admins", "banners", "gameImages", "redeems"];
+  safeKeys.forEach(function(k) {
+    if (db[k] !== undefined) backup.db[k] = db[k];
+  });
+  // ❌ sessions, _botLastCheck, tokens = မပါ
+  
+  // Uploads (base64)
+  try {
+    var uploadDir = "uploads";
+    if (fs.existsSync(uploadDir)) {
+      backup.uploads = {};
+      var files = fs.readdirSync(uploadDir);
+      files.forEach(function(f) {
+        try {
+          var full = require("path").join(uploadDir, f);
+          var stat = fs.statSync(full);
+          if (stat.isFile() && stat.size < 8 * 1024 * 1024) {
+            backup.uploads[f] = fs.readFileSync(full).toString("base64");
+          }
+        } catch(e) {}
+      });
+    }
+  } catch(e) {}
+  return backup;
+}
+
+// === Push to GitHub ===
+async function pushBackup(cfg) {
+  var payload = buildPayload();
+  var jsonStr = JSON.stringify(payload);
+  var contentB64 = Buffer.from(jsonStr, "utf8").toString("base64");
+  var filePath = "backup/safezone.json";
+  var apiPath = "/repos/" + cfg.owner + "/" + cfg.repo + "/contents/" + filePath;
+  var sha = null;
+  try {
+    var ex = await ghReq("GET", apiPath + "?ref=" + cfg.branch, cfg.token);
+    sha = ex.sha;
+  } catch(e) {}
+  var body = {
+    message: "Backup " + new Date().toISOString(),
+    content: contentB64,
+    branch: cfg.branch
+  };
+  if (sha) body.sha = sha;
+  var result = await ghReq("PUT", apiPath, cfg.token, body);
+  return result.commit ? result.commit.sha.substring(0, 7) : "ok";
+}
+
+// === Pull from GitHub ===
+async function pullBackup(cfg) {
+  var filePath = "backup/safezone.json";
+  var apiPath = "/repos/" + cfg.owner + "/" + cfg.repo + "/contents/" + filePath + "?ref=" + cfg.branch;
+  var result = await ghReq("GET", apiPath, cfg.token);
+  var content = Buffer.from(result.content, "base64").toString("utf8");
+  return JSON.parse(content);
+}
+
+// === Apply restore (SAFE) ===
+function applyRestore(payload) {
+  if (!payload || !payload.db) throw new Error("Bad backup");
+  // SAFE: sessions မထိ
+  Object.keys(payload.db).forEach(function(k) {
+    if (k === "sessions") return; // ← skip
+    db[k] = payload.db[k];
+  });
+  saveDB();
+  if (payload.uploads) {
+    if (!fs.existsSync("uploads")) fs.mkdirSync("uploads", { recursive: true });
+    Object.keys(payload.uploads).forEach(function(f) {
+      try {
+        fs.writeFileSync("uploads/" + f, Buffer.from(payload.uploads[f], "base64"));
+      } catch(e) {}
+    });
+  }
+}
+
+// === Auto backup timer ===
+var _bkTimer = null;
+function startBkTimer() {
+  if (_bkTimer) clearInterval(_bkTimer);
+  var cfg = db.config.githubBackup || {};
+  if (!cfg.enabled || !cfg.token || !cfg.owner || !cfg.repo) return;
+  var ms = Math.max(1, Number(cfg.intervalMin) || 5) * 60 * 1000;
+  _bkTimer = setInterval(async function() {
+    try {
+      var fresh = db.config.githubBackup || {};
+      if (!fresh.enabled) return;
+      var sha = await pushBackup(fresh);
+      db.config.githubBackup.lastBackup = Date.now();
+      saveDB();
+      console.log("[Backup] ✅ " + sha);
+    } catch(e) { console.log("[Backup] ❌ " + e.message); }
+  }, ms);
+  console.log("[Backup] Timer: " + (ms/60000) + "min");
+}
+
+// === Auto restore on startup ===
+async function autoRestore() {
+  var cfg = db.config.githubBackup || {};
+  if (!cfg.enabled || !cfg.token || !cfg.owner || !cfg.repo) {
+    console.log("[Backup] Auto-restore disabled");
+    return;
+  }
+  // Data ရှိပြီးသားလား?
+  var hasUsers = Array.isArray(db.users) && db.users.length > 0;
+  var hasProducts = Array.isArray(db.products) && db.products.length > 0;
+  if (hasUsers || hasProducts) {
+    console.log("[Backup] Data exists — skip restore");
+    startBkTimer();
+    return;
+  }
+  console.log("[Backup] No data — restoring...");
+  try {
+    var payload = await pullBackup(cfg);
+    applyRestore(payload);
+    db.config.githubBackup.lastRestore = Date.now();
+    saveDB();
+    console.log("[Backup] ✅ Restored: " + new Date(payload.timestamp).toLocaleString());
+  } catch(e) { console.log("[Backup] ❌ " + e.message); }
+  startBkTimer();
+}
+
+// === Routes ===
+app.get("/api/admin/backup-config", adminAuth, function(req, res) {
+  var cfg = db.config.githubBackup || {};
+  res.json({
+    enabled: !!cfg.enabled,
+    hasToken: !!cfg.token,
+    owner: cfg.owner || "",
+    repo: cfg.repo || "",
+    branch: cfg.branch || "main",
+    intervalMin: cfg.intervalMin || 5,
+    lastBackup: cfg.lastBackup || 0,
+    lastRestore: cfg.lastRestore || 0
+  });
+});
+
+app.post("/api/admin/backup-config", adminAuth, function(req, res) {
+  try {
+    var b = req.body || {};
+    var cfg = db.config.githubBackup || {};
+    if (typeof b.enabled === "boolean") cfg.enabled = b.enabled;
+    if (b.token) cfg.token = String(b.token).trim();
+    if (typeof b.owner === "string") cfg.owner = b.owner.trim();
+    if (typeof b.repo === "string") cfg.repo = b.repo.trim();
+    if (typeof b.branch === "string") cfg.branch = b.branch.trim() || "main";
+    if (b.intervalMin) cfg.intervalMin = Math.max(1, Number(b.intervalMin) || 5);
+    db.config.githubBackup = cfg;
+    saveDB();
+    startBkTimer();
+    res.json({ success: true });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+app.post("/api/admin/backup-now", adminAuth, async function(req, res) {
+  try {
+    var cfg = db.config.githubBackup || {};
+    if (!cfg.token || !cfg.owner || !cfg.repo) return res.json({ success: false, error: "Config မပြည့်ပါ" });
+    var sha = await pushBackup(cfg);
+    db.config.githubBackup.lastBackup = Date.now();
+    saveDB();
+    res.json({ success: true, sha: sha });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+app.post("/api/admin/restore", adminAuth, async function(req, res) {
+  try {
+    var cfg = db.config.githubBackup || {};
+    if (!cfg.token || !cfg.owner || !cfg.repo) return res.json({ success: false, error: "Config မပြည့်ပါ" });
+    var payload = await pullBackup(cfg);
+    applyRestore(payload);
+    db.config.githubBackup.lastRestore = Date.now();
+    saveDB();
+    res.json({ success: true, timestamp: payload.timestamp });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+// ============ END SAFE_BACKUP_V1 ============
+
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });
