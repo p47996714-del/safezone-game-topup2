@@ -6731,32 +6731,33 @@ console.log('✅ Pretty confirm ready');
 
 
 
+
+
+
 <script>
-/* BOT_V4_CLEAN */
+/* BOT_HOOK_V5 */
 (function(){
-  console.log('🤖 Bot V4 loading...');
+  console.log('🤖 Bot V5 loading...');
   
   var _rules = [];
   var _enabled = true;
-  var _lastText = '';
+  var _lastTxt = '';
   var _lastTime = 0;
+  var _busy = false;
   
-  // Rules ရယူ
   async function loadRules() {
     try {
       var r = await fetch('/api/chatbot-rules', { cache: 'no-store' });
       var d = await r.json();
       _enabled = d.enabled !== false;
       _rules = Array.isArray(d.rules) ? d.rules : [];
-      console.log('📋 Bot rules:', _rules.length);
+      console.log('📋 Bot rules: ' + _rules.length + ' (enabled: ' + _enabled + ')');
     } catch(e) {
-      console.log('Rules load err', e.message);
-      _rules = [];
+      console.log('Rules err:', e.message);
     }
   }
   
-  // Reply ရှာ
-  function getReply(text) {
+  function findReply(text) {
     if (!_enabled || !_rules.length) return null;
     var lower = String(text || '').toLowerCase().trim();
     if (!lower) return null;
@@ -6773,12 +6774,14 @@ console.log('✅ Pretty confirm ready');
     return null;
   }
   
-  // SendChat hook
   var _origSend = window.sendChat;
   if (typeof _origSend !== 'function') {
-    console.log('⚠️  sendChat not found');
+    console.log('⚠️  sendChat not found — retry in 2s');
+    setTimeout(function(){ if (typeof window.sendChat === 'function' && !window._botHooked) { window._botHooked = true; hookIt(); } }, 2000);
     return;
   }
+  
+  window._botHooked = true;
   
   window.sendChat = async function() {
     var inp = document.getElementById('chatInput');
@@ -6786,46 +6789,61 @@ console.log('✅ Pretty confirm ready');
     var text = inp.value.trim();
     if (!text) return;
     
-    // 1. User message ပို့
+    // User message ပို့
     await _origSend.apply(this, arguments);
     
-    // 2. Duplicate guard (3s)
+    // Duplicate guard
     var now = Date.now();
-    if (_lastText === text && (now - _lastTime) < 3000) return;
-    _lastText = text;
-    _lastTime = now;
+    if (_lastTxt === text && (now - _lastTime) < 3000) return;
+    _lastTxt = text; _lastTime = now;
     
-    // 3. Rules refresh (တစ်ခါတစ်ခါ refresh)
-    if (!_rules.length) await loadRules();
+    if (_busy) return;
+    _busy = true;
     
-    // 4. Reply ရှာ
-    var reply = getReply(text);
-    if (!reply) return;
-    
-    // 5. Server ကို bot reply ပို့ (admin အနေနဲ့ သိမ်း)
     try {
+      // Rules refresh
+      if (!_rules.length) await loadRules();
+      
+      var reply = findReply(text);
+      if (!reply) { _busy = false; return; }
+      
+      console.log('🤖 Bot reply found');
+      
+      // Server ကို ပို့
       var r = await api('/api/chat/bot-reply', {
         method: 'POST',
         body: JSON.stringify({ text: reply })
       });
+      
       if (r && r.success) {
-        // 6. Chat ပြန် load
+        console.log('✅ Bot reply saved');
         if (typeof loadChat === 'function') {
           await loadChat();
-          // 7. Notification
           if (typeof showToast === 'function') showToast('🤖 Bot ပြန်ဖြေပြီ', 'info');
         }
+      } else {
+        console.log('Bot save failed:', r);
       }
     } catch(e) {
-      console.log('Bot save err', e.message);
+      console.log('Bot err:', e.message);
     }
+    
+    _busy = false;
   };
   
-  // Initial load
+  // Chat ဖွင့်တိုင်း rules refresh
+  var _origTab = window.switchTab;
+  if (typeof _origTab === 'function') {
+    window.switchTab = function(name, btn) {
+      _origTab(name, btn);
+      if (name === 'chat') loadRules();
+    };
+  }
+  
   setTimeout(loadRules, 1500);
   setInterval(loadRules, 30000);
   
-  console.log('✅ Bot V4 ready');
+  console.log('✅ Bot V5 ready');
 })();
 </script>
 
