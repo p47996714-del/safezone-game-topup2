@@ -6555,5 +6555,179 @@ console.log('✅ Pretty confirm ready');
 })();
 </script>
 
+<script>
+/* FEATURES_4910 */
+(function(){
+  /* ====== F9: ANNOUNCEMENT BANNER ====== */
+  async function loadAnn() {
+    try {
+      var r = await fetch("/api/announcement", {cache:"no-store"});
+      var d = await r.json();
+      var old = document.getElementById("_annBanner");
+      if (old) old.remove();
+      if (!d.enabled || !d.text) return;
+      if (localStorage.getItem("_annDismissed_" + d.updatedAt) === "1") return;
+      var colors = {
+        info:"linear-gradient(135deg,#38bdf8,#3b82f6)",
+        success:"linear-gradient(135deg,#22c55e,#059669)",
+        warn:"linear-gradient(135deg,#f59e0b,#d97706)",
+        danger:"linear-gradient(135deg,#ef4444,#dc2626)"
+      };
+      var b = document.createElement("div");
+      b.id = "_annBanner";
+      b.style.cssText = "position:relative;margin:10px 15px 0;padding:12px 40px 12px 14px;border-radius:12px;color:#fff;font-size:13px;font-weight:bold;text-align:center;background:" + (colors[d.type] || colors.info) + ";box-shadow:0 4px 15px rgba(0,0,0,0.3);animation:_annSlide 0.5s ease;z-index:50";
+      var safeText = String(d.text).replace(/[<>]/g, "");
+      b.innerHTML = "<span style=\"margin-right:6px\">📢</span>" + safeText +
+        "<button onclick=\"window._annDismiss(" + d.updatedAt + ")\" style=\"position:absolute;right:8px;top:50%;transform:translateY(-50%);background:rgba(255,255,255,0.25);border:none;color:#fff;width:24px;height:24px;border-radius:50%;cursor:pointer;font-size:14px;line-height:1;padding:0\">✕</button>";
+      var home = document.getElementById("view-home");
+      if (home) home.insertBefore(b, home.firstChild);
+      if (!document.getElementById("_annStyle")) {
+        var st = document.createElement("style");
+        st.id = "_annStyle";
+        st.textContent = "@keyframes _annSlide{from{transform:translateY(-20px);opacity:0}to{transform:translateY(0);opacity:1}}";
+        document.head.appendChild(st);
+      }
+    } catch(e) { console.log("ann err", e.message); }
+  }
+  window._annDismiss = function(ts) {
+    localStorage.setItem("_annDismissed_" + ts, "1");
+    var b = document.getElementById("_annBanner");
+    if (b) { b.style.transition = "all 0.3s"; b.style.opacity = "0"; setTimeout(function(){ b.remove(); }, 300); }
+  };
+
+  /* ====== F10: NEW GAME NOTIF ====== */
+  async function checkNewGames() {
+    try {
+      var r = await fetch("/api/games/list", {cache:"no-store"});
+      var d = await r.json();
+      if (!d.games || !Array.isArray(d.games)) return;
+      var seen = JSON.parse(localStorage.getItem("_seenGames") || "[]");
+      var newOnes = d.games.filter(function(g){ return seen.indexOf(g) === -1; });
+      if (seen.length > 0 && newOnes.length > 0) {
+        playNGSound();
+        newOnes.forEach(function(g, i){ setTimeout(function(){ showNGPopup(g); }, i * 1500); });
+        if ("Notification" in window && Notification.permission === "granted") {
+          newOnes.forEach(function(g){
+            try { new Notification("🎮 ဂိမ်းအသစ် ရောက်ပြီ!", {body: g + " — အခုပဲ ဝယ်လို့ရပြီ", icon:"https://i.imgur.com/iRwIfqs.png"}); } catch(e) {}
+          });
+        }
+      }
+      localStorage.setItem("_seenGames", JSON.stringify(d.games));
+    } catch(e) { console.log("newgame err", e.message); }
+  }
+  function playNGSound() {
+    try {
+      var ctx = new (window.AudioContext || window.webkitAudioContext)();
+      [523,659,784,1047].forEach(function(f, i){
+        var o = ctx.createOscillator(), g = ctx.createGain();
+        o.connect(g); g.connect(ctx.destination);
+        o.frequency.value = f; o.type = "sine";
+        var t = ctx.currentTime + i * 0.12;
+        g.gain.setValueAtTime(0, t);
+        g.gain.linearRampToValueAtTime(0.2, t + 0.02);
+        g.gain.exponentialRampToValueAtTime(0.001, t + 0.35);
+        o.start(t); o.stop(t + 0.35);
+      });
+      if (navigator.vibrate) navigator.vibrate([100,50,100,50,100]);
+    } catch(e) {}
+  }
+  function showNGPopup(g) {
+    var safeG = String(g).replace(/[<>]/g, "");
+    var m = document.createElement("div");
+    m.style.cssText = "position:fixed;top:20px;left:50%;transform:translateX(-50%) translateY(-200px);z-index:9999999;background:linear-gradient(135deg,#a855f7,#ec4899);color:#fff;padding:14px 20px;border-radius:16px;box-shadow:0 15px 40px rgba(168,85,247,0.5);max-width:340px;width:90%;transition:transform 0.5s cubic-bezier(0.34,1.56,0.64,1);font-family:inherit";
+    m.innerHTML = "<div style=\"display:flex;align-items:center;gap:12px\"><div style=\"font-size:32px\">🎮</div><div style=\"flex:1;min-width:0\"><div style=\"font-size:13px;font-weight:bold;margin-bottom:3px\">ဂိမ်းအသစ် ရောက်ပြီ!</div><div style=\"font-size:14px;font-weight:bold;white-space:nowrap;overflow:hidden;text-overflow:ellipsis\">" + safeG + "</div><div style=\"font-size:11px;opacity:0.9;margin-top:2px\">အခုပဲ ဝယ်လို့ရပြီ</div></div><button onclick=\"this.parentElement.parentElement.remove()\" style=\"background:none;border:none;color:#fff;font-size:20px;cursor:pointer\">✕</button></div>";
+    document.body.appendChild(m);
+    setTimeout(function(){ m.style.transform = "translateX(-50%) translateY(0)"; }, 50);
+    setTimeout(function(){ m.style.transform = "translateX(-50%) translateY(-200px)"; setTimeout(function(){ if (m.parentNode) m.parentNode.removeChild(m); }, 500); }, 6000);
+  }
+
+  /* ====== F4: ORDER LIVE TRACKING ====== */
+  function enhanceOrders() {
+    try {
+      var ordList = document.getElementById("ordList");
+      if (!ordList) return;
+      var items = ordList.querySelectorAll(":scope > div");
+      for (var i = 0; i < items.length; i++) {
+        var el = items[i];
+        if (el.querySelector("._otProgress")) continue;
+        var txt = el.textContent || "";
+        var status = "pending";
+        if (txt.indexOf("processing") > -1) status = "processing";
+        else if (txt.indexOf("completed") > -1) status = "completed";
+        else if (txt.indexOf("rejected") > -1) status = "rejected";
+        else if (txt.indexOf("approved") > -1) status = "approved";
+        var stages = { pending:25, processing:60, approved:100, completed:100, rejected:100 };
+        var colors = {
+          pending:"linear-gradient(90deg,#eab308,#f59e0b)",
+          processing:"linear-gradient(90deg,#3b82f6,#8b5cf6)",
+          approved:"linear-gradient(90deg,#22c55e,#059669)",
+          completed:"linear-gradient(90deg,#22c55e,#059669)",
+          rejected:"linear-gradient(90deg,#ef4444,#dc2626)"
+        };
+        var labels = {
+          pending:"⏳ စောင့်ဆိုင်းနေသည်",
+          processing:"⚙️ လုပ်ဆောင်နေသည်",
+          approved:"✅ အတည်ပြုပြီး",
+          completed:"✅ ပြီးဆုံးပါပြီ",
+          rejected:"❌ ပယ်ဖျက်ပါပြီ"
+        };
+        var colorTxt = status === "rejected" ? "#ef4444" : ((status === "completed" || status === "approved") ? "#22c55e" : "#38bdf8");
+        var wrap = document.createElement("div");
+        wrap.className = "_otProgress";
+        wrap.style.cssText = "margin-top:10px;padding-top:10px;border-top:1px dashed rgba(51,65,85,0.6)";
+        wrap.innerHTML = "<div style=\"display:flex;justify-content:space-between;font-size:10px;color:#94a3b8;margin-bottom:6px\"><span>⏳ Pending</span><span>⚙️ Processing</span><span>✅ Done</span></div>" +
+          "<div style=\"height:6px;background:#0f172a;border-radius:3px;overflow:hidden;position:relative\"><div style=\"height:100%;width:" + stages[status] + "%;background:" + colors[status] + ";border-radius:3px;transition:width 0.6s ease;box-shadow:0 0 10px rgba(56,189,248,0.5)\"></div></div>" +
+          "<div style=\"margin-top:6px;font-size:11px;font-weight:bold;color:" + colorTxt + ";text-align:center\">" + labels[status] + "</div>";
+        el.appendChild(wrap);
+      }
+    } catch(e) { console.log("enhanceOrders err", e.message); }
+  }
+
+  function setupOrderObs() {
+    var el = document.getElementById("ordList");
+    if (el && !el.dataset.otObs) {
+      el.dataset.otObs = "1";
+      new MutationObserver(function(){ setTimeout(enhanceOrders, 50); }).observe(el, {childList: true, subtree: true});
+      enhanceOrders();
+    }
+  }
+
+  var _otTimer = null;
+  var _origLoadOrders = window.loadOrders;
+  if (typeof _origLoadOrders === "function") {
+    window.loadOrders = async function() {
+      await _origLoadOrders.apply(this, arguments);
+      setTimeout(enhanceOrders, 150);
+    };
+  }
+
+  var _origSwitchTab = window.switchTab;
+  if (typeof _origSwitchTab === "function") {
+    window.switchTab = function(name, btn) {
+      _origSwitchTab(name, btn);
+      if (name === "orders") {
+        setTimeout(function(){ setupOrderObs(); enhanceOrders(); }, 300);
+        if (_otTimer) clearInterval(_otTimer);
+        _otTimer = setInterval(function(){ if (typeof _origLoadOrders === "function") _origLoadOrders(); }, 20000);
+      } else {
+        if (_otTimer) { clearInterval(_otTimer); _otTimer = null; }
+      }
+    };
+  }
+
+  /* ====== INIT ====== */
+  setTimeout(loadAnn, 3000);
+  setTimeout(checkNewGames, 4000);
+  setTimeout(setupOrderObs, 3500);
+  setInterval(loadAnn, 30000);
+  setInterval(checkNewGames, 60000);
+  setTimeout(function() {
+    if ("Notification" in window && Notification.permission === "default") {
+      try { Notification.requestPermission(); } catch(e) {}
+    }
+  }, 5000);
+  console.log("✅ Features 4/9/10 loaded");
+})();
+</script>
 </body>
 </html>

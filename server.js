@@ -1241,6 +1241,34 @@ app.post('/api/redeem-points', auth, (req, res) => {
   } catch(e) { res.json({ success: false, error: e.message }); }
 });
 
+// ============ ANNOUNCEMENT (F9) ============
+app.get('/api/announcement', (req, res) => {
+  const a = (db.config && db.config.announcement) || {};
+  res.json({ enabled: !!a.enabled, text: String(a.text || ''), type: a.type || 'info', updatedAt: a.updatedAt || 0 });
+});
+app.post('/api/admin/announcement', adminAuth, (req, res) => {
+  try {
+    if (!db.config) db.config = {};
+    db.config.announcement = {
+      enabled: !!req.body.enabled,
+      text: String(req.body.text || '').substring(0, 500),
+      type: req.body.type || 'info',
+      updatedAt: Date.now()
+    };
+    saveDB();
+    res.json({ success: true });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+// ============ GAMES LIST (F10) ============
+app.get('/api/games/list', (req, res) => {
+  try {
+    const games = {};
+    (db.products || []).forEach(p => { if (p && p.game) games[p.game] = (games[p.game] || 0) + 1; });
+    res.json({ games: Object.keys(games), total: Object.keys(games).length });
+  } catch(e) { res.json({ games: [], total: 0 }); }
+});
+
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });
