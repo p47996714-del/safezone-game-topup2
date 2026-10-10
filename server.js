@@ -1918,6 +1918,51 @@ setTimeout(function() {
 }, 100);
 // ============ END BAN_CHECK_V1 ============
 
+
+// ============ ADMIN_2FA_RESET_V1 ============
+app.get("/api/admin/all-users", adminAuth, function(req, res) {
+  try {
+    var list = (db.users || []).map(function(u) {
+      return {
+        username: u.username,
+        phone: u.phone || "",
+        twoFA: !!u.twoFA,
+        telegramId: u.telegramId || "",
+        banned: !!u.banned,
+        balance: u.balance || 0
+      };
+    });
+    res.json(list);
+  } catch(e) { res.json([]); }
+});
+
+app.post("/api/admin/disable-2fa", adminAuth, function(req, res) {
+  try {
+    var un = String((req.body || {}).username || "").trim();
+    if (!un) return res.json({ success: false, error: "Username ဖြည့်ပါ" });
+    var users = db.users || [];
+    var u = users.find(function(x) { return x.username === un; });
+    if (!u) return res.json({ success: false, error: "User မတွေ့" });
+    u.twoFA = false;
+    saveDB();
+    console.log("[2FA] Disabled: " + un);
+    res.json({ success: true });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+
+app.post("/api/admin/disable-2fa-all", adminAuth, function(req, res) {
+  try {
+    var count = 0;
+    (db.users || []).forEach(function(u) {
+      if (u.twoFA) { u.twoFA = false; count++; }
+    });
+    saveDB();
+    console.log("[2FA] All disabled: " + count);
+    res.json({ success: true, count: count });
+  } catch(e) { res.json({ success: false, error: e.message }); }
+});
+// ============ END ADMIN_2FA_RESET_V1 ============
+
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });
