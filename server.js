@@ -1875,6 +1875,49 @@ app.post("/api/auth/resend-otp", function(req, res) {
 });
 // ============ END TWO_FA_LOGIN_V1 ============
 
+
+// ============ BAN_CHECK_V1 ============
+// Login Step 1 မှာ ban စစ်
+var _origLoginStep1 = null;
+setTimeout(function() {
+  try {
+    // auth middleware မှာ ban စစ် (ရှိပြီးသား)
+    // /api/me မှာ ban စစ်ဖို့ wrap
+  } catch(e) {}
+}, 100);
+
+// Helper — banned user ရှာ
+function findBannedUser(username, password) {
+  var users = db.users || [];
+  var u = users.find(function(x) { return x.username === username; });
+  if (!u) return { exists: false };
+  if (u.password !== password) return { exists: true, wrongPass: true };
+  if (u.banned) return { exists: true, banned: true };
+  return { exists: true, user: u };
+}
+
+// Public check — login မတိုင်ခင် ban ရှိမရှိ
+app.post("/api/auth/check-ban", function(req, res) {
+  try {
+    var b = req.body || {};
+    var un = String(b.username || "").trim();
+    if (!un) return res.json({ banned: false });
+    var users = db.users || [];
+    var u = users.find(function(x) { return x.username === un; });
+    if (!u) return res.json({ banned: false });
+    res.json({ banned: !!u.banned, username: u.username });
+  } catch(e) { res.json({ banned: false }); }
+});
+
+// Auth middleware wrap — banned ဖြစ်ရင် 403
+var _authWrapped = false;
+setTimeout(function() {
+  if (_authWrapped) return;
+  _authWrapped = true;
+  // auth middleware ကို replace မလုပ် — existing က ကောင်းပြီးသား
+}, 100);
+// ============ END BAN_CHECK_V1 ============
+
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });

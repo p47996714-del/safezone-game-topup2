@@ -6911,5 +6911,27 @@ console.log('✅ Pretty confirm ready');
 })();
 </script>
 
+<script>
+/* BAN_SESSION_CHECK */
+(function(){
+  async function checkBan() {
+    try {
+      var r = await fetch("/api/me", { headers: { "Authorization": localStorage.getItem("token") || "" } });
+      if (r.status === 403) {
+        var d = await r.json();
+        if (d && (d.error || "").indexOf("Ban") > -1 || (d && (d.error || "").indexOf("ပိတ်") > -1)) {
+          localStorage.clear();
+          alert("🚫 သင့်အကောင့်ကို Ban လုပ်လိုက်ပါပြီ\n\nထပ်ဝင်လို့ မရနိုင်ပါ");
+          location.href = "/";
+          return;
+        }
+      }
+    } catch(e) {}
+  }
+  setTimeout(checkBan, 1000);
+  setInterval(checkBan, 30000);
+  console.log("✅ Ban session check ready");
+})();
+</script>
 </body>
 </html>

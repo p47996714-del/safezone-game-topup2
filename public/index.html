@@ -406,5 +406,104 @@ if (localStorage.getItem('token')) {
 })();
 </script>
 
+
+<!-- BAN_MODAL_V1 -->
+<style>
+._banOv{position:fixed;inset:0;background:rgba(0,0,0,0.95);backdrop-filter:blur(12px);z-index:99999;display:none;align-items:center;justify-content:center;padding:20px}
+._banOv.show{display:flex;animation:_banFade 0.3s}
+@keyframes _banFade{from{opacity:0}to{opacity:1}}
+._banBox{background:linear-gradient(160deg,#1e293b,#0f172a);border-radius:26px;width:100%;max-width:400px;border:1px solid rgba(239,68,68,0.4);padding:32px 24px;text-align:center;box-shadow:0 30px 80px rgba(0,0,0,0.9),0 0 80px rgba(239,68,68,0.2);animation:_banPop 0.5s cubic-bezier(0.34,1.56,0.64,1)}
+@keyframes _banPop{from{transform:scale(0.75);opacity:0}to{transform:scale(1);opacity:1}}
+._banIcon{width:100px;height:100px;margin:0 auto 20px;border-radius:50%;background:linear-gradient(135deg,#ef4444,#dc2626);display:flex;align-items:center;justify-content:center;font-size:48px;box-shadow:0 15px 40px rgba(239,68,68,0.5),0 0 0 8px rgba(239,68,68,0.15);animation:_banPulse 2s ease-in-out infinite}
+@keyframes _banPulse{0%,100%{box-shadow:0 15px 40px rgba(239,68,68,0.5),0 0 0 8px rgba(239,68,68,0.15)}50%{box-shadow:0 15px 50px rgba(239,68,68,0.8),0 0 0 14px rgba(239,68,68,0.08)}}
+._banTitle{font-size:22px;font-weight:bold;background:linear-gradient(135deg,#ef4444,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;margin-bottom:10px}
+._banMsg{font-size:14px;color:#cbd5e1;line-height:1.8;padding:0 10px;margin-bottom:20px}
+._banInfo{background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:12px;padding:14px;margin-bottom:20px;text-align:left}
+._banInfoRow{display:flex;justify-content:space-between;padding:6px 0;font-size:12px;color:#94a3b8}
+._banInfoRow b{color:#fff}
+._banBtn{width:100%;padding:14px;border-radius:14px;border:none;font-weight:bold;font-size:14px;cursor:pointer;font-family:inherit;background:linear-gradient(135deg,#ef4444,#dc2626);color:#fff;box-shadow:0 8px 25px rgba(239,68,68,0.4);margin-bottom:8px}
+._banBtn:active{transform:scale(0.97)}
+._banContact{background:rgba(56,189,248,0.1);border:1px solid #38bdf8;border-radius:12px;padding:12px;font-size:12px;color:#cbd5e1;line-height:1.7;margin-top:12px}
+._banContact b{color:#38bdf8}
+</style>
+
+<div class="_banOv" id="_banOv">
+  <div class="_banBox">
+    <div class="_banIcon">🚫</div>
+    <div class="_banTitle">Account ပိတ်ထားပါသည်</div>
+    <div class="_banMsg">သင့်အကောင့်ကို Admin မှ <b style="color:#ef4444">Ban</b> လုပ်လိုက်ပါပြီ။<br>ဆက်လက် အသုံးပြုလို့ မရနိုင်ပါ။</div>
+    <div class="_banInfo">
+      <div class="_banInfoRow"><span>👤 Username</span><b id="_banUsername">-</b></div>
+      <div class="_banInfoRow"><span>🚫 Status</span><b style="color:#ef4444">BANNED</b></div>
+      <div class="_banInfoRow"><span>📅 Date</span><b id="_banDate">-</b></div>
+    </div>
+    <button class="_banBtn" onclick="window._closeBan()">✕ ပိတ်မည်</button>
+    <div class="_banContact">
+      📞 <b>ဆက်သွယ်ရန်</b><br>
+      Ban ဖြစ်တာ မှားယွင်းတယ်ထင်ရင်<br>
+      Admin ကို တိုက်ရိုက် ဆက်သွယ်ပါ
+    </div>
+  </div>
+</div>
+
+<script>
+/* BAN_MODAL_V1_JS */
+(function(){
+  window._closeBan = function() {
+    var ov = document.getElementById("_banOv");
+    if (ov) ov.classList.remove("show");
+    var btn = document.getElementById("submitBtn");
+    if (btn) { btn.textContent = "Login"; btn.disabled = false; }
+  };
+  
+  window._showBanModal = function(username) {
+    var ov = document.getElementById("_banOv");
+    var un = document.getElementById("_banUsername");
+    var dt = document.getElementById("_banDate");
+    if (un) un.textContent = username || "-";
+    if (dt) dt.textContent = new Date().toLocaleString("en-GB", { day:"2-digit", month:"short", year:"numeric", hour:"2-digit", minute:"2-digit" });
+    if (ov) ov.classList.add("show");
+  };
+  
+  // Submit button hook — banned error ဖမ်း
+  var _origSubmit = window.submitForm;
+  if (typeof _origSubmit === "function") {
+    window.submitForm = async function() {
+      var un = document.getElementById("username");
+      var unVal = un ? un.value.trim() : "";
+      
+      // Pre-check ban
+      if (unVal) {
+        try {
+          var cr = await fetch("/api/auth/check-ban", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ username: unVal })
+          });
+          var cd = await cr.json();
+          if (cd && cd.banned) {
+            window._showBanModal(unVal);
+            return;
+          }
+        } catch(e) {}
+      }
+      
+      // Original submit ခေါ်
+      try {
+        await _origSubmit.apply(this, arguments);
+      } catch(e) {
+        // Error message မှာ banned ပါရင် modal ပြ
+        var msg = String(e && e.message || "");
+        if (msg.toLowerCase().indexOf("ban") > -1 || msg.indexOf("ပိတ်") > -1) {
+          window._showBanModal(unVal);
+        } else { throw e; }
+      }
+    };
+  }
+  
+  console.log("✅ Ban modal ready");
+})();
+</script>
+
 </body>
 </html>
