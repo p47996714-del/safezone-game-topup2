@@ -1439,14 +1439,15 @@ if (typeof app._botAdminRoute === 'undefined') {
 // ============ END BOT_PERSIST_ROUTES ============
 
 
-// ============ BOT V7 ROUTES ============
+
+
+// ============ BOT_CLEAN_V10 ============
 if (!db.config) db.config = {};
 if (!db.config.chatBot) db.config.chatBot = { enabled: true, rules: [] };
 
-// Rules — Public
+// Rules
 app.get("/api/bot/rules", function(req, res) {
   try {
-    if (!db.config.chatBot) db.config.chatBot = { enabled: true, rules: [] };
     res.json({
       enabled: db.config.chatBot.enabled !== false,
       rules: Array.isArray(db.config.chatBot.rules) ? db.config.chatBot.rules : []
@@ -1454,19 +1455,19 @@ app.get("/api/bot/rules", function(req, res) {
   } catch(e) { res.json({ enabled: false, rules: [] }); }
 });
 
-// Save bot reply — Auth
+// Save bot reply
 app.post("/api/bot/save-reply", auth, function(req, res) {
   try {
     var text = String((req.body || {}).text || "").trim();
     if (!text) return res.json({ success: false, error: "empty" });
-    var userId = req.user.id;
+    var uid = req.user.id;
     if (!db.chats) db.chats = {};
-    if (!db.chats[userId]) db.chats[userId] = [];
-    // Duplicate guard
-    var recent = db.chats[userId].slice(-5);
-    for (var i = 0; i < recent.length; i++) {
-      if (recent[i].from === "admin" && recent[i].bot && recent[i].text === text) {
-        return res.json({ success: false, duplicate: true });
+    if (!db.chats[uid]) db.chats[uid] = [];
+    var last = db.chats[uid].slice(-3);
+    for (var i = 0; i < last.length; i++) {
+      if (last[i].text === text) {
+        console.log("[Bot] Duplicate skip");
+        return res.json({ success: true, duplicate: true });
       }
     }
     var msg = {
@@ -1477,49 +1478,38 @@ app.post("/api/bot/save-reply", auth, function(req, res) {
       read: false,
       createdAt: new Date().toISOString()
     };
-    db.chats[userId].push(msg);
-    if (typeof saveDB === "function") saveDB();
-    res.json({ success: true, message: msg });
-  } catch(e) { res.json({ success: false, error: e.message }); }
+    db.chats[uid].push(msg);
+    saveDB();
+    console.log("[Bot] SAVED uid=" + uid + " total=" + db.chats[uid].length);
+    res.json({ success: true, message: msg, total: db.chats[uid].length });
+  } catch(e) {
+    console.log("[Bot] ERR:", e.message);
+    res.json({ success: false, error: e.message });
+  }
 });
 
-// Admin — Rules
-app.get("/api/admin/bot/rules", adminAuth, function(req, res) {
+// Debug
+app.get("/api/bot/debug", auth, function(req, res) {
   try {
-    var cfg = db.config.chatBot || { enabled: true, rules: [] };
-    res.json(cfg);
-  } catch(e) { res.json({ enabled: false, rules: [] }); }
+    var uid = req.user.id;
+    var msgs = (db.chats && db.chats[uid]) || [];
+    res.json({
+      userId: uid,
+      username: req.user.username,
+      totalMessages: msgs.length,
+      botMessages: msgs.filter(function(m){ return m.bot === true; }).length,
+      lastFive: msgs.slice(-5).map(function(m) {
+        return {
+          from: m.from,
+          bot: m.bot || false,
+          text: String(m.text || "").substring(0, 30),
+          time: m.createdAt
+        };
+      })
+    });
+  } catch(e) { res.json({ error: e.message }); }
 });
-
-app.post("/api/admin/bot/rules", adminAuth, function(req, res) {
-  try {
-    var body = req.body || {};
-    if (!db.config.chatBot) db.config.chatBot = { enabled: true, rules: [] };
-    if (typeof body.enabled === "boolean") db.config.chatBot.enabled = body.enabled;
-    if (Array.isArray(body.rules)) db.config.chatBot.rules = body.rules;
-    if (typeof saveDB === "function") saveDB();
-    res.json({ success: true });
-  } catch(e) { res.json({ success: false, error: e.message }); }
-});
-
-// Clean [BOT] old messages
-app.post("/api/admin/bot/clean", adminAuth, function(req, res) {
-  try {
-    var removed = 0;
-    if (db.chats) {
-      Object.keys(db.chats).forEach(function(uid) {
-        var before = db.chats[uid].length;
-        db.chats[uid] = db.chats[uid].filter(function(m) {
-          return String(m.text || "").indexOf("[BOT]") === -1;
-        });
-        removed += (before - db.chats[uid].length);
-      });
-    }
-    if (typeof saveDB === "function") saveDB();
-    res.json({ success: true, removed: removed });
-  } catch(e) { res.json({ success: false, error: e.message }); }
-});
-// ============ END BOT V7 ============
+// ============ END BOT_CLEAN_V10 ============
 
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
