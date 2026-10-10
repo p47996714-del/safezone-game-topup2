@@ -1524,4 +1524,33 @@ app.post("/api/admin/bot/clean", adminAuth, function(req, res) {
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
 const bot = startBot({ getDb: () => db, saveDb: () => saveDB() });
+
+// ============ DEFAULT_BOT_RULES ============
+setTimeout(function() {
+  try {
+    if (!db.config) db.config = {};
+    if (!db.config.chatBot) db.config.chatBot = { enabled: true, rules: [] };
+    var cb = db.config.chatBot;
+    // Rules မရှိရင် default ထည့်
+    if (!Array.isArray(cb.rules) || cb.rules.length === 0) {
+      cb.rules = [
+        { keywords: ["hi","hello","hey","မင်္ဂလာပါ","ဟယ်လို","နေကောင်းလား"], reply: "👋 မင်္ဂလာပါ! Safe Zone မှ ကြိုဆိုပါတယ်။\n\nဘာကူညီပေးရမလဲ?\n💰 ငွေဖြည့် · 📦 Order · 🎁 Promo" },
+        { keywords: ["deposit","ငွေဖြည့်","ဖြည့်","ငွေလွှဲ"], reply: "💰 ငွေဖြည့်နည်း:\n\n1. Wallet tab ဖွင့်ပါ\n2. KBZ/Wave/UAB/AYA ရွေးပါ\n3. Admin နံပါတ်ကို လွှဲပါ\n4. Receipt ပုံ တင်ပါ\n5. ၅-၁၅ မိနစ် အတွင်း approve ဖြစ်မယ် ✅" },
+        { keywords: ["order","မှာတမ်း","ဝယ်","တော့ပ်","ဝယ်ချင်"], reply: "📦 Order တင်နည်း:\n\n1. Home မှာ ဂိမ်း ရွေးပါ\n2. Package ရွေးပါ\n3. Player ID ဖြည့်ပါ\n4. ဝယ်မယ် နှိပ်ပါ\n\n⏱ ၁၀-၃၀ မိနစ်အတွင်း ရမယ်" },
+        { keywords: ["how long","ဘယ်လောက်ကြာ","အချိန်","ကြာမလား"], reply: "⏱ အချိန်:\n\n💰 Deposit: ၅-၁၅ မိနစ်\n📦 Order: ၁၀-၃၀ မိနစ်\n💬 Chat: ၂၄/၇" },
+        { keywords: ["promo","coupon","ကူပွန်","လျှော့","discount"], reply: "🎁 Promo:\n\n🎟️ Coupon Code ကို Home → Coupon မှာ ရိုက်ထည့်ပါ\n⭐ Points စုပြီး Balance ပြန်လဲလို့ရ" },
+        { keywords: ["contact","ဆက်သွယ်","phone","ဖုန်း","admin"], reply: "📞 ဆက်သွယ်ရန်:\n\n💬 ဒီ Chat ကနေ ရေးလို့ရ\n📱 Profile → Contact Us" },
+        { keywords: ["refund","ငွေပြန်","reject","ပယ်"], reply: "💰 Refund:\n\nOrder Reject ဖြစ်ရင် Balance ကို အလိုအလျောက် ပြန်အမ်းပါတယ်" },
+        { keywords: ["ကျေးဇူး","thanks","thank","thx"], reply: "🙏 ကျေးဇူးတင်ပါတယ်! နောက်ထပ် မေးစရာ ရှိရင် ရေးလို့ရပါတယ် 💙" },
+        { keywords: ["vip","အဆင့်","level"], reply: "⭐ VIP အဆင့်:\n\n🥉 Bronze: 0 Ks\n🥈 Silver: 50K+\n🥇 Gold: 200K+\n💎 Diamond: 500K+" },
+        { keywords: ["problem","error","မရ","failed","bug","ပြဿနာ"], reply: "⚠️ ပြဿနာ ဖြစ်ရင် App ကို refresh လုပ်ပါ၊ Logout → Login ပြန်လုပ်ပါ" }
+      ];
+      if (typeof saveDB === "function") saveDB();
+      console.log("[Bot] Default rules ထည့်ပြီ: " + cb.rules.length);
+    }
+  } catch(e) { console.log("[Bot] Err: " + e.message); }
+}, 3000);
+// ============ END DEFAULT_BOT_RULES ============
+
+
 console.log('🤖 Telegram bot starting...');
