@@ -1456,39 +1456,6 @@ app.get("/api/bot/rules", function(req, res) {
 });
 
 // Save bot reply
-app.post("/api/bot/save-reply", auth, function(req, res) {
-  try {
-    var text = String((req.body || {}).text || "").trim();
-    if (!text) return res.json({ success: false, error: "empty" });
-    var uid = req.user.id;
-    if (!db.chats) db.chats = {};
-    if (!db.chats[uid]) db.chats[uid] = [];
-    var last = db.chats[uid].slice(-3);
-    for (var i = 0; i < last.length; i++) {
-      if (last[i].text === text) {
-        console.log("[Bot] Duplicate skip");
-        return res.json({ success: true, duplicate: true });
-      }
-    }
-    var msg = {
-      id: "bot_" + Date.now(),
-      from: "admin",
-      text: text,
-      bot: true,
-      read: false,
-      createdAt: new Date().toISOString()
-    };
-    db.chats[uid].push(msg);
-    saveDB();
-    console.log("[Bot] SAVED uid=" + uid + " total=" + db.chats[uid].length);
-    res.json({ success: true, message: msg, total: db.chats[uid].length });
-  } catch(e) {
-    console.log("[Bot] ERR:", e.message);
-    res.json({ success: false, error: e.message });
-  }
-});
-
-// Debug
 app.get("/api/bot/debug", auth, function(req, res) {
   try {
     var uid = req.user.id;
@@ -1510,6 +1477,43 @@ app.get("/api/bot/debug", auth, function(req, res) {
   } catch(e) { res.json({ error: e.message }); }
 });
 // ============ END BOT_CLEAN_V10 ============
+
+
+// ============ BOT_SAVE_ARRAY_V12 ============
+app.post("/api/bot/save-reply", auth, function(req, res) {
+  try {
+    var text = String((req.body || {}).text || "").trim();
+    if (!text) return res.json({ success: false, error: "empty" });
+    if (!Array.isArray(db.chats)) db.chats = [];
+    // Duplicate check
+    var recent = db.chats.filter(function(c) {
+      return c.userId === req.user.id && c.bot === true;
+    }).slice(-3);
+    for (var i = 0; i < recent.length; i++) {
+      if (recent[i].text === text) {
+        return res.json({ success: true, duplicate: true });
+      }
+    }
+    var msg = {
+      id: "B" + Date.now() + Math.random().toString(36).slice(2, 6),
+      userId: req.user.id,
+      username: req.user.username,
+      from: "admin",
+      text: text,
+      bot: true,
+      read: false,
+      createdAt: Date.now()
+    };
+    db.chats.push(msg);
+    saveDB();
+    console.log("[Bot] SAVED user=" + req.user.username + " total=" + db.chats.length);
+    res.json({ success: true, message: msg });
+  } catch(e) {
+    console.log("[Bot] ERR: " + e.message);
+    res.json({ success: false, error: e.message });
+  }
+});
+// ============ END BOT_SAVE_ARRAY_V12 ============
 
 app.listen(PORT, () => console.log('✅ Server running on port ' + PORT));
 try { startBackupLoop(); } catch(e) { console.log("Backup loop err:", e.message); }
