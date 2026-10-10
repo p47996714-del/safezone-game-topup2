@@ -6729,5 +6729,172 @@ console.log('✅ Pretty confirm ready');
   console.log("✅ Features 4/9/10 loaded");
 })();
 </script>
+
+<style>
+/* BEAUTY_PACK_CSS */
+@keyframes _bpGradShift{0%,100%{background-position:0% 50%}50%{background-position:100% 50%}}
+@keyframes _bpShine{0%{background-position:-200% 0}100%{background-position:200% 0}}
+@keyframes _bpFloat{0%{transform:translateY(100vh) scale(0);opacity:0}10%{opacity:0.5}100%{transform:translateY(-100px) scale(1);opacity:0}}
+@keyframes _bpSparkle{0%,100%{transform:scale(1);opacity:0.8}50%{transform:scale(1.3);opacity:1}}
+@keyframes _bpWave{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+@keyframes _bpSkelShimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* 1. ANIMATED HOME BACKGROUND */
+body{position:relative}
+#_bpBg{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+._bpParticle{position:absolute;border-radius:50%;pointer-events:none;animation:_bpFloat linear infinite}
+._bpSparkle{position:absolute;pointer-events:none;animation:_bpSparkle 2s ease-in-out infinite}
+#_bpBgLine{position:fixed;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#38bdf8,#a855f7,#ec4899,#38bdf8);background-size:200% 100%;animation:_bpGradShift 4s ease infinite;z-index:101;pointer-events:none}
+
+/* 2. GRADIENT TEXT */
+._bpGradText,.section-title,h2{background:linear-gradient(90deg,#38bdf8,#a855f7,#ec4899,#38bdf8);background-size:200% 100%;-webkit-background-clip:text;background-clip:text;color:transparent;animation:_bpGradShift 4s ease infinite;font-weight:bold}
+
+/* 3. FLOATING GLOW BUTTONS */
+.quick-card,.game-card,.deposit-btn,.upload-btn,button:not(.cancel):not(.safeFabItem):not(.czFabItem):not(#_bpBg button){position:relative;transition:transform 0.2s cubic-bezier(0.4,0,0.2,1),box-shadow 0.3s}
+.quick-card:active,.game-card:active{transform:scale(0.96)}
+.quick-card,.game-card{box-shadow:0 4px 20px rgba(56,189,248,0.08)}
+.quick-card:hover,.game-card:hover{box-shadow:0 8px 30px rgba(56,189,248,0.25),0 0 30px rgba(168,85,247,0.15)}
+.deposit-btn,.upload-btn{box-shadow:0 8px 25px rgba(56,189,248,0.35)}
+.deposit-btn:active,.upload-btn:active{transform:scale(0.97)}
+
+/* 4. GLASSMORPHISM */
+.balance-card,.quick-card,.game-card,.section,.modal-box,.productModalBox,._pCardBig,._uvSection,._socialSection,.chat-head,.profile-box,.deposit-box,.deposit-list-item,.faq-item,.user-card,.item{backdrop-filter:blur(14px) saturate(1.3);-webkit-backdrop-filter:blur(14px) saturate(1.3);border:1px solid rgba(148,163,184,0.18) !important}
+.header{backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4)}
+.bottom-nav{backdrop-filter:blur(16px) saturate(1.4);-webkit-backdrop-filter:blur(16px) saturate(1.4)}
+
+/* 5. WAVE ANIMATION */
+._bpWave{position:absolute;bottom:-2px;left:0;width:200%;height:30px;background:linear-gradient(90deg,transparent,rgba(56,189,248,0.15),transparent);animation:_bpWave 8s linear infinite;pointer-events:none}
+.balance-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,#38bdf8,#a855f7,#ec4899,#38bdf8);background-size:200% 100%;animation:_bpGradShift 3s ease infinite}
+
+/* 6. SKELETON SHIMMER */
+._bpSkel{background:linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%);background-size:200% 100%;animation:_bpSkelShimmer 1.5s infinite;border-radius:12px}
+.skeleton,.skel-card{background:linear-gradient(90deg,#1e293b 25%,#334155 50%,#1e293b 75%) !important;background-size:200% 100% !important;animation:_bpSkelShimmer 1.5s infinite !important}
+
+/* 7. 3D TILT */
+._bpTilt{transition:transform 0.15s ease-out}
+
+/* 11. HOT GAME CARDS */
+.game-card{position:relative;overflow:hidden}
+.game-card::after{content:'';position:absolute;top:0;left:-100%;width:100%;height:100%;background:linear-gradient(90deg,transparent,rgba(255,255,255,0.08),transparent);transition:left 0.6s ease;pointer-events:none}
+.game-card:hover::after,.game-card:active::after{left:100%}
+
+/* 14. ANIMATED CHARTS */
+._chartBar{transition:height 0.8s cubic-bezier(0.34,1.56,0.64,1) !important}
+._epicStatNum,.stat-card .value{animation:_bpSparkle 3s ease-in-out infinite}
+
+/* 15. VIP THEMES */
+.vip-Bronze{background:linear-gradient(135deg,#cd7f32,#8b5a2b,#cd7f32);background-size:200% 100%;animation:_bpShine 3s linear infinite;color:#fff !important}
+.vip-Silver{background:linear-gradient(135deg,#c0c0c0,#f0f0f0,#c0c0c0);background-size:200% 100%;animation:_bpShine 3s linear infinite;color:#000 !important}
+.vip-Gold{background:linear-gradient(135deg,#ffd700,#ffb700,#ffd700,#ffec8b);background-size:200% 100%;animation:_bpShine 2s linear infinite;color:#000 !important}
+.vip-Diamond{background:linear-gradient(135deg,#38bdf8,#a855f7,#ec4899,#38bdf8);background-size:200% 100%;animation:_bpShine 2s linear infinite;color:#fff !important}
+
+/* Extra polish */
+.section-title{padding:0 4px}
+#view-home>.section-title{display:inline-block}
+.quick-card .icon{animation:_bpSparkle 4s ease-in-out infinite}
+[class*="vip-"]{box-shadow:0 2px 12px rgba(255,215,0,0.3);font-weight:bold}
+</style>
+
+<script>
+/* BEAUTY_PACK_V1 */
+(function(){
+  console.log('🎨 Beauty pack loading...');
+  
+  /* 1. ANIMATED BACKGROUND */
+  function initBg(){
+    if (document.getElementById('_bpBg')) return;
+    var bg = document.createElement('div');
+    bg.id = '_bpBg';
+    document.body.appendChild(bg);
+    
+    var line = document.createElement('div');
+    line.id = '_bpBgLine';
+    document.body.appendChild(line);
+    
+    var colors = ['#38bdf8','#a855f7','#ec4899','#22c55e','#f59e0b','#3b82f6'];
+    for (var i = 0; i < 15; i++) {
+      var p = document.createElement('div');
+      p.className = '_bpParticle';
+      var size = 2 + Math.random() * 4;
+      p.style.width = size + 'px';
+      p.style.height = size + 'px';
+      p.style.background = colors[i % colors.length];
+      p.style.left = (Math.random() * 100) + '%';
+      p.style.top = '100%';
+      p.style.boxShadow = '0 0 ' + (size*3) + 'px ' + colors[i % colors.length];
+      p.style.animationDuration = (10 + Math.random() * 12) + 's';
+      p.style.animationDelay = (Math.random() * 10) + 's';
+      bg.appendChild(p);
+    }
+    
+    for (var j = 0; j < 8; j++) {
+      var s = document.createElement('div');
+      s.className = '_bpSparkle';
+      s.textContent = '✨';
+      s.style.left = (Math.random() * 100) + '%';
+      s.style.top = (Math.random() * 100) + '%';
+      s.style.fontSize = (10 + Math.random() * 8) + 'px';
+      s.style.animationDelay = (Math.random() * 3) + 's';
+      bg.appendChild(s);
+    }
+  }
+  
+  /* 5. WAVE UNDER CARDS */
+  function addWaves(){
+    var cards = document.querySelectorAll('.balance-card,.quick-card,.game-card');
+    cards.forEach(function(c){
+      if (c.querySelector('._bpWave')) return;
+      if (getComputedStyle(c).position === 'static') c.style.position = 'relative';
+      var w = document.createElement('div');
+      w.className = '_bpWave';
+      c.appendChild(w);
+    });
+  }
+  
+  /* 7. 3D TILT */
+  function initTilt(){
+    var isMobile = window.innerWidth < 768 || /Android|iPhone|iPad/i.test(navigator.userAgent);
+    if (isMobile) return;
+    var cards = document.querySelectorAll('.game-card,.quick-card');
+    cards.forEach(function(c){
+      if (c.dataset.bpTilt) return;
+      c.dataset.bpTilt = '1';
+      c.classList.add('_bpTilt');
+      c.addEventListener('mousemove', function(e){
+        var r = c.getBoundingClientRect();
+        var x = (e.clientX - r.left) / r.width - 0.5;
+        var y = (e.clientY - r.top) / r.height - 0.5;
+        c.style.transform = 'perspective(800px) rotateY(' + (x*8) + 'deg) rotateX(' + (-y*8) + 'deg) scale(1.02)';
+      });
+      c.addEventListener('mouseleave', function(){
+        c.style.transform = '';
+      });
+    });
+  }
+  
+  /* Run periodically */
+  function refresh(){
+    addWaves();
+    initTilt();
+  }
+  
+  setTimeout(initBg, 500);
+  setTimeout(refresh, 2000);
+  setTimeout(refresh, 5000);
+  setInterval(refresh, 6000);
+  
+  if (window.MutationObserver) {
+    try {
+      new MutationObserver(function(){
+        clearTimeout(window._bpRO);
+        window._bpRO = setTimeout(refresh, 400);
+      }).observe(document.body, {childList: true, subtree: true});
+    } catch(e){}
+  }
+  
+  console.log('✅ Beauty pack ready (10 features)');
+})();
+</script>
+
 </body>
 </html>
