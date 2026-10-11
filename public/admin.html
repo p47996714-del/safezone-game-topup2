@@ -909,7 +909,7 @@ async function showPanel(){
   document.getElementById('panelBox').style.display = 'block';
   document.getElementById('who').textContent = au;
   try {
-    const admins = await api('/api/admin/admins');
+    const admins = await api('/api/health');
     me = admins.find(a => a.username === au);
     if (me) document.getElementById('roleTag').innerHTML = '<span class="role-badge role-' + me.role + '">' + me.role + '</span>';
   } catch(e){}
@@ -926,7 +926,7 @@ function tab(name, btn){
 }
 async function refreshBadges(){
   try {
-    const d = await api('/api/admin/stats');
+    const d = await api('/api/admin-stats');
     const b = document.getElementById('chatBadge');
     if (d.unreadChats > 0) { b.textContent = d.unreadChats; b.style.display='inline-block'; }
     else b.style.display='none';
@@ -934,7 +934,7 @@ async function refreshBadges(){
 }
 
 function exportData(type){
-  fetch('/api/admin/export/' + type, { headers: { 'x-admin-user': au, 'x-admin-pass': ap } })
+  fetch('/api/health' + type, { headers: { 'x-admin-user': au, 'x-admin-pass': ap } })
     .then(r => r.blob())
     .then(blob => {
       const a = document.createElement('a');
@@ -946,7 +946,7 @@ function exportData(type){
 }
 
 async function loadDash(){
-  const d = await api('/api/admin/stats');
+  const d = await api('/api/admin-stats');
   const cards = [
     {label:'👥 Users', value:d.totalUsers, cls:'blue'},
     {label:'📦 Orders', value:d.totalOrders, cls:''},
@@ -966,7 +966,7 @@ async function loadDash(){
 }
 
 async function loadDeps(){
-  const d = await api('/api/admin/deposits');
+  const d = await api('/api/admin-deposits');
   document.getElementById('deps').innerHTML = d.length ? d.map(x=>{
     const receiptHtml = x.receipt ? '<div style="margin-top:8px"><button class="btn blue" onclick="viewReceipt(\''+x.receipt.substring(0,20)+'\',\''+x.id+'\')">📸 Receipt ကြည့်</button></div>' : '';
     window['_receipt_' + x.id] = x.receipt || '';
@@ -986,7 +986,7 @@ function viewReceipt(_, id){
 }
 
 async function loadOrds(){
-  const d = await api('/api/admin/orders');
+  const d = await api('/api/admin-orders');
   allOrders = d;
   selectedOrders.clear();
   document.getElementById('ordList').innerHTML = d.length ? d.map(x=>{
@@ -1015,7 +1015,7 @@ async function bulkOrderAction(status){
 }
 
 async function loadChats(){
-  const list = await api('/api/admin/chats');
+  const list = await api('/api/admin-chats');
   document.getElementById('chatsList').innerHTML = list.length ? list.map(c=>{
     const preview = c.last ? escapeHtml(String(c.last.text || '[Media]').slice(0,50)) : '';
     return '<div class="chat-list-item" onclick="openChatWindow(\''+c.userId+'\',\''+c.username+'\')">' +
@@ -1062,7 +1062,7 @@ async function sendBulkChat(){
 }
 
 async function loadUsers(){
-  allUsers = await api('/api/admin/users');
+  allUsers = await api('/api/admin-users');
   filterUsers();
 }
 function filterUsers(){
@@ -1123,7 +1123,7 @@ async function viewHistory(username){
 }
 
 async function loadProductsAdmin(){
-  const d = await api('/api/admin/products');
+  const d = await api('/api/admin-products');
   const cats = ['MOBA','Battle Royale','Casual','Premium','Other'];
   const catLabels = {MOBA:'⚔️ MOBA','Battle Royale':'🔫 Battle Royale','Casual':'♟️ Casual','Premium':'⭐ Premium','Other':'📦 အခြား'};
   document.getElementById('prodList').innerHTML = d.map(p=>{
@@ -1142,7 +1142,7 @@ async function loadProductsAdmin(){
       '</div>';
   }).join('') || '<p class="empty">Package မရှိပါ</p>';
 
-  const imgs = await api('/api/admin/gameImages');
+  const imgs = await api('/api/health');
   document.getElementById('gameImgList').innerHTML = Object.entries(imgs).map(([g,u])=>
     '<div class="admin-item"><div><b style="color:#38bdf8">' + g + '</b><div class="meta" style="font-size:11px;word-break:break-all">' + u + '</div></div>' +
     '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delGameImg(\'' + g + '\')">✕</button></div>'
@@ -1174,7 +1174,7 @@ async function addProduct(){
   const image = document.getElementById('npImg').value.trim() || '🎮';
   const category = document.getElementById('npCat').value;
   if (!game || !name || !price) return alert('ဖြည့်ပါ');
-  const d = await api('/api/admin/products', {method:'POST', body: JSON.stringify({game, name, price, image, category})});
+  const d = await api('/api/admin-products', {method:'POST', body: JSON.stringify({game, name, price, image, category})});
   if (d.success){ alert('✅ ထည့်ပြီး'); ['npGame','npName','npPrice','npImg'].forEach(id=>document.getElementById(id).value=''); loadProductsAdmin(); }
   else alert('❌ ' + d.error);
 }
@@ -1191,18 +1191,18 @@ async function saveGameImg(){
   const game = document.getElementById('giGame').value.trim();
   const url = document.getElementById('giUrl').value.trim();
   if (!game) return alert('ဂိမ်းနာမည် ဖြည့်ပါ');
-  const d = await api('/api/admin/gameImages', {method:'POST', body: JSON.stringify({game, url})});
+  const d = await api('/api/health', {method:'POST', body: JSON.stringify({game, url})});
   if (d.success){ alert('✅ သိမ်းပြီး'); document.getElementById('giGame').value=''; document.getElementById('giUrl').value=''; loadProductsAdmin(); }
   else alert('❌ ' + d.error);
 }
 async function delGameImg(game){
   if (!await _prettyConfirm(game + ' ဖျက်မှာလား?')) return;
-  await api('/api/admin/gameImages', {method:'POST', body: JSON.stringify({game})});
+  await api('/api/health', {method:'POST', body: JSON.stringify({game})});
   loadProductsAdmin();
 }
 
 async function loadCoupons(){
-  const c = await api('/api/admin/coupons');
+  const c = await api('/api/health');
   document.getElementById('couponList').innerHTML = Object.entries(c).map(([code, data])=>
     '<div class="admin-item"><div><b style="color:#38bdf8">'+code+'</b><div class="meta">'+data.amount.toLocaleString()+' Ks · Used: '+(data.uses - data.usesLeft)+'/'+data.uses+'</div></div>' +
     '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delCoupon(\''+code+'\')">✕</button></div>'
@@ -1213,7 +1213,7 @@ async function addCoupon(){
   const amount = document.getElementById('cAmount').value;
   const uses = document.getElementById('cUses').value || 100;
   if (!code || !amount) return alert('ဖြည့်ပါ');
-  const d = await api('/api/admin/coupons', {method:'POST', body: JSON.stringify({code, amount, uses})});
+  const d = await api('/api/health', {method:'POST', body: JSON.stringify({code, amount, uses})});
   if (d.success){ alert('✅ ထည့်ပြီး'); ['cCode','cAmount','cUses'].forEach(id=>document.getElementById(id).value=''); loadCoupons(); }
   else alert('❌ ' + d.error);
 }
@@ -1228,13 +1228,13 @@ async function addAdmin(){
   const password = document.getElementById('newAdminP').value;
   const role = document.getElementById('newAdminR').value;
   if (!username || !password) return alert('ဖြည့်ပါ');
-  const d = await api('/api/admin/admins', {method:'POST', body: JSON.stringify({username, password, role})});
+  const d = await api('/api/health', {method:'POST', body: JSON.stringify({username, password, role})});
   if (d.success){ alert('✅ ထည့်ပြီး'); document.getElementById('newAdminU').value=''; document.getElementById('newAdminP').value=''; loadAdmins(); }
   else alert('❌ ' + d.error);
 }
 async function loadAdmins(){
   try {
-    const d = await api('/api/admin/admins');
+    const d = await api('/api/health');
     document.getElementById('adminList').innerHTML = d.map(a=>
       '<div class="admin-item"><div><b style="color:#38bdf8">'+a.username+'</b> <span class="role-badge role-'+a.role+'" style="margin-left:6px">'+a.role+'</span></div>' +
       (a.username !== au ? '<button class="btn red" style="margin:0;padding:6px 12px;font-size:12px" onclick="delAdmin(\''+a.username+'\')">Delete</button>' : '<span style="font-size:11px;color:#94a3b8">(You)</span>') +
@@ -1250,7 +1250,7 @@ async function delAdmin(u){
 
 async function loadConfig(){
   try {
-    const c = await api('/api/admin/config');
+    const c = await api('/api/admin-config');
     const map = {Name:'siteName',PayNum:'payNumber',PayName:'payName',TgToken:'telegramBotToken',TgChat:'telegramChatId',Wa:'whatsapp',Vb:'viber',Tt:'tiktok',Fb:'facebook'};
     Object.entries(map).forEach(([k,v]) => {
       const el = document.getElementById('cfg' + k);
@@ -1270,12 +1270,12 @@ async function saveConfig(){
     tiktok: document.getElementById('cfgTt').value,
     facebook: document.getElementById('cfgFb').value
   };
-  const d = await api('/api/admin/config', {method:'POST', body: JSON.stringify(body)});
+  const d = await api('/api/admin-config', {method:'POST', body: JSON.stringify(body)});
   if (d.success) alert('✅ သိမ်းပြီး'); else alert('❌ ' + d.error);
 }
 async function loadMaintStatus(){
   try {
-    const c = await api('/api/admin/config');
+    const c = await api('/api/admin-config');
     const m = c.maintenance || {enabled:false, message:''};
     const st = document.getElementById('maintStatus');
     const btn = document.getElementById('maintToggleBtn');
@@ -1290,32 +1290,32 @@ async function loadMaintStatus(){
   } catch(e){}
 }
 async function toggleMaintenance(){
-  const c = await api('/api/admin/config');
+  const c = await api('/api/admin-config');
   const cur = c.maintenance?.enabled || false;
   const newState = !cur;
   const msg = document.getElementById('maintMsgInput').value.trim() || '🔧 ပြုပြင်နေပါသည်။';
-  const d = await api('/api/admin/maintenance', {method:'POST', body: JSON.stringify({enabled:newState, message:msg})});
+  const d = await api('/api/admin-config', {method:'POST', body: JSON.stringify({enabled:newState, message:msg})});
   if (d.success) { await loadMaintStatus(); alert(newState?'🔴 ပိတ်ပြီး':'🟢 ပြန်ဖွင့်ပြီး'); }
   else alert('❌ ' + d.error);
 }
 async function saveMaintMsg(){
   const msg = document.getElementById('maintMsgInput').value.trim();
   if (!msg) return alert('စာ ဖြည့်ပါ');
-  const d = await api('/api/admin/maintenance', {method:'POST', body: JSON.stringify({message:msg})});
+  const d = await api('/api/admin-config', {method:'POST', body: JSON.stringify({message:msg})});
   if (d.success) alert('✅ သိမ်းပြီး'); else alert('❌ ' + d.error);
 }
 async function sendBroadcast(){
   const text = document.getElementById('bcText').value.trim();
   if (!text) return alert('စာ ရေးပါ');
   if (!await _prettyConfirm('User အားလုံးဆီ ပို့မယ်။ သေချာလား?')) return;
-  const d = await api('/api/admin/broadcast', {method:'POST', body: JSON.stringify({text})});
+  const d = await api('/api/health', {method:'POST', body: JSON.stringify({text})});
   if (d.success){ alert('✅ '+d.sent+' ယောက်ဆီ ပို့ပြီး'); document.getElementById('bcText').value=''; }
   else alert('❌ ' + d.error);
 }
 
 let bannerData = [];
 async function loadBanners(){
-  bannerData = await api('/api/admin/banners');
+  bannerData = await api('/api/admin-config');
   document.getElementById('bannerList').innerHTML = bannerData.map((b,i)=>
     '<div class="prod-row" style="grid-template-columns:1fr 1fr">' +
     '<input value="'+b.title+'" onchange="bannerData['+i+'].title=this.value" placeholder="Title">' +
@@ -1324,7 +1324,7 @@ async function loadBanners(){
   ).join('');
 }
 async function saveBanners(){
-  const d = await api('/api/admin/banners', {method:'POST', body: JSON.stringify({banners:bannerData})});
+  const d = await api('/api/admin-config', {method:'POST', body: JSON.stringify({banners:bannerData})});
   if (d.success) alert('✅ သိမ်းပြီး'); else alert('❌ ' + d.error);
 }
 
@@ -1338,7 +1338,7 @@ async function updateOrd(id, status){
 
 async function loadBackupConfig(){
   try {
-    const c = await api('/api/admin/backup-config');
+    const c = await api('/api/admin-config');
     document.getElementById('bkOwner').value = c.owner || '';
     document.getElementById('bkRepo').value = c.repo || '';
     document.getElementById('bkBranch').value = c.branch || 'main';
@@ -1356,10 +1356,10 @@ async function loadBackupConfig(){
   } catch(e){}
 }
 async function toggleBackup(){
-  const c = await api('/api/admin/backup-config');
+  const c = await api('/api/admin-config');
   const enabled = !c.enabled;
   if (enabled && (!c.hasToken || !c.owner || !c.repo)) return alert('Token + Owner + Repo ဖြည့်ပါ');
-  const d = await api('/api/admin/backup-config', {method:'POST', body: JSON.stringify({enabled})});
+  const d = await api('/api/admin-config', {method:'POST', body: JSON.stringify({enabled})});
   if (d.success) { loadBackupConfig(); alert(enabled ? '🟢 ON' : '🔴 OFF'); }
 }
 async function saveBackupConfig(){
@@ -1370,19 +1370,19 @@ async function saveBackupConfig(){
     branch: document.getElementById('bkBranch').value.trim() || 'main',
     intervalMin: Number(document.getElementById('bkInterval').value) || 5
   };
-  const d = await api('/api/admin/backup-config', {method:'POST', body: JSON.stringify(body)});
+  const d = await api('/api/admin-config', {method:'POST', body: JSON.stringify(body)});
   if (d.success) { alert('✅ Saved'); document.getElementById('bkToken').value=''; loadBackupConfig(); }
   else alert('❌ Failed');
 }
 async function backupNow(){
   if (!await _prettyConfirm('Backup now?')) return;
-  const d = await api('/api/admin/backup-now', {method:'POST'});
+  const d = await api('/api/health', {method:'POST'});
   if (d.success) { alert('✅ ' + d.sha.substring(0,7)); loadBackupConfig(); }
   else alert('❌ ' + (d.error || 'Failed'));
 }
 async function restoreNow(){
   if (!await _prettyConfirm('⚠️ Overwrite current data?')) return;
-  const d = await api('/api/admin/restore', {method:'POST'});
+  const d = await api('/api/health', {method:'POST'});
   if (d.success) { alert('✅ Restored'); location.reload(); }
   else alert('❌ Failed');
 }
@@ -1393,7 +1393,7 @@ let wsConfig = {};
 
 async function loadWebsiteConfig() {
   try {
-    const c = await api("/api/admin/config");
+    const c = await api("/api/admin-config");
     wsConfig = c;
     const D = {
       siteName: "Safe Zone Game Topup",
@@ -1686,7 +1686,7 @@ async function onFileSelected(e) {
     const dataUrl = ev.target.result;
     if (bar) bar.style.width = '70%';
     try {
-      const r = await api('/api/admin/upload', { method: 'POST', body: JSON.stringify({ dataUrl }) });
+      const r = await api('/api/health', { method: 'POST', body: JSON.stringify({ dataUrl }) });
       if (bar) bar.style.width = '100%';
       setTimeout(() => { if (prog) prog.classList.remove('show'); if (bar) bar.style.width = '0'; }, 400);
       if (!r || !r.success) { alert('❌ Upload failed: ' + ((r && r.error) || 'Unknown')); return; }
@@ -1751,7 +1751,7 @@ function clearField(id) {
 
 async function loadUploads() {
   try {
-    const list = await api('/api/admin/uploads');
+    const list = await api('/api/health');
     const grid = document.getElementById('uploadGrid');
     if (!grid) return;
     if (!list || !list.length) { grid.innerHTML = '<p class="empty" style="font-size:12px;grid-column:1/-1">ပုံ မရှိသေးပါ</p>'; return; }
@@ -1800,7 +1800,7 @@ tab = function(name, btn) {
 var _spinConfig = null;
 async function loadSpinConfig() {
   try {
-    var c = await api('/api/admin/config');
+    var c = await api('/api/admin-config');
     _spinConfig = c.spinConfig || { enabled: true, prizes: [] };
     if (!_spinConfig.prizes || !_spinConfig.prizes.length) {
       _spinConfig.prizes = [
@@ -2054,7 +2054,7 @@ window._prettyConfirm = function(msg) {
 /* POINTS_MULTIPLIER_ADMIN */
 async function loadPointsMultiplier() {
   try {
-    var c = await api('/api/admin/config');
+    var c = await api('/api/admin-config');
     var pm = parseFloat(c.pointsMultiplier) || 1;
     updatePMDisplay(pm);
   } catch(e) {}
@@ -2102,7 +2102,7 @@ var _pmState = { baseRate: 100, multiplier: 1 };
 
 async function loadPointsSettings() {
   try {
-    var c = await api('/api/admin/config');
+    var c = await api('/api/admin-config');
     _pmState.baseRate = parseFloat(c.pointsBaseRate) || 100;
     _pmState.multiplier = parseFloat(c.pointsMultiplier) || 1;
     var b = document.getElementById('pmBaseRate');
@@ -2133,7 +2133,7 @@ function updatePreview() {
 async function saveBaseRate() {
   var b = parseFloat(document.getElementById('pmBaseRate').value);
   if (isNaN(b) || b < 1) { alert('❌ Base Rate 1 အထက် ဖြစ်ရမယ်'); return; }
-  var d = await api('/api/admin/points-base-rate', { method: 'POST', body: JSON.stringify({ rate: b }) });
+  var d = await api('/api/admin-config', { method: 'POST', body: JSON.stringify({ rate: b }) });
   if (d && d.success) {
     _pmState.baseRate = b;
     alert('✅ Base Rate သိမ်းပြီး: ' + b + ' Ks = 1 Point');
@@ -2185,7 +2185,7 @@ var _rrState = { rate: 10 };
 
 async function loadRedeemRate() {
   try {
-    var c = await api('/api/admin/config');
+    var c = await api('/api/admin-config');
     _rrState.rate = parseFloat(c.pointsRedeemRate) || 10;
     updateRRDisplay(_rrState.rate);
   } catch(e) { console.log('loadRedeemRate err:', e.message); }
@@ -2209,7 +2209,7 @@ async function saveRR(rate) {
   rate = parseFloat(rate);
   if (isNaN(rate) || rate < 0.01) { alert('❌ မှန်ကန်တဲ့ Rate ထည့်ပါ'); return; }
   if (rate > 10000) { alert('❌ Rate အရမ်းကြီးနေတယ်'); return; }
-  var d = await api('/api/admin/points-redeem-rate', { method: 'POST', body: JSON.stringify({ rate: rate }) });
+  var d = await api('/api/admin-config', { method: 'POST', body: JSON.stringify({ rate: rate }) });
   if (d && d.success) {
     _rrState.rate = rate;
     updateRRDisplay(rate);
@@ -2254,7 +2254,7 @@ var _videosState = { videos: [], categories: [], title: '📺 Video Guides', des
 
 async function loadVideosAdmin() {
   try {
-    var d = await api('/api/admin/videos');
+    var d = await api('/api/admin-config');
     if (d.error) return;
     _videosState = d;
     renderVideoList();
@@ -2334,7 +2334,7 @@ async function addVideo() {
     desc: desc
   });
   _videosState.videos = vids;
-  var d = await api('/api/admin/videos', { method: 'POST', body: JSON.stringify({ videos: vids }) });
+  var d = await api('/api/admin-config', { method: 'POST', body: JSON.stringify({ videos: vids }) });
   if (d && d.success) {
     document.getElementById('vNewTitle').value = '';
     document.getElementById('vNewUrl').value = '';
@@ -2351,7 +2351,7 @@ async function deleteVideo(i) {
   var vids = (_videosState.videos || []).slice();
   vids.splice(i, 1);
   _videosState.videos = vids;
-  var d = await api('/api/admin/videos', { method: 'POST', body: JSON.stringify({ videos: vids }) });
+  var d = await api('/api/admin-config', { method: 'POST', body: JSON.stringify({ videos: vids }) });
   if (d && d.success) renderVideoList();
 }
 
@@ -2376,7 +2376,7 @@ async function editVideo(i) {
   v.desc = newDesc.trim();
   
   var vids = _videosState.videos.slice();
-  var d = await api('/api/admin/videos', { method: 'POST', body: JSON.stringify({ videos: vids }) });
+  var d = await api('/api/admin-config', { method: 'POST', body: JSON.stringify({ videos: vids }) });
   if (d && d.success) {
     renderVideoList();
     alert('✅ ပြင်ပြီ');
@@ -2390,7 +2390,7 @@ async function moveVideoUp(i) {
   vids[i - 1] = vids[i];
   vids[i] = tmp;
   _videosState.videos = vids;
-  var d = await api('/api/admin/videos', { method: 'POST', body: JSON.stringify({ videos: vids }) });
+  var d = await api('/api/admin-config', { method: 'POST', body: JSON.stringify({ videos: vids }) });
   if (d && d.success) renderVideoList();
 }
 
@@ -2401,14 +2401,14 @@ async function moveVideoDown(i) {
   vids[i + 1] = vids[i];
   vids[i] = tmp;
   _videosState.videos = vids;
-  var d = await api('/api/admin/videos', { method: 'POST', body: JSON.stringify({ videos: vids }) });
+  var d = await api('/api/admin-config', { method: 'POST', body: JSON.stringify({ videos: vids }) });
   if (d && d.success) renderVideoList();
 }
 
 async function saveVideoSettings() {
   var title = document.getElementById('vidSectionTitle').value.trim();
   var desc = document.getElementById('vidSectionDesc').value.trim();
-  var d = await api('/api/admin/videos/settings', { method: 'POST', body: JSON.stringify({ title: title, desc: desc }) });
+  var d = await api('/api/admin-config', { method: 'POST', body: JSON.stringify({ title: title, desc: desc }) });
   if (d && d.success) {
     _videosState.title = title;
     _videosState.desc = desc;
@@ -2418,7 +2418,7 @@ async function saveVideoSettings() {
 
 async function toggleVideoSection() {
   var newEnabled = _videosState.enabled === false;
-  var d = await api('/api/admin/videos/settings', { method: 'POST', body: JSON.stringify({ enabled: newEnabled }) });
+  var d = await api('/api/admin-config', { method: 'POST', body: JSON.stringify({ enabled: newEnabled }) });
   if (d && d.success) {
     _videosState.enabled = newEnabled;
     renderVideoSettings();
@@ -2456,7 +2456,7 @@ setTimeout(loadVideosAdmin, 2000);
         
         if (!game || !name || !price) return alert('ဖြည့်ပါ');
         
-        var d = await api('/api/admin/products', {
+        var d = await api('/api/admin-products', {
           method: 'POST',
           body: JSON.stringify({
             game: game,
@@ -2489,7 +2489,7 @@ setTimeout(loadVideosAdmin, 2000);
       window._subcatLoadProducts = true;
       var _origLoad = window.loadProductsAdmin;
       window.loadProductsAdmin = async function() {
-        var d = await api('/api/admin/products');
+        var d = await api('/api/admin-products');
         var cats = ['MOBA','Battle Royale','Casual','Premium','Other'];
         var catLabels = {MOBA:'⚔️ MOBA', 'Battle Royale':'🔫 BR', 'Casual':'♟️ Casual', 'Premium':'⭐ Premium', 'Other':'📦 Other'};
         
@@ -2534,7 +2534,7 @@ setTimeout(loadVideosAdmin, 2000);
   
   async function loadMusicPlaylist() {
     try {
-      var c = await api('/api/admin/config');
+      var c = await api('/api/admin-config');
       _musicPlaylist = Array.isArray(c.musicList) ? c.musicList.slice() : (c.musicUrl ? [{name:'Track 1', url:c.musicUrl}] : []);
       renderMusicPlaylist();
     } catch(e) { console.log('load err', e.message); }
@@ -2577,7 +2577,7 @@ setTimeout(loadVideosAdmin, 2000);
     if (!await _prettyConfirm('🎵 ဒီသီချင်း ဖျက်မှာလား?')) return;
     var m = _musicPlaylist[i];
     if (m && m.url && m.url.indexOf('/uploads/') === 0) {
-      try { await api('/api/admin/delete-file', {method:'POST', body: JSON.stringify({url: m.url})}); } catch(e) {}
+      try { await api('/api/health', {method:'POST', body: JSON.stringify({url: m.url})}); } catch(e) {}
     }
     _musicPlaylist.splice(i, 1);
     renderMusicPlaylist(); saveMusicPlaylist();
@@ -2625,7 +2625,7 @@ setTimeout(loadVideosAdmin, 2000);
           r.onerror = rej;
           r.readAsDataURL(file);
         });
-        var r2 = await api('/api/admin/upload', {method:'POST', body: JSON.stringify({dataUrl: dataUrl})});
+        var r2 = await api('/api/health', {method:'POST', body: JSON.stringify({dataUrl: dataUrl})});
         if (r2 && r2.success) {
           _musicPlaylist.push({name: file.name.replace(/\.[^.]+$/, ''), url: r2.url});
           ok++;
@@ -2681,7 +2681,7 @@ setTimeout(loadVideosAdmin, 2000);
   }
   window.toggleAnn = async function() {
     _ann.enabled = !_ann.enabled;
-    await api("/api/admin/announcement", {method:"POST", body: JSON.stringify(_ann)});
+    await api("/api/admin-config", {method:"POST", body: JSON.stringify(_ann)});
     loadAnn();
     alert(_ann.enabled ? "🟢 Banner ON" : "🔴 Banner OFF");
   };
@@ -2690,14 +2690,14 @@ setTimeout(loadVideosAdmin, 2000);
     var typ = document.getElementById("annType").value;
     if (!txt) return alert("စာ ဖြည့်ပါ");
     _ann.text = txt; _ann.type = typ; _ann.enabled = true;
-    var r = await api("/api/admin/announcement", {method:"POST", body: JSON.stringify(_ann)});
+    var r = await api("/api/admin-config", {method:"POST", body: JSON.stringify(_ann)});
     if (r && r.success) { alert("✅ သိမ်းပြီ"); loadAnn(); }
     else alert("❌ Failed");
   };
   window.clearAnn = async function() {
     if (!confirm("Banner ဖျက်မလား?")) return;
     _ann = { enabled: false, text: "", type: "info" };
-    await api("/api/admin/announcement", {method:"POST", body: JSON.stringify(_ann)});
+    await api("/api/admin-config", {method:"POST", body: JSON.stringify(_ann)});
     loadAnn();
   };
   setTimeout(function(){
@@ -2786,7 +2786,7 @@ setTimeout(loadVideosAdmin, 2000);
     var inp = document.getElementById("botTestInput");
     var text = inp.value.trim();
     if (!text) return alert("စာ ရိုက်ပါ");
-    var r = await api("/api/admin/chatbot-test", { method:"POST", body: JSON.stringify({ text: text }) });
+    var r = await api("/api/bot-rules", { method:"POST", body: JSON.stringify({ text: text }) });
     var box = document.getElementById("botTestResult");
     if (box) {
       box.style.display = "block";
@@ -2812,7 +2812,7 @@ setTimeout(loadVideosAdmin, 2000);
   
   async function b3Load() {
     try {
-      var r = await fetch('/api/admin/chatbot-rules', {
+      var r = await fetch('/api/bot-rules', {
         headers: { 'x-admin-user': au, 'x-admin-pass': ap }
       });
       var d = await r.json();
@@ -2858,7 +2858,7 @@ setTimeout(loadVideosAdmin, 2000);
   
   async function b3Save() {
     try {
-      var r = await fetch('/api/admin/chatbot-rules', {
+      var r = await fetch('/api/bot-rules', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', 'x-admin-user': au, 'x-admin-pass': ap },
         body: JSON.stringify(_b3)
@@ -2922,7 +2922,7 @@ window.runBotDebug = async function() {
   
   try {
     // 1. Bot rules
-    var r1 = await fetch('/api/bot/rules', { cache: 'no-store' });
+    var r1 = await fetch('/api/bot-rules', { cache: 'no-store' });
     var d1 = await r1.json();
     out.push('═══ BOT RULES ═══');
     out.push('HTTP: ' + r1.status);
@@ -3063,7 +3063,7 @@ window.runBotDebug = async function() {
   // Live update - stats ကို auto refresh
   async function updateLiveStats() {
     try {
-      var d = await api('/api/admin/stats');
+      var d = await api('/api/admin-stats');
       if (!d) return;
       
       // Today
