@@ -1,12 +1,10 @@
-import { getDB, saveDB } from '../_utils.js';
+import { getDB, saveDB, getAdmin } from '../_utils.js';
 
-export async function onRequestGet({ request, env }) {
+export async function onRequestPost({ request, env }) {
   try {
-    const url = new URL(request.url);
-    const key = url.searchParams.get('key');
-    if (key !== 'safezone2026') {
-      return new Response('<h2>Wrong key</h2>', { status: 401, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
-    }
+    const admin = await getAdmin(env, request);
+    if (!admin) return new Response('Unauthorized', { status: 401 });
+    
     const db = await getDB(env);
     db.products = [
       { id: 1, game: 'Mobile Legends', name: '86 Diamonds', price: 3000, image: 'D', category: 'MOBA', subCategory: null, imgUrl: '' },
@@ -55,7 +53,7 @@ export async function onRequestGet({ request, env }) {
       enabled: true,
       rules: [
         { keywords: ['hi', 'hello', 'hey'], reply: 'Welcome to Safe Zone!' },
-        { keywords: ['deposit'], reply: 'Go to Wallet tab to deposit' },
+        { keywords: ['deposit'], reply: 'Go to Wallet tab' },
         { keywords: ['order'], reply: 'Select game on Home' }
       ]
     };
@@ -77,19 +75,14 @@ export async function onRequestGet({ request, env }) {
     if (!db.sessions) db.sessions = {};
     if (!db.coupons) db.coupons = {};
     await saveDB(env, db);
-    const html = '<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Seed Done</title>' +
-      '<style>body{background:#0f172a;color:#22c55e;font-family:sans-serif;text-align:center;padding:40px}' +
-      'h1{font-size:28px}.box{background:#1e293b;padding:20px;border-radius:16px;display:inline-block;text-align:left;margin-top:20px}' +
-      '.row{padding:8px 0;color:#fff;font-size:14px}.row b{color:#38bdf8}' +
-      'a{display:inline-block;margin-top:20px;padding:12px 24px;background:linear-gradient(135deg,#38bdf8,#a855f7);color:#fff;text-decoration:none;border-radius:12px;font-weight:bold}</style>' +
-      '</head><body><h1>Data Seeded!</h1><div class="box">' +
-      '<div class="row">Products: <b>' + db.products.length + '</b></div>' +
-      '<div class="row">Game Images: <b>' + Object.keys(db.gameImages).length + '</b></div>' +
-      '<div class="row">Banners: <b>' + db.banners.length + '</b></div>' +
-      '<div class="row">Bot Rules: <b>' + db.config.chatBot.rules.length + '</b></div>' +
-      '</div><div><a href="/">Back to Site</a></div></body></html>';
-    return new Response(html, { status: 200, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    return new Response(JSON.stringify({ success: true, products: db.products.length, banners: db.banners.length, botRules: db.config.chatBot.rules.length }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' }
+    });
   } catch (e) {
-    return new Response('<h2>Error: ' + e.message + '</h2>', { status: 500, headers: { 'Content-Type': 'text/html; charset=utf-8' } });
+    return new Response(JSON.stringify({ success: false, error: e.message }), {
+      status: 500,
+      headers: { 'Content-Type': 'application/json' }
+    });
   }
 }
